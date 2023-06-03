@@ -3,7 +3,6 @@ package com.onpurple.security.jwt;
 import com.onpurple.dto.request.TokenDto;
 import com.onpurple.exception.CustomException;
 import com.onpurple.exception.ErrorCode;
-import com.onpurple.model.User;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.security.UserDetailsServiceImpl;
 import com.onpurple.util.RedisUtil;
@@ -24,7 +23,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-import static com.onpurple.enums.ExpireEnum.REFRESH_EXPIRE;
 import static com.onpurple.security.jwt.JwtUtil.ACCESS_TOKEN;
 import static com.onpurple.security.jwt.JwtUtil.REFRESH_TOKEN;
 
