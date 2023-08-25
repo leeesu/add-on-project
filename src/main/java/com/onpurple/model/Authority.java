@@ -1,4 +1,4 @@
-package com.project.date.model;
+package com.onpurple.model;
 
 public enum Authority {
   USER,

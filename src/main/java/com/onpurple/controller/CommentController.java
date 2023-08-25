@@ -1,10 +1,10 @@
-package com.project.date.controller;
+package com.onpurple.controller;
 
-import javax.servlet.http.HttpServletRequest;
 
-import com.project.date.dto.request.CommentRequestDto;
-import com.project.date.dto.response.ResponseDto;
-import com.project.date.service.CommentService;
+import com.onpurple.dto.request.CommentRequestDto;
+import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.service.CommentService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;

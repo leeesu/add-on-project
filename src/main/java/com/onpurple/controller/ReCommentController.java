@@ -1,12 +1,11 @@
-package com.project.date.controller;
+package com.onpurple.controller;
 
-
-import com.project.date.dto.request.ReCommentRequestDto;
-import com.project.date.dto.response.ResponseDto;
-import com.project.date.service.ReCommentService;
+import com.onpurple.dto.request.ReCommentRequestDto;
+import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.service.ReCommentService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import javax.servlet.http.HttpServletRequest;
 
 @RequiredArgsConstructor
 @RestController
@@ -18,7 +17,7 @@ public class ReCommentController {
     // 대댓글 작성
     @PostMapping( "/reComment/{commentId}")
     public ResponseDto<?> createReComment(@PathVariable Long commentId, @RequestPart(value = "data") ReCommentRequestDto requestDto,
-                                     HttpServletRequest request) {
+                                          HttpServletRequest request) {
         return reCommentService.createReComment(commentId, requestDto,request);
     }
 

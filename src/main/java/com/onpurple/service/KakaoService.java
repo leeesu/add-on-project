@@ -1,17 +1,21 @@
-package com.project.date.service;
+package com.onpurple.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.date.dto.request.KakaoUserRequestDto;
-import com.project.date.dto.request.TokenDto;
-import com.project.date.impl.UserDetailsImpl;
-import com.project.date.jwt.TokenProvider;
-import com.project.date.model.User;
-import com.project.date.repository.UserRepository;
+import com.onpurple.dto.request.KakaoUserRequestDto;
+import com.onpurple.dto.request.TokenDto;
+import com.onpurple.impl.UserDetailsImpl;
+import com.onpurple.jwt.TokenProvider;
+import com.onpurple.model.User;
+import com.onpurple.repository.UserRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,7 +26,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.UUID;
 
 @Slf4j

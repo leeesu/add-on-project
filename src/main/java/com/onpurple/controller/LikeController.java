@@ -1,10 +1,14 @@
-package com.project.date.controller;
+package com.onpurple.controller;
 
-import com.project.date.dto.response.ResponseDto;
-import com.project.date.service.LikeService;
+import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.service.LikeService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
-import javax.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 @RequiredArgsConstructor
 @RestController
 public class LikeController {

@@ -1,23 +1,20 @@
-package com.project.date.service;
+package com.onpurple.service;
 
 
-import com.project.date.dto.request.ReCommentRequestDto;
-import com.project.date.dto.response.PostResponseDto;
-import com.project.date.dto.response.ReCommentResponseDto;
-import com.project.date.dto.response.ResponseDto;
-import com.project.date.jwt.TokenProvider;
-import com.project.date.model.Comment;
-import com.project.date.model.Post;
-import com.project.date.model.ReComment;
-import com.project.date.model.User;
-import com.project.date.repository.CommentRepository;
-import com.project.date.repository.ReCommentRepository;
+import com.onpurple.dto.request.ReCommentRequestDto;
+import com.onpurple.dto.response.ReCommentResponseDto;
+import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.jwt.TokenProvider;
+import com.onpurple.model.Comment;
+import com.onpurple.model.ReComment;
+import com.onpurple.model.User;
+import com.onpurple.repository.CommentRepository;
+import com.onpurple.repository.ReCommentRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-
 import org.springframework.transaction.annotation.Transactional;
-import javax.servlet.http.HttpServletRequest;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

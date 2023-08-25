@@ -1,11 +1,10 @@
-package com.project.date.model;
+package com.onpurple.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.project.date.dto.request.ReCommentRequestDto;
+import com.onpurple.dto.request.ReCommentRequestDto;
+import jakarta.persistence.*;
 import lombok.*;
 
-import javax.persistence.*;
-import java.util.List;
 
 
 @Builder

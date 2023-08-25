@@ -1,10 +1,12 @@
-package com.project.date.repository;
+package com.onpurple.repository;
 
-import com.project.date.model.Likes;
-import com.project.date.model.User;
+
+
+
+import com.onpurple.model.Likes;
+import com.onpurple.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-
 
 import java.util.List;
 import java.util.Optional;

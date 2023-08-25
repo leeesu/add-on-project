@@ -1,4 +1,4 @@
-package com.project.date.model;
+package com.onpurple.model;
 
 import lombok.Builder;
 import lombok.Getter;

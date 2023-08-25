@@ -1,11 +1,9 @@
-package com.project.date.model;
+package com.onpurple.model;
 
-import com.project.date.dto.request.PostRequestDto;
+import com.onpurple.dto.request.PostRequestDto;
+import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;

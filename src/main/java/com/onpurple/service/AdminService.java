@@ -1,17 +1,18 @@
-package com.project.date.service;
+package com.onpurple.service;
 
-import com.project.date.dto.response.ResponseDto;
-import com.project.date.jwt.TokenProvider;
-import com.project.date.model.*;
-import com.project.date.repository.CommentRepository;
-import com.project.date.repository.ImgRepository;
-import com.project.date.repository.PostRepository;
-import com.project.date.util.AwsS3UploadService;
+
+import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.jwt.TokenProvider;
+import com.onpurple.model.*;
+import com.onpurple.repository.CommentRepository;
+import com.onpurple.repository.ImgRepository;
+import com.onpurple.repository.PostRepository;
+import com.onpurple.util.AwsS3UploadService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

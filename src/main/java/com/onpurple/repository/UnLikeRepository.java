@@ -1,7 +1,8 @@
-package com.project.date.repository;
+package com.onpurple.repository;
 
-import com.project.date.model.UnLike;
-import com.project.date.model.User;
+
+import com.onpurple.model.UnLike;
+import com.onpurple.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

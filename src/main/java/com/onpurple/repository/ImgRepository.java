@@ -1,6 +1,7 @@
-package com.project.date.repository;
+package com.onpurple.repository;
 
-import com.project.date.model.Img;
+
+import com.onpurple.model.Img;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

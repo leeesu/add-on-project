@@ -1,17 +1,19 @@
-package com.project.date.service;
+package com.onpurple.service;
 
-import com.project.date.dto.request.ProfileUpdateRequestDto;
-import com.project.date.dto.response.ProfileResponseDto;
-import com.project.date.dto.response.ResponseDto;
-import com.project.date.jwt.TokenProvider;
-import com.project.date.model.*;
-import com.project.date.repository.ImgRepository;
-import com.project.date.repository.UserRepository;
+
+import com.onpurple.dto.request.ProfileUpdateRequestDto;
+import com.onpurple.dto.response.ProfileResponseDto;
+import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.jwt.TokenProvider;
+import com.onpurple.model.Img;
+import com.onpurple.model.User;
+import com.onpurple.repository.ImgRepository;
+import com.onpurple.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

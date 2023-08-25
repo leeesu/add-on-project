@@ -1,4 +1,4 @@
-package com.project.date.util;
+package com.onpurple.util;
 
 import com.amazonaws.services.s3.model.ObjectMetadata;
 

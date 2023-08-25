@@ -1,11 +1,9 @@
-package com.project.date.model;
+package com.onpurple.model;
 
-import com.project.date.dto.request.ReportRequestDto;
+
+import com.onpurple.dto.request.ReportRequestDto;
+import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
-import javax.persistence.*;
 @Builder
 @Getter
 @Setter

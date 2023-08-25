@@ -1,10 +1,10 @@
-package com.project.date.model;
+package com.onpurple.model;
 
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import javax.persistence.*;
 
 @Builder
 @Getter

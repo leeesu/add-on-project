@@ -1,29 +1,29 @@
-package com.project.date.service;
+package com.onpurple.service;
 
 
-import com.project.date.dto.request.PostRequestDto;
-import com.project.date.dto.response.CommentResponseDto;
-import com.project.date.dto.response.PostResponseDto;
-import com.project.date.dto.response.ResponseDto;
-import com.project.date.jwt.TokenProvider;
-import com.project.date.model.Comment;
-import com.project.date.model.Img;
-import com.project.date.model.Post;
-import com.project.date.model.User;
-import com.project.date.repository.CommentRepository;
-import com.project.date.repository.ImgRepository;
-import com.project.date.repository.PostRepository;
-import com.project.date.util.AwsS3UploadService;
+import com.onpurple.dto.request.PostRequestDto;
+import com.onpurple.dto.response.CommentResponseDto;
+import com.onpurple.dto.response.PostResponseDto;
+import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.jwt.TokenProvider;
+import com.onpurple.model.Comment;
+import com.onpurple.model.Img;
+import com.onpurple.model.Post;
+import com.onpurple.model.User;
+import com.onpurple.repository.CommentRepository;
+import com.onpurple.repository.ImgRepository;
+import com.onpurple.repository.PostRepository;
+import com.onpurple.util.AwsS3UploadService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -39,8 +39,8 @@ public class PostService {
     // 게시글 작성
     @Transactional
     public ResponseDto<?> createPost(PostRequestDto requestDto,
-                                     HttpServletRequest request,
-                                     List<String> imgPaths) {
+                                                                   HttpServletRequest request,
+                                                                   List<String> imgPaths) {
 
         if (null == request.getHeader("RefreshToken")) {
             return ResponseDto.fail("USER_NOT_FOUND",

@@ -1,8 +1,7 @@
-package com.project.date.dto.response;
+package com.onpurple.dto.response;
 
-
-import com.project.date.model.Post;
-import com.project.date.model.User;
+import com.onpurple.model.Post;
+import com.onpurple.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

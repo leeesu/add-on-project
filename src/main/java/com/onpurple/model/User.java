@@ -1,14 +1,14 @@
-package com.project.date.model;
+package com.onpurple.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.project.date.dto.request.ImageUpdateRequestDto;
-import com.project.date.dto.request.ProfileUpdateRequestDto;
-import com.project.date.dto.request.UserUpdateRequestDto;
+
+import com.onpurple.dto.request.ImageUpdateRequestDto;
+import com.onpurple.dto.request.ProfileUpdateRequestDto;
+import com.onpurple.dto.request.UserUpdateRequestDto;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.Hibernate;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

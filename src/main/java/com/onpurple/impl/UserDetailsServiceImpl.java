@@ -1,7 +1,8 @@
-package com.project.date.impl;
+package com.onpurple.impl;
 
-import com.project.date.model.User;
-import com.project.date.repository.UserRepository;
+
+import com.onpurple.model.User;
+import com.onpurple.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

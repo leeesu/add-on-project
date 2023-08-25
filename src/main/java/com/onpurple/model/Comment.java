@@ -1,8 +1,8 @@
-package com.project.date.model;
+package com.onpurple.model;
 
-import javax.persistence.*;
 
-import com.project.date.dto.request.CommentRequestDto;
+import com.onpurple.dto.request.CommentRequestDto;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

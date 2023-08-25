@@ -1,4 +1,4 @@
-package com.project.date.util.dto;
+package com.onpurple.util.dto;
 
 import lombok.Getter;
 import lombok.Setter;

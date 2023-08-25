@@ -1,4 +1,5 @@
-package com.project.date.dto.response;
+package com.onpurple.dto.response;
+
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

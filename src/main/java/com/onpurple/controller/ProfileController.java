@@ -1,13 +1,12 @@
-package com.project.date.controller;
+package com.onpurple.controller;
 
-import com.project.date.dto.request.ProfileUpdateRequestDto;
-import com.project.date.dto.response.ResponseDto;
-import com.project.date.service.ProfileService;
+
+import com.onpurple.dto.request.ProfileUpdateRequestDto;
+import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.service.ProfileService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
-
 
 @RequiredArgsConstructor
 @RestController

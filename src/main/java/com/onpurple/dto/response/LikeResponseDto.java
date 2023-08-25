@@ -1,14 +1,10 @@
-package com.project.date.dto.response;
+package com.onpurple.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.project.date.model.Post;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.context.annotation.Profile;
-
-import java.util.List;
 
 @Builder
 @Getter

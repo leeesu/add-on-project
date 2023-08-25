@@ -1,6 +1,6 @@
-package com.project.date.repository;
+package com.onpurple.repository;
 
-import com.project.date.model.Report;
+import com.onpurple.model.Report;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

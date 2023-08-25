@@ -1,13 +1,12 @@
-package com.project.date.controller;
+package com.onpurple.controller;
 
-import com.project.date.dto.response.ResponseDto;
-import com.project.date.service.MypageService;
+import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.service.MypageService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletRequest;
 
 @RequiredArgsConstructor
 @RestController

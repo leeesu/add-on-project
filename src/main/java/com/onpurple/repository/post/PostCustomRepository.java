@@ -1,9 +1,7 @@
-package com.project.date.repository.post;
+package com.onpurple.repository.post;
 
-import com.project.date.dto.response.PostResponseDto;
-import com.project.date.model.Post;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
+
+import com.onpurple.dto.response.PostResponseDto;
 
 import java.util.List;
 

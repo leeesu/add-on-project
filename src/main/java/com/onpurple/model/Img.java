@@ -1,13 +1,12 @@
-package com.project.date.model;
+package com.onpurple.model;
 
-import com.project.date.dto.request.ImageUpdateRequestDto;
-import com.project.date.dto.request.UserUpdateRequestDto;
+import com.onpurple.dto.request.ImageUpdateRequestDto;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import javax.persistence.*;
 
 @Getter
 @Entity

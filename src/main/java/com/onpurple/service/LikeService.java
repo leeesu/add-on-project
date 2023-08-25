@@ -1,17 +1,20 @@
-package com.project.date.service;
+package com.onpurple.service;
 
-import com.project.date.dto.response.*;
-import com.project.date.jwt.TokenProvider;
-import com.project.date.model.*;
-import com.project.date.repository.*;
-import freemarker.template.utility.StringUtil;
+
+import com.onpurple.dto.response.*;
+import com.onpurple.jwt.TokenProvider;
+import com.onpurple.model.*;
+import com.onpurple.repository.*;
+import jakarta.servlet.http.HttpServletRequest;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j

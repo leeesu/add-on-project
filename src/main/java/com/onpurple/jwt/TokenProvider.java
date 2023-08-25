@@ -1,12 +1,12 @@
-package com.project.date.jwt;
+package com.onpurple.jwt;
 
-import com.project.date.dto.request.TokenDto;
-import com.project.date.dto.response.ResponseDto;
-import com.project.date.impl.UserDetailsImpl;
-import com.project.date.model.Authority;
-import com.project.date.model.RefreshToken;
-import com.project.date.model.User;
-import com.project.date.repository.RefreshTokenRepository;
+import com.onpurple.dto.request.TokenDto;
+import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.impl.UserDetailsImpl;
+import com.onpurple.model.Authority;
+import com.onpurple.model.RefreshToken;
+import com.onpurple.model.User;
+import com.onpurple.repository.RefreshTokenRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;

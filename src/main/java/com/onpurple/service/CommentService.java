@@ -1,20 +1,24 @@
-package com.project.date.service;
+package com.onpurple.service;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
-import javax.servlet.http.HttpServletRequest;
 
-import com.project.date.dto.request.CommentRequestDto;
-import com.project.date.dto.response.CommentResponseDto;
-import com.project.date.dto.response.ResponseDto;
-import com.project.date.jwt.TokenProvider;
-import com.project.date.model.Comment;
-import com.project.date.model.Post;
-import com.project.date.model.User;
-import com.project.date.repository.CommentRepository;
+import com.onpurple.dto.request.CommentRequestDto;
+import com.onpurple.dto.response.CommentResponseDto;
+import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.jwt.TokenProvider;
+import com.onpurple.model.Comment;
+import com.onpurple.model.Post;
+import com.onpurple.model.User;
+import com.onpurple.repository.CommentRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

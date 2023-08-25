@@ -1,16 +1,15 @@
-package com.project.date.controller;
+package com.onpurple.controller;
 
-
-import com.project.date.dto.request.PostRequestDto;
-import com.project.date.dto.response.ResponseDto;
-import com.project.date.service.PostService;
-import com.project.date.util.AwsS3UploadService;
+import com.onpurple.dto.request.PostRequestDto;
+import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.service.PostService;
+import com.onpurple.util.AwsS3UploadService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController

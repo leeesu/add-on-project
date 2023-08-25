@@ -1,20 +1,20 @@
-package com.project.date.service;
+package com.onpurple.service;
 
-import com.project.date.dto.request.*;
-import com.project.date.dto.response.ResponseDto;
-import com.project.date.dto.response.UserResponseDto;
-import com.project.date.jwt.TokenProvider;
-import com.project.date.model.*;
-import com.project.date.repository.ImgRepository;
-import com.project.date.repository.UserRepository;
-import com.project.date.util.AwsS3UploadService;
+import com.onpurple.dto.request.*;
+import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.dto.response.UserResponseDto;
+import com.onpurple.jwt.TokenProvider;
+import com.onpurple.model.Authority;
+import com.onpurple.model.Img;
+import com.onpurple.model.User;
+import com.onpurple.repository.ImgRepository;
+import com.onpurple.repository.UserRepository;
+import com.onpurple.util.AwsS3UploadService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -275,6 +275,7 @@ public class UserService {
 
         return tokenProvider.deleteRefreshToken(user);
     }
+
 
     @Transactional(readOnly = true)
     public User isPresentUser(String username) {

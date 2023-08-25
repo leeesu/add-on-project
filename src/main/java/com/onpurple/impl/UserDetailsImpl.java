@@ -1,7 +1,7 @@
-package com.project.date.impl;
+package com.onpurple.impl;
 
-import com.project.date.model.Authority;
-import com.project.date.model.User;
+import com.onpurple.model.Authority;
+import com.onpurple.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,19 +1,23 @@
-package com.project.date.service;
+package com.onpurple.service;
 
-import com.project.date.dto.response.*;
-import com.project.date.jwt.TokenProvider;
-import com.project.date.model.*;
-import com.project.date.repository.LikeRepository;
-import com.project.date.repository.UserRepository;
+
+import com.onpurple.dto.response.LikedResponseDto;
+import com.onpurple.dto.response.MypageResponseDto;
+import com.onpurple.dto.response.OtherLikeResponseDto;
+import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.jwt.TokenProvider;
+import com.onpurple.model.Likes;
+import com.onpurple.model.User;
+import com.onpurple.repository.LikeRepository;
+import com.onpurple.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
 
 @RequiredArgsConstructor
 @Service
