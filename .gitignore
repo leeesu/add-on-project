@@ -35,3 +35,13 @@ out/
 
 ### VS Code ###
 .vscode/
+
+
+### CUSTOM
+.env
+### Aws S3 bucket ###
+awsS3.yml
+
+### setting ###
+application.properties
+application-embedded.yml
