@@ -1,7 +1,7 @@
 package com.onpurple.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.date.dto.response.ResponseDto;
+import com.onpurple.dto.response.ResponseDto;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.access.AccessDeniedException;

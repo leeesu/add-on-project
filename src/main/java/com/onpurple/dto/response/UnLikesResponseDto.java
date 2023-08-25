@@ -1,6 +1,5 @@
 package com.onpurple.dto.response;
 
-import com.project.date.model.Likes;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
