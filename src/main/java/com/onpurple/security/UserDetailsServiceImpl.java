@@ -1,4 +1,4 @@
-package com.onpurple.impl;
+package com.onpurple.security;
 
 
 import com.onpurple.model.User;

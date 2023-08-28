@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onpurple.dto.request.KakaoUserRequestDto;
 import com.onpurple.dto.request.TokenDto;
-import com.onpurple.impl.UserDetailsImpl;
+import com.onpurple.security.UserDetailsImpl;
 import com.onpurple.jwt.TokenProvider;
 import com.onpurple.model.User;
 import com.onpurple.repository.UserRepository;
