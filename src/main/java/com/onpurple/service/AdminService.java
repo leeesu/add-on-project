@@ -35,20 +35,9 @@ public class AdminService {
 //    토큰을 통해 해당 토큰의 정보를 확인. 이때 해당 정보의 Role 설정이 Admin일 경우  게시글 삭제가 가능하도록 설정.
 //    반대로 해당 정보의 Role 설정이 User인 경우 게시글 삭제가 진행되지 않도록 에러메시지 전송.
     @Transactional
-    public ResponseDto<?> deletePostByAdmin(HttpServletRequest request, Long postId) {
-        if (null == request.getHeader("RefreshToken")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
+    public ResponseDto<?> deletePostByAdmin(User user, Long postId) {
 
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-        User user = validateUser(request);
-        if (null == user) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
+
         Post post = isPresentPost(postId);
         if (null == post) {
             return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글입니다.");
@@ -74,20 +63,8 @@ public class AdminService {
 //    관리자 권한으로 댓글 삭제.
 //    관리자 권한으로 게시글 삭제와 동일한 로직으로 구현.
     @Transactional
-    public ResponseDto<?> deleteCommentByAdmin(HttpServletRequest request, Long commentId) {
-        if (null == request.getHeader("RefreshToken")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
+    public ResponseDto<?> deleteCommentByAdmin(User user, Long commentId) {
 
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-        User user = validateUser(request);
-        if (null == user) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
         Comment comment = isPresentComment(commentId);
         if (null == comment) {
             return ResponseDto.fail("NOT_FOUND", "존재하지 않는 댓글입니다.");
@@ -111,13 +88,5 @@ public class AdminService {
     public Comment isPresentComment(Long commentId) {
         Optional<Comment> optionalComment = commentRepository.findById(commentId);
         return optionalComment.orElse(null);
-    }
-
-    @Transactional
-    public User validateUser(HttpServletRequest request) {
-        if (!tokenProvider.validateToken(request.getHeader("RefreshToken"))) {
-            return null;
-        }
-        return tokenProvider.getUserFromAuthentication();
     }
 }

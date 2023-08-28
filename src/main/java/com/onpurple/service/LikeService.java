@@ -2,10 +2,8 @@ package com.onpurple.service;
 
 
 import com.onpurple.dto.response.*;
-import com.onpurple.jwt.TokenProvider;
 import com.onpurple.model.*;
 import com.onpurple.repository.*;
-import jakarta.servlet.http.HttpServletRequest;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +20,6 @@ import java.util.stream.Collectors;
 @RestController
 public class LikeService {
 
-    private final TokenProvider tokenProvider;
     private final LikeRepository likeRepository;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
@@ -32,22 +29,7 @@ public class LikeService {
     // 게시글 좋아요
     @Transactional
     public ResponseDto<?> PostLike(Long postId,
-                                   HttpServletRequest request) {
-
-        if (null == request.getHeader("RefreshToken")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        User user = validateUser(request);
-        if (null == user) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
+                                   User user) {
 
         Post post = isPresentPost(postId);
         if (null == post) {
@@ -83,22 +65,7 @@ public class LikeService {
     // 댓글 좋아요
     @Transactional
     public ResponseDto<?> CommentLike(Long commentId,
-                                      HttpServletRequest request) {
-
-        if (null == request.getHeader("RefreshToken")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        User user = validateUser(request);
-        if (null == user) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
+                                      User user) {
 
         Comment comment = isPresentComment(commentId);
         if (null == comment)
@@ -132,22 +99,7 @@ public class LikeService {
     //회원 좋아요
     @Transactional
     public ResponseDto<?> UserLike(Long targetId,
-                                   HttpServletRequest request) {
-
-        if (null == request.getHeader("RefreshToken")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        User user = validateUser(request);
-        if (null == user) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
+                                   User user) {
 
         User target = isPresentTarget(targetId);
         if (null == target)
@@ -177,22 +129,8 @@ public class LikeService {
 
     //회원 싫어요
     public ResponseDto<?> ProfileUnLike(Long targetId,
-                                        HttpServletRequest request) {
+                                        User user) {
 
-        if (null == request.getHeader("RefreshToken")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        User user = validateUser(request);
-        if (null == user) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
 
         User target = isPresentTarget(targetId);
         if (null == target)
@@ -223,22 +161,7 @@ public class LikeService {
 
     // 매칭 JPQL QUERY방식
     @Transactional(readOnly = true)
-    public ResponseDto<?> likeCheck(Long userId, HttpServletRequest request) {
-
-        if (null == request.getHeader("RefreshToken")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        User user = validateUser(request);
-        if (null == user) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
+    public ResponseDto<?> likeCheck(Long userId, User user) {
 
         List<Integer> likeList = likeRepository.likeToLikeUserId(userId)
                 .stream()
@@ -270,22 +193,7 @@ public class LikeService {
     //    내가 좋아요 한 사람 리스트 조회.
 //    프론트에서 나를 좋아요 한 사람을 찾아 프로필을 불러올 때 조건을 걸기 위해서 생성된 메소드.
     @Transactional(readOnly = true)
-    public ResponseDto<?> getLike(HttpServletRequest request) {
-
-        if (null == request.getHeader("RefreshToken")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        User user = validateUser(request);
-        if (null == user) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
+    public ResponseDto<?> getLike(User user) {
 
         //    토큰을 통해 user를 확인하고 확인된 유저 기준 좋아요를 누른 대상 모드를 찾아 리스트에 저장.
         List<Likes> likesList = likeRepository.findAllByUser(user);
@@ -303,22 +211,7 @@ public class LikeService {
     //    내가 싫어요 한 사람 리스트 조회.
 //    264~295의 내가 좋아요한  사람 리스트 조회와 동일한 로직으로 구현.
     @Transactional(readOnly = true)
-    public ResponseDto<?> getUnLike(HttpServletRequest request) {
-
-        if (null == request.getHeader("RefreshToken")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        User user = validateUser(request);
-        if (null == user) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
+    public ResponseDto<?> getUnLike(User user) {
 
         List<UnLike> unLikesList = unLikeRepository.findAllByUser(user);
         List<UnLikesResponseDto> unLikesResponseDtoList = new ArrayList<>();
@@ -348,13 +241,6 @@ public class LikeService {
     public Comment isPresentComment(Long commentId) {
         Optional<Comment> optionalComment = commentRepository.findById(commentId);
         return optionalComment.orElse(null);
-    }
-
-    public User validateUser(HttpServletRequest request) {
-        if (!tokenProvider.validateToken(request.getHeader("RefreshToken"))) {
-            return null;
-        }
-        return tokenProvider.getUserFromAuthentication();
     }
 
 }
