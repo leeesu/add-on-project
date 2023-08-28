@@ -142,5 +142,15 @@ public class JwtUtil {
         response.addHeader(REFRESH_TOKEN, tokenDto.getRefreshToken());
     }
 
+    //JWT 토큰의 만료시간
+    public Long getExpiration(String accessToken){
+
+        Date expiration = Jwts.parserBuilder().setSigningKey(key)
+                .build().parseClaimsJws(accessToken).getBody().getExpiration();
+
+        long now = new Date().getTime();
+        return expiration.getTime() - now;
+    }
+
 
 }

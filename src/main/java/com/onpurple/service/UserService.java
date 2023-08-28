@@ -10,6 +10,8 @@ import com.onpurple.repository.ImgRepository;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.security.jwt.JwtUtil;
 import com.onpurple.util.AwsS3UploadService;
+import com.onpurple.util.RedisUtil;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ public class UserService {
     private final ImgRepository imgRepository;
     private final AwsS3UploadService awsS3UploadService;
     private final JwtUtil jwtUtil;
+    private final RedisUtil redisUtil;
     private static final String ADMIN_TOKEN = ("AAABnvxRVklrnYxKZ0aHgTBcXukeZygoC");
 
     //    아이디 체크. DB에 저장되어 있는 usernaeme을 찾아 유저가 존재한다면 에러메시지 전송)
@@ -102,7 +105,7 @@ public class UserService {
 
 //        현재 서비스에서 회원가입 이후 바로 서비스를 이용할 수 있도록 설정하였기에 회원가입이 진행될 때 토큰이 발행되도록 설정
         TokenDto tokenDto = jwtUtil.createAllToken(jwtUtil.createAccessToken(user), jwtUtil.createRefreshToken(user));
-        tokenToHeaders(tokenDto, response)
+        jwtUtil.tokenAddHeaders(tokenDto, response);
 
         if (user.getRole().equals(Authority.ADMIN)) {
             return ResponseDto.success("관리자 회원가입이 완료되었습니다");
@@ -126,38 +129,6 @@ public class UserService {
     }
 
     @Transactional
-//  로그인. 아이디와 패스워드를 입력한 후 일치하면 완료. 이후 토큰 발행을 통해 서비스 이용.
-//  사용자의 아이디가 존재하지 않거나 비밀번호확인이 일치하지 않았을 때 오류 메시지를 출력.
-    public ResponseDto<?> login(LoginRequestDto requestDto, HttpServletResponse response) {
-        User user = isPresentUser(requestDto.getUsername());
-        if (null == user) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "사용자를 찾을 수 없습니다.");
-        }
-
-        if (!user.validatePassword(passwordEncoder, requestDto.getPassword())) {
-            return ResponseDto.fail("INVALID_USER", "비밀번호가 틀렸습니다..");
-        }
-
-        TokenDto tokenDto = tokenProvider.generateTokenDto(user);
-        tokenToHeaders(tokenDto, response);
-
-        if (user.getRole().equals(Authority.ADMIN)) {
-            return ResponseDto.success("관리자 로그인에 성공하였습니다");
-        }
-
-        return ResponseDto.success(
-                UserResponseDto.builder()
-                        .userId(user.getId())
-                        .nickname(user.getNickname())
-                        .gender(user.getGender())
-                        .imageUrl(user.getImageUrl())
-                        .build()
-        );
-    }
-
-    //    유저 정보 확인. Front에서 헤더에 user에 대한 정보가 필요하여 해당 메소드를 통해 확인.
-    @Transactional
     public ResponseDto<?> getUser(User user) {
 
         return ResponseDto.success(
@@ -174,23 +145,7 @@ public class UserService {
     //    비밀번호 수정.
     @Transactional
     public ResponseDto<?> updatePassword(UserUpdateRequestDto requestDto,
-                                         HttpServletRequest request) {
-
-
-        if (null == request.getHeader("RefreshToken")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        User user = validateUser(request);
-        if (null == user) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
+                                         User user) {
 
         if (!requestDto.getPassword().equals(requestDto.getPasswordConfirm())) {
             return ResponseDto.fail("PASSWORDS_NOT_MATCHED",
@@ -207,21 +162,8 @@ public class UserService {
 
     //    이미지 수정
     @Transactional
-    public ResponseDto<?> updateImage(HttpServletRequest request, List<String> imgPaths, ImageUpdateRequestDto requestDto) {
-        if (null == request.getHeader("RefreshToken")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
+    public ResponseDto<?> updateImage(User user, List<String> imgPaths, ImageUpdateRequestDto requestDto) {
 
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        User user = validateUser(request);
-        if (null == user) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
 //        이미지를 확인하고 user의 기존 이미지를 삭제. 이후 새로 넣은 이미지로 업데이트 되도록 설정.
         if (imgPaths != null) {
             String deleteImage = user.getImageUrl();
@@ -243,19 +185,10 @@ public class UserService {
     }
 
     //  로그아웃. 토큰을 확인하여 일치할 경우 로그인 된 유저의 이미지와 토큰을 삭제.
-    public ResponseDto<?> logout(User user) {
+    public ResponseDto<?> logout(HttpServletRequest request) {
 
-        List<Img> findImgList = imgRepository.findByUser_Id(user.getId());
-        List<String> imgList = new ArrayList<>();
-        for (Img img : findImgList) {
-            imgList.add(img.getImageUrl());
-        }
-
-        for (String imgUrl : imgList) {
-            awsS3UploadService.deleteFile(AwsS3UploadService.getFileNameFromURL(imgUrl));
-        }
-
-        return tokenProvider.deleteRefreshToken(user);
+        deleteToken(request);
+        return ResponseDto.success("로그아웃이 완료되었습니다.");
     }
 
 
@@ -269,6 +202,18 @@ public class UserService {
     public User isPresentNickname(String nickname) {
         Optional<User> optionalUser = userRepository.findByNickname(nickname);
         return optionalUser.orElse(null);
+    }
+
+    @Transactional
+    public void deleteToken(HttpServletRequest request) {
+        String accessToken = jwtUtil.resolveToken(request, JwtUtil.ACCESS_TOKEN);
+        String refreshToken = jwtUtil.resolveToken(request, JwtUtil.REFRESH_TOKEN);
+        Claims info = jwtUtil.getUserInfoFromToken(refreshToken);
+        long remainMilliSeconds = jwtUtil.getExpiration(accessToken);
+        // 액세스 토큰 만료시점 까지 저장
+        redisUtil.set("logout", accessToken, remainMilliSeconds);
+        // refreshToken 삭제
+        redisUtil.delete(info.getId());
     }
 
 }

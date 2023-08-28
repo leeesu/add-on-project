@@ -54,20 +54,21 @@ public class UserController {
     }
 
     @RequestMapping(value = "/mypage/password", method = RequestMethod.PUT)
-    public ResponseDto<?> passwordUpdate(@RequestBody UserUpdateRequestDto requestDto, HttpServletRequest request) {
+    public ResponseDto<?> passwordUpdate(@RequestBody UserUpdateRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        return userService.updatePassword(requestDto, request);
+        return userService.updatePassword(requestDto, userDetails.getUser());
     }
 
     @RequestMapping(value = "/mypage/image", method = RequestMethod.PUT)
-    public ResponseDto<?> imageUpdate(ImageUpdateRequestDto requestDto, @RequestPart("imageUrl") List<MultipartFile> multipartFiles, HttpServletRequest request) {
+    public ResponseDto<?> imageUpdate(ImageUpdateRequestDto requestDto, @RequestPart("imageUrl") List<MultipartFile> multipartFiles,
+                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         if (multipartFiles == null) {
             throw new NullPointerException("사진을 업로드해주세요");
         }
 
         List<String> imgPaths = s3Service.upload(multipartFiles);
-        return userService.updateImage(request, imgPaths, requestDto);
+        return userService.updateImage(userDetails.getUser(), imgPaths, requestDto);
     }
 
 
@@ -78,9 +79,9 @@ public class UserController {
     }
 
     @RequestMapping(value = "/user/logout", method = RequestMethod.POST)
-    public ResponseDto<?> logout(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseDto<?> logout(HttpServletRequest request) {
 
-        return userService.logout(userDetails.getUser());
+        return userService.logout(request);
     }
 
     @RequestMapping(value = "/user/kakaoLogin", method = RequestMethod.GET)

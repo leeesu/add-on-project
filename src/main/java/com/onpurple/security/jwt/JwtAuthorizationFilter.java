@@ -60,7 +60,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                         // 기존 refreshToken 토큰 삭제
                         redisUtil.delete(info.getId());
                         // 새로운 토큰 발급
-                        TokenDto tokenDto = issueToken(user);
+                        TokenDto tokenDto = reissueToken(user);
 
                         // header 로 토큰 send
                         jwtUtil.tokenAddHeaders(tokenDto, res);
@@ -96,7 +96,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
 
-    public TokenDto issueToken(User user) {
+    public TokenDto reissueToken(User user) {
         TokenDto tokenDto = jwtUtil.createAllToken(jwtUtil.createAccessToken(user), jwtUtil.createRefreshToken(user)
         );
         // Redis에 저장
