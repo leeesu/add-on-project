@@ -2,13 +2,11 @@ package com.onpurple.service;
 
 
 import com.onpurple.dto.response.ResponseDto;
-import com.onpurple.jwt.TokenProvider;
 import com.onpurple.model.*;
 import com.onpurple.repository.CommentRepository;
 import com.onpurple.repository.ImgRepository;
 import com.onpurple.repository.PostRepository;
 import com.onpurple.util.AwsS3UploadService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,8 +22,6 @@ public class AdminService {
     private final PostRepository postRepository;
 
     private final CommentRepository commentRepository;
-
-    private final TokenProvider tokenProvider;
 
     private final ImgRepository imgRepository;
 

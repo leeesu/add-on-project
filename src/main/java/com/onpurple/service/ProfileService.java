@@ -4,16 +4,13 @@ package com.onpurple.service;
 import com.onpurple.dto.request.ProfileUpdateRequestDto;
 import com.onpurple.dto.response.ProfileResponseDto;
 import com.onpurple.dto.response.ResponseDto;
-import com.onpurple.jwt.TokenProvider;
 import com.onpurple.model.Img;
 import com.onpurple.model.User;
 import com.onpurple.repository.ImgRepository;
 import com.onpurple.repository.UserRepository;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,8 +24,6 @@ public class ProfileService {
     private final UserRepository userRepository;
 
     private final ImgRepository imgRepository;
-
-    private final TokenProvider tokenProvider;
 
 
     //    전체 프로필 조회(메인페이지). user DB에 저장된 모든 내용을 찾은 후 리스트에 저장.
@@ -97,34 +92,11 @@ public class ProfileService {
 
     //    프로필 수정. DB에 저장된 유저의 정보들 중 프로필에 해당되는 내용을 수정.
     @Transactional
-    public ResponseDto<?> updateProfile(ProfileUpdateRequestDto requestDto, HttpServletRequest request) {
-        if (null == request.getHeader("RefreshToken")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        User user = validateUser(request);
-        if (null == user) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
-
+    public ResponseDto<?> updateProfile(ProfileUpdateRequestDto requestDto, User user) {
 
         user.update(requestDto);
         userRepository.save(user);
         return ResponseDto.success("프로필 정보 수정이 완료되었습니다!");
-    }
-
-    @Transactional
-    public User validateUser(HttpServletRequest request) {
-        if (!tokenProvider.validateToken(request.getHeader("RefreshToken"))) {
-            return null;
-        }
-        return tokenProvider.getUserFromAuthentication();
     }
 
     @Transactional(readOnly = true)

@@ -3,9 +3,11 @@ package com.onpurple.controller;
 
 import com.onpurple.dto.request.CommentRequestDto;
 import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.security.UserDetailsImpl;
 import com.onpurple.service.CommentService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,8 +20,8 @@ public class CommentController {
 
   @PostMapping("/comment/{postId}")
   public ResponseDto<?> createComment(@PathVariable Long postId, @RequestBody CommentRequestDto requestDto,
-                                      HttpServletRequest request) {
-    return commentService.createComment(postId, requestDto, request);
+                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    return commentService.createComment(postId, requestDto, userDetails.getUser());
   }
 
   @GetMapping("/comment/{postId}")
@@ -29,13 +31,13 @@ public class CommentController {
 
   @PutMapping( "/comment/{commentId}")
   public ResponseDto<?> updateComment(@PathVariable Long commentId, @RequestBody CommentRequestDto requestDto,
-      HttpServletRequest request) {
-    return commentService.updateComment(commentId, requestDto, request);
+                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    return commentService.updateComment(commentId, requestDto, userDetails.getUser());
   }
 
   @DeleteMapping( "/comment/{commentId}")
   public ResponseDto<?> deleteComment(@PathVariable Long commentId,
-      HttpServletRequest request) {
-    return commentService.deleteComment(commentId, request);
+                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    return commentService.deleteComment(commentId, userDetails.getUser());
   }
 }

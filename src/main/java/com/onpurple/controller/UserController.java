@@ -3,6 +3,7 @@ package com.onpurple.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.onpurple.dto.request.*;
 import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.security.UserDetailsImpl;
 import com.onpurple.service.KakaoService;
 import com.onpurple.service.UserService;
 import com.onpurple.util.AwsS3UploadService;
@@ -11,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,12 +40,7 @@ public class UserController {
         return userService.createUser(requestDto, userInfoRequestDto, imgPaths, response);
     }
 
-    @RequestMapping(value = "/user/login", method = RequestMethod.POST)
-    public ResponseDto<?> login(@RequestBody @Valid LoginRequestDto requestDto, HttpServletResponse response) {
-
-        return userService.login(requestDto, response);
-    }
-
+    // login Filter단에서 이루어지게 구현
     @PostMapping("/user/idCheck/{username}")
     public ResponseDto<?> checkUser(@PathVariable String username) {
 
@@ -75,15 +72,15 @@ public class UserController {
 
 
     @RequestMapping(value = "/user/me", method = RequestMethod.GET)
-    public ResponseDto<?> getUser(HttpServletRequest request) {
+    public ResponseDto<?> getUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        return userService.getUser(request);
+        return userService.getUser(userDetails.getUser());
     }
 
     @RequestMapping(value = "/user/logout", method = RequestMethod.POST)
-    public ResponseDto<?> logout(HttpServletRequest request) {
+    public ResponseDto<?> logout(@AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        return userService.logout(request);
+        return userService.logout(userDetails.getUser());
     }
 
     @RequestMapping(value = "/user/kakaoLogin", method = RequestMethod.GET)

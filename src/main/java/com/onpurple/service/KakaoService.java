@@ -6,9 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onpurple.dto.request.KakaoUserRequestDto;
 import com.onpurple.dto.request.TokenDto;
 import com.onpurple.security.UserDetailsImpl;
-import com.onpurple.jwt.TokenProvider;
 import com.onpurple.model.User;
 import com.onpurple.repository.UserRepository;
+import com.onpurple.security.jwt.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +34,7 @@ import java.util.UUID;
 public class KakaoService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
-    private final TokenProvider tokenProvider;
+    private final JwtUtil jwtUtil;
 
     public KakaoUserRequestDto kakaoLogin(String code, HttpServletResponse response) throws JsonProcessingException {
         // 1. "인가 코드"로 전체 response 요청
@@ -50,11 +50,10 @@ public class KakaoService {
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        TokenDto tokenDto = tokenProvider.generateTokenDto(kakaoUser);
+        TokenDto tokenDto = jwtUtil.createAllToken(jwtUtil.createAccessToken(kakaoUser), jwtUtil.createRefreshToken(kakaoUser));
         // 헤더에 토큰 담기
         response.setContentType("application/json;charset=UTF-8");
-        response.addHeader("Authorization", "Bearer " + tokenDto.getAccessToken());
-        response.addHeader("RefreshToken", tokenDto.getRefreshToken());
+        jwtUtil.tokenAddHeaders(tokenDto, response);
 
         return kakaoUserInfo;
     }

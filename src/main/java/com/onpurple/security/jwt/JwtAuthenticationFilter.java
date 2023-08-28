@@ -77,7 +77,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
-        TokenDto tokenDto = issueAllToken(user);
+        TokenDto tokenDto = jwtUtil.createAllToken(jwtUtil.createAccessToken(user), jwtUtil.createRefreshToken(user));
         // header 로 토큰 send
         jwtUtil.tokenAddHeaders(tokenDto, response);
     }
@@ -86,20 +86,5 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
         log.info("로그인 실패");
         response.setStatus(401);
-    }
-
-    // 토큰 재발급
-    public TokenDto issueAllToken(User user) {
-        TokenDto tokenDto = jwtUtil.createAllToken(
-                jwtUtil.createAccessToken(user),
-                jwtUtil.createRefreshToken(user)
-        );
-        // Redis에 저장
-        redisUtil.set(
-                String.valueOf(user.getId()),
-                tokenDto.getRefreshToken(),
-                refreshTokenTime // 만료 될 수 있도록 TTL 설정
-        );
-        return tokenDto;
     }
 }

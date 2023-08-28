@@ -2,10 +2,13 @@ package com.onpurple.controller;
 
 import com.onpurple.dto.request.ReportRequestDto;
 import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.security.UserDetailsImpl;
+import com.onpurple.security.UserDetailsServiceImpl;
 import com.onpurple.service.ReportService;
 import com.onpurple.util.AwsS3UploadService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,13 +23,14 @@ public class ReportController {
     // 신고글 작성
     @PostMapping( "/report")
     public ResponseDto<?> createReport(@RequestPart(value = "data",required = false) ReportRequestDto requestDto,
-                                       HttpServletRequest request, @RequestPart(value = "imageUrl",required = false) List<MultipartFile> multipartFiles) {
+                                       @AuthenticationPrincipal UserDetailsImpl userDetails,
+                                       @RequestPart(value = "imageUrl",required = false) List<MultipartFile> multipartFiles) {
 
         if (multipartFiles == null) {
             throw new NullPointerException("사진을 업로드해주세요");
         }
         List<String> imgPaths = s3Service.upload(multipartFiles);
-        return reportService.createReport(requestDto,request, imgPaths);
+        return reportService.createReport(requestDto,userDetails.getUser(), imgPaths);
     }
 
     @GetMapping("/report")
@@ -45,7 +49,7 @@ public class ReportController {
     //신고글 삭제
     @DeleteMapping( "/report/{reportId}")
     public ResponseDto<?> deleteReport(@PathVariable Long reportId,
-                                     HttpServletRequest request) {
-        return reportService.deleteReport(reportId, request);
+                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return reportService.deleteReport(reportId, userDetails.getUser());
     }
 }

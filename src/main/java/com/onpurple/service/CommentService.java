@@ -4,16 +4,13 @@ package com.onpurple.service;
 import com.onpurple.dto.request.CommentRequestDto;
 import com.onpurple.dto.response.CommentResponseDto;
 import com.onpurple.dto.response.ResponseDto;
-import com.onpurple.jwt.TokenProvider;
 import com.onpurple.model.Comment;
 import com.onpurple.model.Post;
 import com.onpurple.model.User;
 import com.onpurple.repository.CommentRepository;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,25 +22,10 @@ import java.util.Optional;
 public class CommentService {
 
   private final CommentRepository commentRepository;
-  private final TokenProvider tokenProvider;
   private final PostService postService;
 
   @Transactional
-  public ResponseDto<?> createComment(Long postId, CommentRequestDto requestDto, HttpServletRequest request) {
-    if (null == request.getHeader("RefreshToken")) {
-      return ResponseDto.fail("USER_NOT_FOUND",
-              "로그인이 필요합니다.");
-    }
-
-    if (null == request.getHeader("Authorization")) {
-      return ResponseDto.fail("USER_NOT_FOUND",
-              "로그인이 필요합니다.");
-    }
-
-    User user = validateUser(request);
-    if (null == user) {
-      return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-    }
+  public ResponseDto<?> createComment(Long postId, CommentRequestDto requestDto, User user) {
 
     Post post = postService.isPresentPost(postId);
     if (null == post) {
@@ -98,21 +80,7 @@ public class CommentService {
   }
 
   @Transactional
-  public ResponseDto<?> updateComment(Long commentId, CommentRequestDto requestDto, HttpServletRequest request) {
-    if (null == request.getHeader("RefreshToken")) {
-      return ResponseDto.fail("USER_NOT_FOUND",
-              "로그인이 필요합니다.");
-    }
-
-    if (null == request.getHeader("Authorization")) {
-      return ResponseDto.fail("USER_NOT_FOUND",
-              "로그인이 필요합니다.");
-    }
-
-    User user = validateUser(request);
-    if (null == user) {
-      return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-    }
+  public ResponseDto<?> updateComment(Long commentId, CommentRequestDto requestDto, User user) {
 
     Post post = postService.isPresentPost(requestDto.getPostId());
     if (null == post) {
@@ -145,21 +113,7 @@ public class CommentService {
   }
 
   @Transactional
-  public ResponseDto<?> deleteComment(Long commentId, HttpServletRequest request) {
-    if (null == request.getHeader("RefreshToken")) {
-      return ResponseDto.fail("USER_NOT_FOUND",
-              "로그인이 필요합니다.");
-    }
-
-    if (null == request.getHeader("Authorization")) {
-      return ResponseDto.fail("USER_NOT_FOUND",
-              "로그인이 필요합니다.");
-    }
-
-    User user = validateUser(request);
-    if (null == user) {
-      return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-    }
+  public ResponseDto<?> deleteComment(Long commentId, User user) {
 
     Comment comment = isPresentComment(commentId);
     if (null == comment) {
@@ -189,13 +143,5 @@ public class CommentService {
   public Comment isPresentComment(Long commentId) {
     Optional<Comment> optionalComment = commentRepository.findById(commentId);
     return optionalComment.orElse(null);
-  }
-
-  @Transactional
-  public User validateUser(HttpServletRequest request) {
-    if (!tokenProvider.validateToken(request.getHeader("RefreshToken"))) {
-      return null;
-    }
-    return tokenProvider.getUserFromAuthentication();
   }
 }

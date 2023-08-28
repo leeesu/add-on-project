@@ -2,10 +2,14 @@ package com.onpurple.controller;
 
 import com.onpurple.dto.request.PostRequestDto;
 import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.security.UserDetailsImpl;
 import com.onpurple.service.PostService;
 import com.onpurple.util.AwsS3UploadService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,13 +26,14 @@ public class PostController {
   // 게시글 작성
   @PostMapping( "/post")
   public ResponseDto<?> createPost(@RequestPart(value = "data",required = false) PostRequestDto requestDto,
-                                   HttpServletRequest request, @RequestPart(value = "imageUrl",required = false) List<MultipartFile> multipartFiles) {
+                                   @AuthenticationPrincipal UserDetailsImpl userDetails,
+                                   @RequestPart(value = "imageUrl",required = false) List<MultipartFile> multipartFiles) {
 
     if (multipartFiles == null) {
       throw new NullPointerException("사진을 업로드해주세요");
     }
     List<String> imgPaths = s3Service.upload(multipartFiles);
-    return postService.createPost(requestDto,request, imgPaths);
+    return postService.createPost(requestDto,userDetails.getUser(), imgPaths);
   }
 
   // 카테고리별 전체 게시글 가져오기
@@ -50,20 +55,20 @@ public class PostController {
   public ResponseDto<?> updatePost(@PathVariable Long postId,
                                    @RequestPart(value = "data") PostRequestDto requestDto,
                                    @RequestPart("imageUrl") List<MultipartFile> multipartFiles,
-                                   HttpServletRequest request) {
+                                   @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
     if (multipartFiles == null) {
       throw new NullPointerException("사진을 업로드해주세요");
     }
     List<String> imgPaths = s3Service.upload(multipartFiles);
-    return postService.updatePost(postId, requestDto, request, imgPaths);
+    return postService.updatePost(postId, requestDto, userDetails.getUser(), imgPaths);
   }
 
   //게시글 삭제
   @DeleteMapping( "/post/{postId}")
   public ResponseDto<?> deletePost(@PathVariable Long postId,
-                                   HttpServletRequest request) {
-    return postService.deletePost(postId, request);
+                                   @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    return postService.deletePost(postId, userDetails.getUser());
   }
 
   // 카테고리별 전체 게시글 검색

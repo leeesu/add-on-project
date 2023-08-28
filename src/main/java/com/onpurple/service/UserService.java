@@ -3,16 +3,17 @@ package com.onpurple.service;
 import com.onpurple.dto.request.*;
 import com.onpurple.dto.response.ResponseDto;
 import com.onpurple.dto.response.UserResponseDto;
-import com.onpurple.jwt.TokenProvider;
 import com.onpurple.model.Authority;
 import com.onpurple.model.Img;
 import com.onpurple.model.User;
 import com.onpurple.repository.ImgRepository;
 import com.onpurple.repository.UserRepository;
+import com.onpurple.security.jwt.JwtUtil;
 import com.onpurple.util.AwsS3UploadService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,9 +27,9 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final TokenProvider tokenProvider;
     private final ImgRepository imgRepository;
     private final AwsS3UploadService awsS3UploadService;
+    private final JwtUtil jwtUtil;
     private static final String ADMIN_TOKEN = ("AAABnvxRVklrnYxKZ0aHgTBcXukeZygoC");
 
     //    아이디 체크. DB에 저장되어 있는 usernaeme을 찾아 유저가 존재한다면 에러메시지 전송)
@@ -51,7 +52,8 @@ public class UserService {
 
     //    회원가입. SingupRequsetDto에 선언한 내용을 입력하여 회원가입
     @Transactional
-    public ResponseDto<?> createUser(SignupRequestDto requestDto, UserInfoRequestDto userInfoRequestDto, List<String> imgPaths, HttpServletResponse response) {
+    public ResponseDto<?> createUser(SignupRequestDto requestDto, UserInfoRequestDto userInfoRequestDto,
+                                     List<String> imgPaths, HttpServletResponse response) {
         if (!requestDto.getPassword().equals(requestDto.getPasswordConfirm())) {
             return ResponseDto.fail("PASSWORDS_NOT_MATCHED",
                     "비밀번호와 비밀번호 확인이 일치하지 않습니다.");
@@ -99,8 +101,8 @@ public class UserService {
         user.imageSave(imgList.get(0));
 
 //        현재 서비스에서 회원가입 이후 바로 서비스를 이용할 수 있도록 설정하였기에 회원가입이 진행될 때 토큰이 발행되도록 설정
-        TokenDto tokenDto = tokenProvider.generateTokenDto(user);
-        tokenToHeaders(tokenDto, response);
+        TokenDto tokenDto = jwtUtil.createAllToken(jwtUtil.createAccessToken(user), jwtUtil.createRefreshToken(user));
+        tokenToHeaders(tokenDto, response)
 
         if (user.getRole().equals(Authority.ADMIN)) {
             return ResponseDto.success("관리자 회원가입이 완료되었습니다");
@@ -156,21 +158,8 @@ public class UserService {
 
     //    유저 정보 확인. Front에서 헤더에 user에 대한 정보가 필요하여 해당 메소드를 통해 확인.
     @Transactional
-    public ResponseDto<?> getUser(HttpServletRequest request) {
+    public ResponseDto<?> getUser(User user) {
 
-        if (null == request.getHeader("RefreshToken")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-        User user = validateUser(request);
-        if (null == user) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
         return ResponseDto.success(
                 UserResponseDto.builder()
                         .userId(user.getId())
@@ -254,15 +243,8 @@ public class UserService {
     }
 
     //  로그아웃. 토큰을 확인하여 일치할 경우 로그인 된 유저의 이미지와 토큰을 삭제.
-    public ResponseDto<?> logout(HttpServletRequest request) {
-        if (!tokenProvider.validateToken(request.getHeader("RefreshToken"))) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
-        User user = tokenProvider.getUserFromAuthentication();
-        if (null == user) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "사용자를 찾을 수 없습니다.");
-        }
+    public ResponseDto<?> logout(User user) {
+
         List<Img> findImgList = imgRepository.findByUser_Id(user.getId());
         List<String> imgList = new ArrayList<>();
         for (Img img : findImgList) {
@@ -289,21 +271,4 @@ public class UserService {
         return optionalUser.orElse(null);
     }
 
-    @Transactional
-    public User validateUser(HttpServletRequest request) {
-        if (!tokenProvider.validateToken(request.getHeader("RefreshToken"))) {
-            return null;
-        }
-        return tokenProvider.getUserFromAuthentication();
-    }
-
-    //  TokenDto와 HttpServletResponse 응답을 헤더에 보낼 경우
-    //  권한과 tokenDto에 있는 AccessToken을 추가
-    //  Refresh-token을 추가
-    //  AccessToken의 유효기간을 추가한다.
-    public void tokenToHeaders(TokenDto tokenDto, HttpServletResponse response) {
-        response.addHeader("Authorization", "Bearer " + tokenDto.getAccessToken());
-        response.addHeader("RefreshToken", tokenDto.getRefreshToken());
-        response.addHeader("Access-Token-Expire-Time", tokenDto.getAccessTokenExpiresIn().toString());
-    }
 }

@@ -3,9 +3,11 @@ package com.onpurple.controller;
 
 import com.onpurple.dto.request.ProfileUpdateRequestDto;
 import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.security.UserDetailsImpl;
 import com.onpurple.service.ProfileService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -27,9 +29,10 @@ public class ProfileController {
     }
 
     @PatchMapping( "/mypage/userInfo")
-    public ResponseDto<?> updateProfile(@RequestBody ProfileUpdateRequestDto requestDto, HttpServletRequest request) {
+    public ResponseDto<?> updateProfile(@RequestBody ProfileUpdateRequestDto requestDto,
+                                        @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-       return profileService.updateProfile(requestDto, request);
+       return profileService.updateProfile(requestDto, userDetails.getUser());
     }
 
 }

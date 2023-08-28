@@ -5,12 +5,10 @@ import com.onpurple.dto.response.LikedResponseDto;
 import com.onpurple.dto.response.MypageResponseDto;
 import com.onpurple.dto.response.OtherLikeResponseDto;
 import com.onpurple.dto.response.ResponseDto;
-import com.onpurple.jwt.TokenProvider;
 import com.onpurple.model.Likes;
 import com.onpurple.model.User;
 import com.onpurple.repository.LikeRepository;
 import com.onpurple.repository.UserRepository;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,28 +20,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Service
 public class MypageService {
-    private final TokenProvider tokenProvider;
+
     private final UserRepository userRepository;
     private final LikeRepository likeRepository;
 
 //    마이페이지 조회. 토큰을 확인하고 정보를 불러올 때 나를 좋아요 한 사람과 서로 좋아요 한 사람의 리스트를 불러온다.
 //    이때 기준이 되는 id를 내 userId로 설정.
     @Transactional
-    public ResponseDto<?> getMyPage(HttpServletRequest request, Long userId) {
-        if (null == request.getHeader("RefreshToken")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        User user = validateUser(request);
-        if (null == user) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
+    public ResponseDto<?> getMyPage(User user, Long userId) {
 
 //        서로 좋아요 리스트 코드. likeRepository에서 서로 좋아요 한 id를 찾은 후 stream .distinct를 이용하여 중복제거.
 //        이후  매칭된 user를 list에 저장하고 이를 반환.
@@ -94,15 +78,6 @@ public class MypageService {
                         .likedResponseDtoList(likedResponseDtoList)
                         .otherLikeResponseDtoList(otherLikeResponseDtoList)
                         .build());
-    }
-
-
-    @Transactional
-    public User validateUser(HttpServletRequest request) {
-        if (!tokenProvider.validateToken(request.getHeader("RefreshToken"))) {
-            return null;
-        }
-        return tokenProvider.getUserFromAuthentication();
     }
 
 }

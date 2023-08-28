@@ -5,7 +5,6 @@ import com.onpurple.dto.request.PostRequestDto;
 import com.onpurple.dto.response.CommentResponseDto;
 import com.onpurple.dto.response.PostResponseDto;
 import com.onpurple.dto.response.ResponseDto;
-import com.onpurple.jwt.TokenProvider;
 import com.onpurple.model.Comment;
 import com.onpurple.model.Img;
 import com.onpurple.model.Post;
@@ -14,7 +13,6 @@ import com.onpurple.repository.CommentRepository;
 import com.onpurple.repository.ImgRepository;
 import com.onpurple.repository.PostRepository;
 import com.onpurple.util.AwsS3UploadService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +28,6 @@ import java.util.Optional;
 public class PostService {
 
     private final PostRepository postRepository;
-    private final TokenProvider tokenProvider;
     private final CommentRepository commentRepository;
     private final ImgRepository imgRepository;
     private final AwsS3UploadService awsS3UploadService;
@@ -39,23 +36,8 @@ public class PostService {
     // 게시글 작성
     @Transactional
     public ResponseDto<?> createPost(PostRequestDto requestDto,
-                                                                   HttpServletRequest request,
+                                                                   User user,
                                                                    List<String> imgPaths) {
-
-        if (null == request.getHeader("RefreshToken")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        User user = validateUser(request);
-        if (null == user) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
         String createdAt = formatTime();
 
         Post post = Post.builder()
@@ -185,22 +167,8 @@ public class PostService {
     @Transactional
     public ResponseDto<PostResponseDto> updatePost(Long postId,
                                                    PostRequestDto requestDto,
-                                                   HttpServletRequest request,
+                                                   User user,
                                                    List<String> imgPaths) {
-        if (null == request.getHeader("RefreshToken")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        User user = validateUser(request);
-        if (null == user) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
 
         Post post = isPresentPost(postId);
         if (null == post) {
@@ -256,21 +224,7 @@ public class PostService {
     }
     //게시글 삭제
     @Transactional
-    public ResponseDto<?> deletePost(Long postId, HttpServletRequest request) {
-        if (null == request.getHeader("RefreshToken")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        User user = validateUser(request);
-        if (null == user) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
+    public ResponseDto<?> deletePost(Long postId, User user) {
 
         Post post = isPresentPost(postId);
         if (null == post) {
@@ -323,43 +277,5 @@ public class PostService {
         Optional<Post> optionalPost = postRepository.findById(postId);
         return optionalPost.orElse(null);
     }
-
-    @Transactional
-    public User validateUser(HttpServletRequest request) {
-        if (!tokenProvider.validateToken(request.getHeader("RefreshToken"))) {
-            return null;
-        }
-        return tokenProvider.getUserFromAuthentication();
-    }
-
-//    // 카테고리 전체 게시글 조회
-//    @Transactional(readOnly = true)
-//    public ResponseDto<?> getAllPost(String category, String keyword, int page, int size) {
-//        Pageable pageable = PageRequest.of(page, size);
-//
-//        Slice<PostResponseDto> postList = postRepository.findAllByCategorySearch(category, keyword, pageable);
-//        if (postList.isEmpty()) {
-//            return ResponseDto.fail("POST_NOT_FOUND", "존재하지 않는 게시글입니다.");
-//
-//        }
-//        return ResponseDto.success(postList);
-//
-//    }
-
-//    // 카테고리 전체 게시글 조회
-//    @Transactional(readOnly = true)
-//    public ResponseDto<?> getAllPost(String category, int page, int size) {
-//        Pageable pageable = PageRequest.of(page, size);
-//
-//        Slice<PostResponseDto> postList = postRepository.findAllByCategory(category, pageable);
-//        if (postList.isEmpty()) {
-//            return ResponseDto.fail("POST_NOT_FOUND", "존재하지 않는 게시글입니다.");
-//
-//        }
-//        return ResponseDto.success(postList);
-//
-//    }
-
-
 
 }

@@ -4,7 +4,6 @@ package com.onpurple.service;
 import com.onpurple.dto.request.ReCommentRequestDto;
 import com.onpurple.dto.response.ReCommentResponseDto;
 import com.onpurple.dto.response.ResponseDto;
-import com.onpurple.jwt.TokenProvider;
 import com.onpurple.model.Comment;
 import com.onpurple.model.ReComment;
 import com.onpurple.model.User;
@@ -26,22 +25,10 @@ public class ReCommentService {
     private final CommentService commentService;
     private final CommentRepository commentRepository;
     private final ReCommentRepository reCommentRepository;
-    private final TokenProvider tokenProvider;
 
     @Transactional
-    public ResponseDto<?> createReComment(Long commentId, ReCommentRequestDto requestDto, HttpServletRequest request) {
-        if (null == request.getHeader("RefreshToken")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("MEMBER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-        User user = validateUser(request);
-        if (null == user) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
+    public ResponseDto<?> createReComment(Long commentId, ReCommentRequestDto requestDto, User user) {
+
         Comment comment = isPresentComment(commentId);
         if (null == comment)
             return ResponseDto.fail("COMMENT_NOT_FOUND", "댓글을 찾을 수 없습니다.");
@@ -91,21 +78,8 @@ public class ReCommentService {
 
 
     @Transactional
-    public ResponseDto<?> updateReComment(Long reCommentId, ReCommentRequestDto requestDto, HttpServletRequest request) {
-        if (null == request.getHeader("RefreshToken")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
+    public ResponseDto<?> updateReComment(Long reCommentId, ReCommentRequestDto requestDto, User user) {
 
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        User user = validateUser(request);
-        if (null == user) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
 
         ReComment reComment = isPresentReComment(reCommentId);
         if (null == reComment) {
@@ -127,21 +101,7 @@ public class ReCommentService {
     }
 
     @Transactional
-    public ResponseDto<?> deleteReComment(Long reCommentId, HttpServletRequest request) {
-        if (null == request.getHeader("RefreshToken")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        User user = validateUser(request);
-        if (null == user) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
+    public ResponseDto<?> deleteReComment(Long reCommentId, User user) {
 
         ReComment reComment = isPresentReComment(reCommentId);
         if (null == reComment) {
@@ -154,14 +114,6 @@ public class ReCommentService {
 
         reCommentRepository.delete(reComment);
         return ResponseDto.success("delete success");
-    }
-
-    @Transactional
-    public User validateUser(HttpServletRequest request) {
-        if (!tokenProvider.validateToken(request.getHeader("RefreshToken"))) {
-            return null;
-        }
-        return tokenProvider.getUserFromAuthentication();
     }
 
     @Transactional(readOnly = true)

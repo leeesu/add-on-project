@@ -4,13 +4,11 @@ package com.onpurple.service;
 import com.onpurple.dto.request.ReportRequestDto;
 import com.onpurple.dto.response.ReportResponseDto;
 import com.onpurple.dto.response.ResponseDto;
-import com.onpurple.jwt.TokenProvider;
 import com.onpurple.model.Img;
 import com.onpurple.model.Report;
 import com.onpurple.model.User;
 import com.onpurple.repository.ReportRepository;
 import com.onpurple.util.AwsS3UploadService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,30 +22,13 @@ import java.util.Optional;
 public class ReportService {
 
     private final ReportRepository reportRepository;
-    private final TokenProvider tokenProvider;
     private final AwsS3UploadService awsS3UploadService;
 
     // 신고글 작성
     @Transactional
     public ResponseDto<?> createReport(ReportRequestDto requestDto,
-                                       HttpServletRequest request,
+                                       User user,
                                        List<String> imgPaths) {
-
-        if (null == request.getHeader("RefreshToken")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        User user = validateUser(request);
-        if (null == user) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
-
 
 
         Report report = Report.builder()
@@ -130,21 +111,8 @@ public class ReportService {
     }
 
     @Transactional
-    public ResponseDto<?> deleteReport(Long reportId, HttpServletRequest request) {
-        if (null == request.getHeader("RefreshToken")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
+    public ResponseDto<?> deleteReport(Long reportId, User user) {
 
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("USER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        User user = validateUser(request);
-        if (null == user) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
 
         Report report = isPresentReport(reportId);
         if (null == report) {
@@ -173,21 +141,12 @@ public class ReportService {
         }
     }
 
-    @Transactional
-    public User validateUser(HttpServletRequest request) {
-        if (!tokenProvider.validateToken(request.getHeader("RefreshToken"))) {
-            return null;
-        }
-        return tokenProvider.getUserFromAuthentication();
-    }
 
     @Transactional(readOnly = true)
     public Report isPresentReport(Long reportId) {
         Optional<Report> optionalReport = reportRepository.findById(reportId);
         return optionalReport.orElse(null);
     }
-
-
 
 
 }
