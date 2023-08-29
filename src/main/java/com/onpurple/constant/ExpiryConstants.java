@@ -1,0 +1,16 @@
+package com.onpurple.constant;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
+
+public enum ExpiryConstants {
+    //ACCESS : 30분, REFRESH : 7일
+    ACCESS_EXPIRE(1000 * 60 * 30),
+    REFRESH_EXPIRE(1000 * 60 * 60 * 24 * 7);
+    
+    
+    private final long time;
+}

@@ -1,12 +1,12 @@
 package com.onpurple.security.jwt;
 
+import com.onpurple.constant.ExpiryConstants;
 import com.onpurple.dto.request.TokenDto;
 import com.onpurple.exception.CustomException;
 import com.onpurple.exception.ErrorCode;
 import com.onpurple.model.User;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.security.UserDetailsServiceImpl;
-import com.onpurple.util.RedisUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -15,17 +15,21 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
+import static com.onpurple.constant.ExpiryConstants.*;
 import static com.onpurple.security.jwt.JwtUtil.*;
 
 @RequiredArgsConstructor
@@ -34,12 +38,8 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
-    private final RedisUtil redisUtil;
     private final UserRepository userRepository;
-
-    @Value("${REFRESH_TOKEN_EXPIRE_TIME}")
-    private long refreshTokenTime;
-
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
@@ -58,7 +58,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
                         );
                         // 기존 refreshToken 토큰 삭제
-                        redisUtil.delete(info.getId());
+                        redisTemplate.delete(info.getId());
                         // 새로운 토큰 발급
                         TokenDto tokenDto = reissueToken(user);
 
@@ -100,10 +100,11 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         TokenDto tokenDto = jwtUtil.createAllToken(jwtUtil.createAccessToken(user), jwtUtil.createRefreshToken(user)
         );
         // Redis에 저장
-        redisUtil.set(
+        redisTemplate.opsForValue().set(
                 String.valueOf(user.getId()),
                 tokenDto.getRefreshToken(),
-                refreshTokenTime // 만료 될 수 있도록 TTL 설정
+                REFRESH_EXPIRE.getTime(), // 만료 될 수 있도록 TTL 설정
+                TimeUnit.MINUTES
         );
         return tokenDto;
     }

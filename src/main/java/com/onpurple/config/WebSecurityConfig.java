@@ -1,13 +1,15 @@
 package com.onpurple.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.onpurple.repository.UserRepository;
 import com.onpurple.security.UserDetailsServiceImpl;
+import com.onpurple.security.jwt.JwtAuthenticationFilter;
 import com.onpurple.security.jwt.JwtAuthorizationFilter;
 import com.onpurple.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -22,14 +24,16 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 
 @Configuration
-@EnableWebSecurity // Spring Security 지원을 가능하게 함
+@EnableWebSecurity
 @RequiredArgsConstructor
 public class WebSecurityConfig {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
-    private final ObjectMapper objectMapper;
-    private final JwtAuthorizationFilter jwtAuthorizationFilter;
+    private final AuthenticationConfiguration authenticationConfiguration;
+    private final UserRepository userRepository;
+    private final RedisTemplate<String, String> redisTemplate;
+
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -37,10 +41,17 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public JwtAuthorizationFilter jwtAuthorizationFilter() {
-        return jwtAuthorizationFilter;
+    public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil, userRepository);
+        filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
+        return filter;
     }
 
+
+    @Bean
+    public JwtAuthorizationFilter jwtAuthorizationFilter() {
+        return new JwtAuthorizationFilter(jwtUtil, userDetailsService,userRepository, redisTemplate);
+    }
 
     private static final String[] PERMIT = {
             "/swagger-ui.html",
@@ -77,7 +88,8 @@ public class WebSecurityConfig {
                 .anyRequest().authenticated();
 
         // 필터 관리
-        http.addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtAuthorizationFilter(), JwtAuthenticationFilter.class);
+        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

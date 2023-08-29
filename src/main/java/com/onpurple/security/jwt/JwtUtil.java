@@ -1,10 +1,9 @@
 package com.onpurple.security.jwt;
 
+import com.onpurple.constant.ExpiryConstants;
 import com.onpurple.dto.request.TokenDto;
 import com.onpurple.model.Authority;
 import com.onpurple.model.User;
-import com.onpurple.security.UserDetailsServiceImpl;
-import com.onpurple.util.RedisUtil;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -15,12 +14,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
+
+import static com.onpurple.constant.ExpiryConstants.*;
 
 @Slf4j
 @Component
@@ -31,21 +33,16 @@ public class JwtUtil {
     public static final String ACCESS_TOKEN = "AccessToken";
     public static final String REFRESH_TOKEN = "RefreshToken";
     private static final String AUTHORITIES_KEY = "auth";
+
     // 로그 설정
     public static final Logger logger = LoggerFactory.getLogger("JWT 로그");
 
-    @Value("${jwt.secret.key}")
+    @Value("${jwt.secret.key}") // Base64 Encode 한 SecretKey
     private String secretKey;
-    @Value("${ACCESS_TOKEN_EXPIRE_TIME}")
-    private long accessTokenTime;
-    @Value("${REFRESH_TOKEN_EXPIRE_TIME}")
-    private long refreshTokenTime;
     private Key key;
 
-    private RedisUtil redisUtil;
+    private final RedisTemplate<String, String> redisTemplate;
     private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
-
-    private UserDetailsServiceImpl userDetailsService;
 
     @PostConstruct
     public void init() {
@@ -78,8 +75,8 @@ public class JwtUtil {
                 .setSubject(user.getUsername())
                 .claim(AUTHORITIES_KEY, Authority.USER.toString())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(now + accessTokenTime))
-                .signWith(key, SignatureAlgorithm.HS256)
+                .setExpiration(new Date(now + ACCESS_EXPIRE.getTime()))
+                .signWith(key, signatureAlgorithm)
                 .compact();
     }
     // REFRESH_TOKEN 생성
@@ -90,8 +87,8 @@ public class JwtUtil {
                 Jwts.builder()
                 .setSubject(String.valueOf(user.getId()))
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(now + refreshTokenTime))
-                .signWith(key, SignatureAlgorithm.HS256)
+                .setExpiration(new Date(now + REFRESH_EXPIRE.getTime()))
+                .signWith(key, signatureAlgorithm)
                 .compact();
 
         return refreshToken;
@@ -125,7 +122,7 @@ public class JwtUtil {
 
         //DB에 저장한 토큰 비교
         Claims claims = getUserInfoFromToken(token);
-        String redisRefreshToken = String.valueOf(redisUtil.get(claims.getId()));
+        String redisRefreshToken = String.valueOf(redisTemplate.opsForValue().get(claims.getId()));
         if(redisRefreshToken.equals(token)) return true;
         else return false;
     }

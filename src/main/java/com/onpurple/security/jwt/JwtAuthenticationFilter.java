@@ -5,43 +5,32 @@ import com.onpurple.dto.request.LoginRequestDto;
 import com.onpurple.dto.request.TokenDto;
 import com.onpurple.exception.CustomException;
 import com.onpurple.exception.ErrorCode;
-import com.onpurple.model.Authority;
 import com.onpurple.model.User;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.security.UserDetailsImpl;
-import com.onpurple.util.RedisUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.antlr.v4.runtime.Token;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.TimeToLive;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j(topic = "로그인 및 JWT 생성")
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
 
-    private final RedisUtil redisUtil;
-
-    @Value("${REFRESH_TOKEN_EXPIRE_TIME}")
-    private long refreshTokenTime;
 
     public JwtAuthenticationFilter(
-            JwtUtil jwtUtil, UserRepository userRepository, RedisUtil redisUtil) {
+            JwtUtil jwtUtil, UserRepository userRepository) {
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
-        this.redisUtil = redisUtil;
         // 로그인 처리를 여기서 처리한다.
         setFilterProcessesUrl("/user/login");
     }

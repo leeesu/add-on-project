@@ -10,11 +10,11 @@ import com.onpurple.repository.ImgRepository;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.security.jwt.JwtUtil;
 import com.onpurple.util.AwsS3UploadService;
-import com.onpurple.util.RedisUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +32,7 @@ public class UserService {
     private final ImgRepository imgRepository;
     private final AwsS3UploadService awsS3UploadService;
     private final JwtUtil jwtUtil;
-    private final RedisUtil redisUtil;
+    private final RedisTemplate<String, String> redisTemplate;
     private static final String ADMIN_TOKEN = ("AAABnvxRVklrnYxKZ0aHgTBcXukeZygoC");
 
     //    아이디 체크. DB에 저장되어 있는 usernaeme을 찾아 유저가 존재한다면 에러메시지 전송)
@@ -186,7 +186,6 @@ public class UserService {
 
     //  로그아웃. 토큰을 확인하여 일치할 경우 로그인 된 유저의 이미지와 토큰을 삭제.
     public ResponseDto<?> logout(HttpServletRequest request) {
-
         deleteToken(request);
         return ResponseDto.success("로그아웃이 완료되었습니다.");
     }
@@ -211,9 +210,11 @@ public class UserService {
         Claims info = jwtUtil.getUserInfoFromToken(refreshToken);
         long remainMilliSeconds = jwtUtil.getExpiration(accessToken);
         // 액세스 토큰 만료시점 까지 저장
-        redisUtil.set("logout", accessToken, remainMilliSeconds);
+        redisTemplate.opsForValue().set(
+                "logout", accessToken, remainMilliSeconds
+        );
         // refreshToken 삭제
-        redisUtil.delete(info.getId());
+        redisTemplate.delete(info.getId());
     }
 
 }
