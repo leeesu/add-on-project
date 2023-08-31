@@ -4,7 +4,7 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
-
+db
 ### STS ###
 .apt_generated
 .classpath
@@ -39,9 +39,10 @@ out/
 
 ### CUSTOM
 .env
+/db
 ### Aws S3 bucket ###
 awsS3.yml
 
 ### setting ###
-application.properties
+*.properties
 application-embedded.yml

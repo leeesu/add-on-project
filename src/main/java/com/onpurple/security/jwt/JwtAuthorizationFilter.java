@@ -97,7 +97,8 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     }
 
     public TokenDto reissueToken(User user) {
-        TokenDto tokenDto = jwtUtil.createAllToken(jwtUtil.createAccessToken(user), jwtUtil.createRefreshToken(user)
+        TokenDto tokenDto = jwtUtil.createAllToken(
+                jwtUtil.createAccessToken(user), jwtUtil.createRefreshToken(user)
         );
         // Redis에 저장
         redisTemplate.opsForValue().set(

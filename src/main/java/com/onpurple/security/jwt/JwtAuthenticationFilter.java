@@ -3,8 +3,11 @@ package com.onpurple.security.jwt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onpurple.dto.request.LoginRequestDto;
 import com.onpurple.dto.request.TokenDto;
+import com.onpurple.dto.response.KakaoLoginResponseDto;
+import com.onpurple.dto.response.LoginResponseDto;
 import com.onpurple.exception.CustomException;
 import com.onpurple.exception.ErrorCode;
+import com.onpurple.exception.ErrorResponse;
 import com.onpurple.model.User;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.security.UserDetailsImpl;
@@ -14,6 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -25,12 +29,15 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
+    private final ObjectMapper objectMapper;
 
 
     public JwtAuthenticationFilter(
-            JwtUtil jwtUtil, UserRepository userRepository) {
+            JwtUtil jwtUtil, UserRepository userRepository,
+            ObjectMapper objectMapper) {
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
+        this.objectMapper = objectMapper;
         // 로그인 처리를 여기서 처리한다.
         setFilterProcessesUrl("/user/login");
     }
@@ -53,7 +60,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             );
         } catch (IOException e) {
             log.error(e.getMessage());
-            throw new RuntimeException(e.getMessage());
+            throw new CustomException(ErrorCode.USER_INFO_NOT_MATCHED);
         }
     }
 
@@ -69,6 +76,15 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         TokenDto tokenDto = jwtUtil.createAllToken(jwtUtil.createAccessToken(user), jwtUtil.createRefreshToken(user));
         // header 로 토큰 send
         jwtUtil.tokenAddHeaders(tokenDto, response);
+        sendJsonResponse(response, user);
+    }
+    private void sendJsonResponse(HttpServletResponse response, User user) throws IOException {
+        response.setContentType("application/json;charset=UTF-8");
+
+        LoginResponseDto responseData = LoginResponseDto.fromEntity(user);
+        String responseJson = new ObjectMapper().writeValueAsString(responseData);
+
+        response.getWriter().println(responseJson);
     }
 
     @Override
@@ -76,4 +92,5 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         log.info("로그인 실패");
         response.setStatus(401);
     }
+
 }

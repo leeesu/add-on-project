@@ -16,6 +16,7 @@ public enum ErrorCode {
     TOKEN_NOT_MATCHED("Token이 유효하지 않습니다."),
     INTERNAL_SERVER_ERROR("서버에 오류가 발생했습니다."),
     INVALID_REQUEST("잘못된 요청입니다."),
+    USER_INFO_NOT_MATCHED("회원정보가 일치하지 않습니다"),
     PASSWORD_NOT_MATCHED("비밀번호가 일치하지 않습니다."),
     DUPLICATED_USER("중복된 사용자입니다."),
     TOKEN_NOT_FOUND("토큰을 찾을 수 없습니다."),
