@@ -56,7 +56,7 @@ public class UserService {
     //    회원가입. SingupRequsetDto에 선언한 내용을 입력하여 회원가입
     @Transactional
     public ResponseDto<?> createUser(SignupRequestDto requestDto, UserInfoRequestDto userInfoRequestDto,
-                                     List<String> imgPaths, HttpServletResponse response) {
+                                     String imgPaths, HttpServletResponse response) {
         if (!requestDto.getPassword().equals(requestDto.getPasswordConfirm())) {
             return ResponseDto.fail("PASSWORDS_NOT_MATCHED",
                     "비밀번호와 비밀번호 확인이 일치하지 않습니다.");
@@ -71,13 +71,15 @@ public class UserService {
             }
             role = Authority.ADMIN;
         }
+        //        이미지 등록 이미지를 추가하여 user의 img에 추가
+        postBlankCheck(imgPaths);
 
         User user = User.builder()
                 .username(requestDto.getUsername())
                 .password(passwordEncoder.encode(requestDto.getPassword()))
                 .nickname(requestDto.getNickname())
                 .gender(requestDto.getGender())
-                .imageUrl(requestDto.getImageUrl())
+                .imageUrl(imgPaths)
                 .role(role)
                 .age(userInfoRequestDto.getAge())
                 .mbti(userInfoRequestDto.getMbti())
@@ -93,15 +95,9 @@ public class UserService {
                 .build();
         userRepository.save(user);
 
-        postBlankCheck(imgPaths);
 
-//        이미지 등록 이미지를 추가하여 user의 imgList 첫번째 배열에 저장
-        List<String> imgList = new ArrayList<>();
-        for (String imgUrl : imgPaths) {
-            Img img = new Img(imgUrl, user);
-            imgList.add(img.getImageUrl());
-        }
-        user.imageSave(imgList.get(0));
+
+
 
 //        현재 서비스에서 회원가입 이후 바로 서비스를 이용할 수 있도록 설정하였기에 회원가입이 진행될 때 토큰이 발행되도록 설정
         TokenDto tokenDto = jwtUtil.createAllToken(jwtUtil.createAccessToken(user), jwtUtil.createRefreshToken(user));
@@ -122,7 +118,7 @@ public class UserService {
 
     }
 
-    private void postBlankCheck(List<String> imgPaths) {
+    private void postBlankCheck(String imgPaths) {
         if (imgPaths == null || imgPaths.isEmpty()) { //.isEmpty()도 되는지 확인해보기
             throw new NullPointerException("이미지를 등록해주세요(Blank Check)");
         }
@@ -162,24 +158,15 @@ public class UserService {
 
     //    이미지 수정
     @Transactional
-    public ResponseDto<?> updateImage(User user, List<String> imgPaths, ImageUpdateRequestDto requestDto) {
+    public ResponseDto<?> updateImage(User user, String imgPaths, ImageUpdateRequestDto requestDto) {
 
 //        이미지를 확인하고 user의 기존 이미지를 삭제. 이후 새로 넣은 이미지로 업데이트 되도록 설정.
         if (imgPaths != null) {
             String deleteImage = user.getImageUrl();
             awsS3UploadService.deleteFile(AwsS3UploadService.getFileNameFromURL(deleteImage));
         }
-        user.update(requestDto);
-
-        List<String> imgList = new ArrayList<>();
-        for (String imgUrl : imgPaths) {
-            Img img = new Img(imgUrl, user);
-            imgList.add(img.getImageUrl());
-        }
 //        수정된 이미지를 imgList의 첫번째 배열에 저장한 후 user에 저장.
-        user.imageSave(imgList.get(0));
-
-        userRepository.save(user);
+        user.imageSave(imgPaths);
 
         return ResponseDto.success("프로필 사진 수정이 완료되었습니다!");
     }

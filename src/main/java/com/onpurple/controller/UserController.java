@@ -31,11 +31,11 @@ public class UserController {
     @RequestMapping(value = "/user/signup", method = RequestMethod.POST)
     public ResponseDto<?> signup(@RequestPart(value = "info", required = false) @Valid SignupRequestDto requestDto,
                                  @RequestPart(value = "userInfo", required = false) UserInfoRequestDto userInfoRequestDto,
-                                 @RequestPart(value = "imageUrl", required = false) List<MultipartFile> multipartFiles, HttpServletResponse response) {
+                                 @RequestPart(value = "imageUrl", required = false) MultipartFile multipartFiles, HttpServletResponse response) {
         if (multipartFiles == null) {
             throw new NullPointerException("사진을 업로드해주세요");
         }
-        List<String> imgPaths = s3Service.upload(multipartFiles);
+        String imgPaths = s3Service.uploadOne(multipartFiles);
 
         return userService.createUser(requestDto, userInfoRequestDto, imgPaths, response);
     }
@@ -60,14 +60,14 @@ public class UserController {
     }
 
     @RequestMapping(value = "/mypage/image", method = RequestMethod.PUT)
-    public ResponseDto<?> imageUpdate(ImageUpdateRequestDto requestDto, @RequestPart("imageUrl") List<MultipartFile> multipartFiles,
+    public ResponseDto<?> imageUpdate(ImageUpdateRequestDto requestDto, @RequestPart("imageUrl") MultipartFile multipartFiles,
                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         if (multipartFiles == null) {
             throw new NullPointerException("사진을 업로드해주세요");
         }
 
-        List<String> imgPaths = s3Service.upload(multipartFiles);
+        String imgPaths = s3Service.uploadOne(multipartFiles);
         return userService.updateImage(userDetails.getUser(), imgPaths, requestDto);
     }
 
