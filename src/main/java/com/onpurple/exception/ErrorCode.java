@@ -24,7 +24,8 @@ public enum ErrorCode {
     ACCESS_DENIED("로그인이 필요합니다."),
     ADMIN_PASSWORD_NOT_MATCHED("관리자 암호가 일치하지 않습니다."),
     IMAGE_NOT_FOUND("이미지를 등록해주세요"),
-    INVALID_IMAGE_FORMAT("지원되지 않은 형식의 이미지파일 입니다.");
+    INVALID_IMAGE_FORMAT("지원되지 않은 형식의 이미지파일 입니다."),
+    IMAGE_CONVERT_FAILD("이미지 변환 중 에러가 발생헀습니다");
 
     private final String message;
 }

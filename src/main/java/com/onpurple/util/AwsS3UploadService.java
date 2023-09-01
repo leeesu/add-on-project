@@ -38,11 +38,11 @@ AwsS3UploadService implements UploadService {
             objectMetadata.setContentLength(file.getSize());
             objectMetadata.setContentType(file.getContentType());
 
-            try(InputStream inputStream = file.getInputStream()) {
+            try (InputStream inputStream = file.getInputStream()) {
                 s3Client.putObject(new PutObjectRequest(component.getBucket(), fileName, inputStream, objectMetadata)
                         .withCannedAcl(CannedAccessControlList.PublicRead));
                 imgUrlList.add(s3Client.getUrl(component.getBucket(), fileName).toString());
-            } catch(IOException e) {
+            } catch (IOException e) {
                 throw new IllegalArgumentException(String.format("파일 변환 중 에러가 발생하였습니다 (%s)", file.getOriginalFilename()));
             }
         }
@@ -50,22 +50,24 @@ AwsS3UploadService implements UploadService {
     }
 
     // 단일 이미지 업로드
-    public String updateOne(MultipartFile file) {
+    public String uploadOne(MultipartFile file) {
+        String imageName="";
 
         String fileName = createFileName(file.getOriginalFilename());
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(file.getSize());
         objectMetadata.setContentType(file.getContentType());
 
-        try(InputStream inputStream = file.getInputStream()) {
+        try (InputStream inputStream = file.getInputStream()) {
             s3Client.putObject(new PutObjectRequest(component.getBucket(), fileName, inputStream, objectMetadata)
                     .withCannedAcl(CannedAccessControlList.PublicRead));
-            String image = s3Client.getUrl(component.getBucket(), fileName).toString();
-            return image;
-        } catch(IOException e) {
-            throw new IllegalArgumentException(String.format("파일 변환 중 에러가 발생하였습니다 (%s)", file.getOriginalFilename()));
+            imageName = s3Client.getUrl(component.getBucket(), fileName).toString();
+        } catch (IOException e) {
+            new CustomException(ErrorCode.IMAGE_CONVERT_FAILD);
         }
+        return imageName;
     }
+
 
 
 
