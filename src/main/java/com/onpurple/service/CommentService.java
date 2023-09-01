@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -51,59 +52,40 @@ public class CommentService {
 
   @Transactional(readOnly = true)
   public ResponseDto<?> getAllCommentsByPost(Long postId) {
-    Post post = postService.isPresentPost(postId);
-    if (null == post) {
-      return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글입니다.");
-    }
+    Post post = validatePost(postId);
 
-    List<Comment> commentList = commentRepository.findAllByPost(post);
-    List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
+    List<CommentResponseDto> commentResponseDtoList = commentRepository
+            .findAllByPost(post)
+            .stream()
+            .map(CommentResponseDto::fromEntity)
+            .collect(Collectors.toList());
 
-    for (Comment comment : commentList) {
-      commentResponseDtoList.add(
-          CommentResponseDto.fromEntity(comment)
-      );
-    }
     return ResponseDto.success(commentResponseDtoList);
   }
 
   @Transactional
   public ResponseDto<?> updateComment(Long commentId, CommentRequestDto requestDto, User user) {
+      // 이곳에서 validate 메서드에서 예외 발생 가능성이 있는 작업 수행
+       // post validate
+      validatePost(requestDto.getPostId());
+      // comment validate
+      Comment comment = validateComment(commentId);
+      // user validate
+      validateUser(comment, user);
 
-    Post post = postService.isPresentPost(requestDto.getPostId());
-    if (null == post) {
-      return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글입니다.");
-    }
+      String modifiedAt = formatTime();
 
-    Comment comment = isPresentComment(commentId);
-    if (null == comment) {
-      return ResponseDto.fail("NOT_FOUND", "존재하지 않는 댓글입니다.");
-    }
+      comment.update(requestDto);
+      comment.updateModified(modifiedAt);
 
-    if (comment.validateUser(user)) {
-      return ResponseDto.fail("BAD_REQUEST", "작성자만 수정할 수 있습니다.");
-    }
-
-    String modifiedAt = formatTime();
-
-    comment.update(requestDto);
-    comment.updateModified(modifiedAt);
-    return ResponseDto.success(
-        CommentResponseDto.fromEntity(comment)
-    );
+      return ResponseDto.success(CommentResponseDto.fromEntity(comment));
   }
+
 
   @Transactional
   public ResponseDto<?> deleteComment(Long commentId, User user) {
-
-    Comment comment = isPresentComment(commentId);
-    if (null == comment) {
-      return ResponseDto.fail("NOT_FOUND", "존재하지 않는 댓글입니다.");
-    }
-
-    if (comment.validateUser(user)) {
-      return ResponseDto.fail("BAD_REQUEST", "작성자만 수정할 수 있습니다.");
-    }
+    Comment comment = validateComment(commentId);
+    validateUser(comment, user);
 
     commentRepository.delete(comment);
     return ResponseDto.success("success");
@@ -142,7 +124,7 @@ public class CommentService {
     return comment;
   }
 
-  public void validateAuthor(Comment comment, User user) {
+  public void validateUser(Comment comment, User user) {
     if (comment.validateUser(user)) {
       throw new CustomException(ErrorCode.INVALID_USER_MATCH);
     }
