@@ -1,5 +1,6 @@
 package com.onpurple.dto.response;
 
+import com.onpurple.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -48,5 +49,36 @@ public class ProfileResponseDto{
     private Integer likes;
 
     private Integer unLike;
+
+    public static ProfileResponseDto allFromEntity(User user) {
+        return ProfileResponseDto.builder()
+                .userId(user.getId())
+                .gender(user.getGender())
+                .nickname(user.getNickname())
+                .age(user.getAge())
+                .introduction(user.getIntroduction())
+                .imageUrl(user.getImageUrl())
+                .area(user.getArea())
+                .build();
+    }
+
+    public static ProfileResponseDto detailFromEntity(User user) {
+        return ProfileResponseDto.builder()
+                .userId(user.getId())
+                .imageUrl(user.getImageUrl())
+                .nickname(user.getNickname())
+                .age(user.getAge())
+                .mbti(user.getMbti())
+                .introduction(user.getIntroduction())
+                .idealType(user.getIdealType())
+                .job(user.getJob())
+                .hobby(user.getHobby())
+                .drink(user.getDrink())
+                .pet(user.getPet())
+                .smoke(user.getSmoke())
+                .likeMovieType(user.getLikeMovieType())
+                .area(user.getArea())
+                .build();
+    }
 
 }

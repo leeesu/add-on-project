@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -28,30 +29,16 @@ public class ProfileService {
 
     //    전체 프로필 조회(메인페이지). user DB에 저장된 모든 내용을 찾은 후 리스트에 저장.
 //    이후 저장한 내용을 반환.
+
     @Transactional(readOnly = true)
     public ResponseDto<?> getAllProfiles() {
-        List<User> profileList = userRepository.findAll();
-        List<ProfileResponseDto> profileResponseDto = new ArrayList<>();
-//        랜덤 추출 코드. 리스트를 불러올 때 기존의 경우 수정일자 순으로 정렬하였지만 무작위로 리스트를 불러올 때 사용.
-        Collections.shuffle(profileList);
-        for (User user : profileList) {
-            List<Img> findImgList = imgRepository.findByUser_id(user.getId());
-            List<String> imgList = new ArrayList<>();
-            for (Img img : findImgList) {
-                imgList.add(img.getImageUrl());
-            }
-            profileResponseDto.add(
-                    ProfileResponseDto.builder()
-                            .userId(user.getId())
-                            .gender(user.getGender())
-                            .nickname(user.getNickname())
-                            .age(user.getAge())
-                            .introduction(user.getIntroduction())
-                            .imageUrl(user.getImageUrl())
-                            .area(user.getArea())
-                            .build()
-            );
-        }
+        List<ProfileResponseDto> profileResponseDto = userRepository.findAll().stream()
+                .map(ProfileResponseDto::allFromEntity)
+                .collect(Collectors.toList());
+
+        //  랜덤 추출 코드. 리스트를 불러올 때 기존의 경우 수정일자 순으로 정렬하였지만 무작위로 리스트를 불러올 때 사용
+        Collections.shuffle(profileResponseDto);
+
         return ResponseDto.success(profileResponseDto);
     }
 
@@ -62,31 +49,8 @@ public class ProfileService {
         if (null == user) {
             return ResponseDto.fail("NOT_FOUND", "존재하지 않는 프로필입니다.");
         }
-
-        List<Img> findImgList = imgRepository.findByUser_id(user.getId());
-        List<String> imgList = new ArrayList<>();
-        for (Img img : findImgList) {
-            imgList.add(img.getImageUrl());
-        }
-
         return ResponseDto.success(
-                ProfileResponseDto.builder()
-                        .userId(user.getId())
-                        .imageUrl(user.getImageUrl())
-                        .nickname(user.getNickname())
-                        .age(user.getAge())
-                        .mbti(user.getMbti())
-                        .introduction(user.getIntroduction())
-                        .idealType(user.getIdealType())
-                        .job(user.getJob())
-                        .hobby(user.getHobby())
-                        .drink(user.getDrink())
-                        .pet(user.getPet())
-                        .smoke(user.getSmoke())
-                        .likeMovieType(user.getLikeMovieType())
-                        .area(user.getArea())
-
-                        .build()
+                ProfileResponseDto.detailFromEntity(user)
         );
     }
 
