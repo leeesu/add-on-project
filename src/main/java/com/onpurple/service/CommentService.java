@@ -2,8 +2,11 @@ package com.onpurple.service;
 
 
 import com.onpurple.dto.request.CommentRequestDto;
+import com.onpurple.dto.request.PostRequestDto;
 import com.onpurple.dto.response.CommentResponseDto;
 import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.exception.CustomException;
+import com.onpurple.exception.ErrorCode;
 import com.onpurple.model.Comment;
 import com.onpurple.model.Post;
 import com.onpurple.model.User;
@@ -25,33 +28,25 @@ public class CommentService {
   private final PostService postService;
 
   @Transactional
-  public ResponseDto<?> createComment(Long postId, CommentRequestDto requestDto, User user) {
-
-    Post post = postService.isPresentPost(postId);
-    if (null == post) {
-      return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글입니다.");
-    }
-    String createdAt = formatTime();
-
-
-    Comment comment = Comment.builder()
-            .user(user)
-            .post(post)
-            .comment(requestDto.getComment())
-            .createdAt(createdAt)
-            .modifiedAt(createdAt)
-        .build();
+  public ResponseDto<?> createComment(Long postId, CommentRequestDto commentRequestDto, User user) {
+    // post 유효성 검사
+    Post post = validatePost(postId);
+    Comment comment = commentFromRequest(commentRequestDto, post, user);
     commentRepository.save(comment);
     return ResponseDto.success(
-        CommentResponseDto.builder()
-                .commentId(comment.getId())
-                .nickname(comment.getUser().getNickname())
-                .comment(comment.getComment())
-                .likes(comment.getLikes())
-                .createdAt(comment.getCreatedAt())
-                .modifiedAt(comment.getModifiedAt())
-                .build()
+        CommentResponseDto.fromEntity(comment)
     );
+  }
+
+  private Comment commentFromRequest(CommentRequestDto commentRequestDto,
+                                     Post post, User user) {
+    return Comment.builder()
+            .user(user)
+            .post(post)
+            .comment(commentRequestDto.getComment())
+            .createdAt(formatTime())
+            .modifiedAt(formatTime())
+            .build();
   }
 
   @Transactional(readOnly = true)
@@ -66,14 +61,7 @@ public class CommentService {
 
     for (Comment comment : commentList) {
       commentResponseDtoList.add(
-          CommentResponseDto.builder()
-                  .commentId(comment.getId())
-                  .nickname(comment.getUser().getNickname())
-                  .comment(comment.getComment())
-                  .likes(comment.getLikes())
-                  .createdAt(comment.getCreatedAt())
-                  .modifiedAt(comment.getModifiedAt())
-                  .build()
+          CommentResponseDto.fromEntity(comment)
       );
     }
     return ResponseDto.success(commentResponseDtoList);
@@ -101,14 +89,7 @@ public class CommentService {
     comment.update(requestDto);
     comment.updateModified(modifiedAt);
     return ResponseDto.success(
-        CommentResponseDto.builder()
-                .commentId(comment.getId())
-                .nickname(comment.getUser().getNickname())
-                .comment(comment.getComment())
-                .likes(comment.getLikes())
-                .createdAt(comment.getCreatedAt())
-                .modifiedAt(comment.getModifiedAt())
-                .build()
+        CommentResponseDto.fromEntity(comment)
     );
   }
 
@@ -143,5 +124,27 @@ public class CommentService {
   public Comment isPresentComment(Long commentId) {
     Optional<Comment> optionalComment = commentRepository.findById(commentId);
     return optionalComment.orElse(null);
+  }
+
+  public Post validatePost(Long postId) {
+    Post post = postService.isPresentPost(postId);
+    if (post == null) {
+      throw new CustomException(ErrorCode.POST_NOT_FOUND);
+    }
+    return post;
+  }
+
+  public Comment validateComment(Long commentId) {
+    Comment comment = isPresentComment(commentId);
+    if (comment == null) {
+      throw new CustomException(ErrorCode.COMMENT_NOT_FOUND);
+    }
+    return comment;
+  }
+
+  public void validateAuthor(Comment comment, User user) {
+    if (comment.validateUser(user)) {
+      throw new CustomException(ErrorCode.INVALID_USER_MATCH);
+    }
   }
 }

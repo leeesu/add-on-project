@@ -87,7 +87,7 @@ public class WebSecurityConfig {
         http.authorizeRequests()
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 .requestMatchers("/user/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/board/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/post/**").permitAll()
                 .requestMatchers(PERMIT).permitAll()
                 .anyRequest().authenticated();
         http.exceptionHandling((exceptionHandling) ->
