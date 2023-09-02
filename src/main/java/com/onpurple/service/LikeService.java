@@ -8,8 +8,8 @@ import com.onpurple.model.*;
 import com.onpurple.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
-@RestController
+@Service
 public class LikeService {
 
     private final LikeRepository likeRepository;
@@ -167,11 +167,7 @@ public class LikeService {
 
         List<UserResponseDto> userResponseDto = userRepository.matchingUser(likeList)
                 .stream()
-                .map(list -> UserResponseDto.builder()
-                        .userId(list.getId())
-                        .nickname(list.getNickname())
-                        .imageUrl(list.getImageUrl())
-                        .build())
+                .map(UserResponseDto::createFromEntity)
                 .collect(Collectors.toList());
 
         return ResponseDto.success(userResponseDto);
@@ -187,32 +183,13 @@ public class LikeService {
 
         List<LikesResponseDto> likesResponseDtoList = likesList
                 .stream()
-                .map(likes -> LikesResponseDto.builder()
-                        .userId(likes.getTarget().getId())
-                        .imageUrl(likes.getTarget().getImageUrl())
-                        .build())
+                .map(LikesResponseDto::fromEntity)
                 .collect(Collectors.toList());
 
         return ResponseDto.success(likesResponseDtoList);
     }
 
 
-    //    내가 싫어요 한 사람 리스트 조회.
-//    264~295의 내가 좋아요한  사람 리스트 조회와 동일한 로직으로 구현.
-    @Transactional(readOnly = true)
-    public ResponseDto<?> getUnLike(User user) {
-        List<UnLike> unLikesList = unLikeRepository.findAllByUser(user);
-
-        List<UnLikesResponseDto> unLikesResponseDtoList = unLikesList
-                .stream()
-                .map(unLike -> UnLikesResponseDto.builder()
-                        .userId(unLike.getTarget().getId())
-                        .imageUrl(unLike.getTarget().getImageUrl())
-                        .build())
-                .collect(Collectors.toList());
-
-        return ResponseDto.success(unLikesResponseDtoList);
-    }
 
 
     @Transactional(readOnly = true)
