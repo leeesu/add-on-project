@@ -27,7 +27,9 @@ public enum ErrorCode {
     INVALID_IMAGE_FORMAT("지원되지 않은 형식의 이미지파일 입니다."),
     IMAGE_CONVERT_FAILD("이미지 변환 중 에러가 발생헀습니다"),
     COMMENT_NOT_FOUND("해당 댓글이 존재하지 않습니다."),
-    INVALID_USER_MATCH("작성자만 수정할 수 있습니다.");
+    INVALID_USER_MATCH("작성자만 수정할 수 있습니다."),
+    INVALID_SELF_LIKE("본인에게 좋아요 할 수 없습니다."),
+    DUPLICATE_LIKE_FAIL("중복으로 좋아요 할  수 없습니다.");
 
     private final String message;
 }

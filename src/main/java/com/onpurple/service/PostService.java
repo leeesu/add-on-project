@@ -190,4 +190,21 @@ public class PostService {
         return optionalPost.orElse(null);
     }
 
+    public Post assertValidatePost(Long postId) {
+        Post post = isPresentPost(postId);
+        if (null == post) {
+            throw new CustomException(ErrorCode.POST_NOT_FOUND);
+        }
+        return post;
+    }
+
+
+
+
+    public void validatePostUser(Post post, User user) {
+        if (post.validateUser(user)) {
+            throw new CustomException(ErrorCode.INVALID_USER_MATCH);
+        }
+    }
+
 }

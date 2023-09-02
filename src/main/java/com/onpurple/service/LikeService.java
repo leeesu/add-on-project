@@ -2,15 +2,15 @@ package com.onpurple.service;
 
 
 import com.onpurple.dto.response.*;
+import com.onpurple.exception.CustomException;
+import com.onpurple.exception.ErrorCode;
 import com.onpurple.model.*;
 import com.onpurple.repository.*;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,10 +35,8 @@ public class LikeService {
         if (null == post) {
             return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글입니다.");
         }
-
-        if (!post.validateUser(user)) {
-            return ResponseDto.fail("BAD_REQUEST", "본인에게 좋아요 할 수 없습니다.");
-        }
+        // 본인에게 좋아요 할 수 없도록 예외처리
+        validatePostLikeUser(post, user);
         //좋아요 한 적 있는지 체크
         Likes liked = likeRepository.findByUserAndPostId(user, postId).orElse(null);
 
@@ -66,14 +64,10 @@ public class LikeService {
     @Transactional
     public ResponseDto<?> CommentLike(Long commentId,
                                       User user) {
-
-        Comment comment = isPresentComment(commentId);
-        if (null == comment)
-            return ResponseDto.fail("COMMENT_NOT_FOUND", "댓글을 찾을 수 없습니다.");
-
-        if (!comment.validateUser(user)) {
-            return ResponseDto.fail("BAD_REQUEST", "본인에게 좋아요 할 수 없습니다.");
-        }
+        // 댓글 유효성 체크
+        Comment comment = assertValidateComment(commentId);
+        // 본인 댓글에 좋아요 할 수 없도록 예외처리
+        validateCommentLikeUser(comment, user);
 
         //좋아요 한 적 있는지 체크
         Likes liked = likeRepository.findByUserAndCommentId(user, commentId).orElse(null);
@@ -162,68 +156,64 @@ public class LikeService {
     // 매칭 JPQL QUERY방식
     @Transactional(readOnly = true)
     public ResponseDto<?> likeCheck(Long userId, User user) {
-
         List<Integer> likeList = likeRepository.likeToLikeUserId(userId)
                 .stream()
                 .distinct()
                 .collect(Collectors.toList());
-        //매칭되는 아이디 찾아서 가져오기
-        //stream 으로 중복제거
-        if ((likeList.isEmpty())) {
-            return ResponseDto.fail("MATCHING_USER_NOT_FOUND", "매칭된 회원을 찾을 수 없습니다.");
+
+        if (likeList.isEmpty()) {
+            return ResponseDto.fail("MATCHING_USER_NOT_FOUND", "MATCHING_USER_NOT_FOUND");
         }
 
-        List<User> getLikeUser = userRepository.matchingUser(likeList);
-        List<UserResponseDto> userResponseDtos = new ArrayList<>();
+        List<UserResponseDto> userResponseDto = userRepository.matchingUser(likeList)
+                .stream()
+                .map(list -> UserResponseDto.builder()
+                        .userId(list.getId())
+                        .nickname(list.getNickname())
+                        .imageUrl(list.getImageUrl())
+                        .build())
+                .collect(Collectors.toList());
 
-        for (User list : getLikeUser) {
-            userResponseDtos.add(
-                    UserResponseDto.builder()
-                            .userId(list.getId())
-                            .nickname(list.getNickname())
-                            .imageUrl(list.getImageUrl())
-                            .build()
-            );
-
-
-        }
-        return ResponseDto.success(userResponseDtos);
+        return ResponseDto.success(userResponseDto);
     }
+
 
     //    내가 좋아요 한 사람 리스트 조회.
-//    프론트에서 나를 좋아요 한 사람을 찾아 프로필을 불러올 때 조건을 걸기 위해서 생성된 메소드.
+    //    프론트에서 나를 좋아요 한 사람을 찾아 프로필을 불러올 때 조건을 걸기 위해서 생성된 메소드.
     @Transactional(readOnly = true)
     public ResponseDto<?> getLike(User user) {
-
-        //    토큰을 통해 user를 확인하고 확인된 유저 기준 좋아요를 누른 대상 모드를 찾아 리스트에 저장.
+        //    토큰을 통해 user를 확인하고 확인된 유저 기준 좋아요를 누른 대상 모드를 찾아 리스트에 저장
         List<Likes> likesList = likeRepository.findAllByUser(user);
-        List<LikesResponseDto> likesResponseDtoList = new ArrayList<>();
-        for (Likes likes : likesList) {
-            likesResponseDtoList.add(
-                    LikesResponseDto.builder()
-                            .userId(likes.getTarget().getId())
-                            .imageUrl(likes.getTarget().getImageUrl())
-                            .build());
-        }
+
+        List<LikesResponseDto> likesResponseDtoList = likesList
+                .stream()
+                .map(likes -> LikesResponseDto.builder()
+                        .userId(likes.getTarget().getId())
+                        .imageUrl(likes.getTarget().getImageUrl())
+                        .build())
+                .collect(Collectors.toList());
+
         return ResponseDto.success(likesResponseDtoList);
     }
+
 
     //    내가 싫어요 한 사람 리스트 조회.
 //    264~295의 내가 좋아요한  사람 리스트 조회와 동일한 로직으로 구현.
     @Transactional(readOnly = true)
     public ResponseDto<?> getUnLike(User user) {
-
         List<UnLike> unLikesList = unLikeRepository.findAllByUser(user);
-        List<UnLikesResponseDto> unLikesResponseDtoList = new ArrayList<>();
-        for (UnLike unLike : unLikesList) {
-            unLikesResponseDtoList.add(
-                    UnLikesResponseDto.builder()
-                            .userId(unLike.getTarget().getId())
-                            .imageUrl(unLike.getTarget().getImageUrl())
-                            .build());
-        }
+
+        List<UnLikesResponseDto> unLikesResponseDtoList = unLikesList
+                .stream()
+                .map(unLike -> UnLikesResponseDto.builder()
+                        .userId(unLike.getTarget().getId())
+                        .imageUrl(unLike.getTarget().getImageUrl())
+                        .build())
+                .collect(Collectors.toList());
+
         return ResponseDto.success(unLikesResponseDtoList);
     }
+
 
     @Transactional(readOnly = true)
     public User isPresentTarget(Long targetId) {
@@ -241,6 +231,25 @@ public class LikeService {
     public Comment isPresentComment(Long commentId) {
         Optional<Comment> optionalComment = commentRepository.findById(commentId);
         return optionalComment.orElse(null);
+    }
+
+    public void validatePostLikeUser(Post post, User user) {
+        if (!post.validateUser(user)) {
+            throw new CustomException(ErrorCode.INVALID_SELF_LIKE);
+        }
+    }
+    public Comment assertValidateComment(Long commentId) {
+        Comment comment = isPresentComment(commentId);
+        if (null == comment)
+            throw new CustomException(ErrorCode.COMMENT_NOT_FOUND);
+        return comment;
+    }
+
+    public void validateCommentLikeUser(Comment comment, User user) {
+
+        if (!comment.validateUser(user)) {
+            throw new CustomException(ErrorCode.INVALID_SELF_LIKE);
+        }
     }
 
 }
