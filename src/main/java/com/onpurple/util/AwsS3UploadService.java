@@ -5,6 +5,8 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.onpurple.exception.CustomException;
+import com.onpurple.exception.ErrorCode;
 import com.onpurple.util.dto.S3Component;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -14,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,16 +38,38 @@ AwsS3UploadService implements UploadService {
             objectMetadata.setContentLength(file.getSize());
             objectMetadata.setContentType(file.getContentType());
 
-            try(InputStream inputStream = file.getInputStream()) {
+            try (InputStream inputStream = file.getInputStream()) {
                 s3Client.putObject(new PutObjectRequest(component.getBucket(), fileName, inputStream, objectMetadata)
                         .withCannedAcl(CannedAccessControlList.PublicRead));
                 imgUrlList.add(s3Client.getUrl(component.getBucket(), fileName).toString());
-            } catch(IOException e) {
+            } catch (IOException e) {
                 throw new IllegalArgumentException(String.format("파일 변환 중 에러가 발생하였습니다 (%s)", file.getOriginalFilename()));
             }
         }
         return imgUrlList;
     }
+
+    // 단일 이미지 업로드
+    public String uploadOne(MultipartFile file) {
+        String imageName="";
+
+        String fileName = createFileName(file.getOriginalFilename());
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setContentLength(file.getSize());
+        objectMetadata.setContentType(file.getContentType());
+
+        try (InputStream inputStream = file.getInputStream()) {
+            s3Client.putObject(new PutObjectRequest(component.getBucket(), fileName, inputStream, objectMetadata)
+                    .withCannedAcl(CannedAccessControlList.PublicRead));
+            imageName = s3Client.getUrl(component.getBucket(), fileName).toString();
+        } catch (IOException e) {
+            new CustomException(ErrorCode.IMAGE_CONVERT_FAILD);
+        }
+        return imageName;
+    }
+
+
+
 
 
     // Amazon S3 를 사용해서 파일 업로드
@@ -76,11 +101,17 @@ AwsS3UploadService implements UploadService {
 
     // 파일 유효성 검사
     private String getFileExtension(String fileName) {
-        try {
-            return fileName.substring(fileName.lastIndexOf("."));
-        } catch (StringIndexOutOfBoundsException e) {
-            throw new IllegalArgumentException(String.format("잘못된 형식의 파일 (%s) 입니다", fileName));
+        if(fileName.length() == 0) {
+            new CustomException(ErrorCode.INVALID_IMAGE_FORMAT);
         }
+        ArrayList<String> format = new ArrayList<>(
+                Arrays.asList(".jpeg",".jpg",".png",".JPEG",".PNG",".JPG")
+        );
+        String validate = fileName.substring(fileName.lastIndexOf("."));
+        if(!format.contains(validate)) {
+            throw new CustomException(ErrorCode.INVALID_IMAGE_FORMAT);
+        }
+        return fileName.substring(fileName.lastIndexOf("."));
     }
 
     // URL 에서 파일이름(key) 추출

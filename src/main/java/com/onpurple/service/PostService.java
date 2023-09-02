@@ -5,6 +5,8 @@ import com.onpurple.dto.request.PostRequestDto;
 import com.onpurple.dto.response.CommentResponseDto;
 import com.onpurple.dto.response.PostResponseDto;
 import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.exception.CustomException;
+import com.onpurple.exception.ErrorCode;
 import com.onpurple.model.Comment;
 import com.onpurple.model.Img;
 import com.onpurple.model.Post;
@@ -13,6 +15,7 @@ import com.onpurple.repository.CommentRepository;
 import com.onpurple.repository.ImgRepository;
 import com.onpurple.repository.PostRepository;
 import com.onpurple.util.AwsS3UploadService;
+import com.onpurple.util.ImageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,57 +33,32 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
-    private final ImgRepository imgRepository;
-    private final AwsS3UploadService awsS3UploadService;
+    private final ImageUtil imageUtil;
 
 
     // 게시글 작성
     @Transactional
-    public ResponseDto<?> createPost(PostRequestDto requestDto,
-                                                                   User user,
-                                                                   List<String> imgPaths) {
-        String createdAt = formatTime();
-
-        Post post = Post.builder()
-                .user(user)
-                .title(requestDto.getTitle())
-                .content(requestDto.getContent())
-                .category(requestDto.getCategory())
-                .createdAt(createdAt)
-                .modifiedAt(createdAt)
-                .build();
-
+    public ResponseDto<PostResponseDto.CreateResponse> createPost(PostRequestDto requestDto,
+                                                                  User user, List<String> imgPaths) {
+        Post post = postFromRequest(requestDto, user);
         postRepository.save(post);
 
-        postBlankCheck(imgPaths);
-
-        List<String> imgList = new ArrayList<>();
-        for (String imgUrl : imgPaths) {
-            Img img = new Img(imgUrl, post);
-            imgRepository.save(img);
-            imgList.add(img.getImageUrl());
-        }
+        List<String> imgList;
+        imgList = imageUtil.addImage(imgPaths, post);
 
         return ResponseDto.success(
-                PostResponseDto.builder()
-                        .postId(post.getId())
-                        .title(post.getTitle())
-                        .content(post.getContent())
-                        .nickname(post.getUser().getNickname())
-                        .imgList(imgList)
-                        .category(post.getCategory())
-                        .likes(post.getLikes())
-                        .view(0)
-                        .createdAt(post.getCreatedAt())
-                        .modifiedAt(post.getModifiedAt())
-                        .build()
-        );
+                PostResponseDto.CreateResponse.fromEntity(post, imgList));
     }
 
-    private void postBlankCheck(List<String> imgPaths) {
-        if(imgPaths == null || imgPaths.isEmpty()){ //.isEmpty()도 되는지 확인해보기
-            throw new NullPointerException("이미지를 등록해주세요(Blank Check)");
-        }
+    private Post postFromRequest(PostRequestDto postRequestDto, User user) {
+        return Post.builder()
+                .user(user)
+                .title(postRequestDto.getTitle())
+                .content(postRequestDto.getContent())
+                .category(postRequestDto.getCategory())
+                .createdAt(formatTime())
+                .modifiedAt(formatTime())
+                .build();
     }
 
 
@@ -89,27 +68,12 @@ public class PostService {
         List<Post> postList = postRepository.findAllByCategoryOrderByCreatedAtDesc(category);
         List<PostResponseDto> postResponseDto = new ArrayList<>();
         for (Post post : postList) {
-            List<Img> findImgList = imgRepository.findByPost_Id(post.getId());
-            List<String> imgList = new ArrayList<>();
-            for (Img img : findImgList) {
-                imgList.add(img.getImageUrl());
-            }
+            // 이미지 가져오기
+            List<String> imgList = imageUtil.getListImage(post);
             postResponseDto.add(
-                    PostResponseDto.builder()
-                            .postId(post.getId())
-                            .title(post.getTitle())
-                            .imageUrl(imgList.get(0))
-                            .content(post.getContent())
-                            .likes(post.getLikes())
-                            .view(post.getView())
-                            .category(post.getCategory())
-                            .nickname(post.getUser().getNickname())
-                            .createdAt(post.getCreatedAt())
-                            .modifiedAt(post.getModifiedAt())
-                            .build()
+                    PostResponseDto.GetAllResponse.fromEntity(post, imgList)
             );
         }
-
         return ResponseDto.success(postResponseDto);
 
     }
@@ -118,133 +82,57 @@ public class PostService {
 
     // 게시글 단건 조회
     @Transactional// readOnly설정시 데이터가 Mapping되지 않는문제로 해제
-    public ResponseDto<?> getPost(Long postId) {
+    public ResponseDto<PostResponseDto.DetailResponse> getPost(Long postId) {
         Post post = isPresentPost(postId);
         if (null == post) {
-            return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글입니다.");
+            throw new CustomException(ErrorCode.POST_NOT_FOUND);
         }
-        List<Comment> commentList = commentRepository.findAllByPost(post);
-        List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
 
-        for (Comment comment : commentList) {
-            commentResponseDtoList.add(
-                    CommentResponseDto.builder()
-                            .commentId(comment.getId())
-                            .nickname(comment.getUser().getNickname())
-                            .comment(comment.getComment())
-                            .likes(comment.getLikes())
-                            .createdAt(comment.getCreatedAt())
-                            .modifiedAt(comment.getModifiedAt())
-                            .build()
-            );
-        }
-        //단건 조회 조회수 증가
+        List<CommentResponseDto> commentResponseDtoList = commentRepository.findAllByPost(post).stream()
+                .map(CommentResponseDto::fromEntity)
+                .collect(Collectors.toList());
+
+        // 단건 조회 조회수 증가
         post.updateViewCount();
-
-        List<Img> findImgList = imgRepository.findByPost_Id(post.getId());
-        List<String> imgList = new ArrayList<>();
-        for (Img img : findImgList) {
-            imgList.add(img.getImageUrl());
-        }
+        List<String> imgList = imageUtil.getListImage(post);
 
         return ResponseDto.success(
-                PostResponseDto.builder()
-                        .postId(post.getId())
-                        .title(post.getTitle())
-                        .content(post.getContent())
-                        .commentResponseDtoList(commentResponseDtoList)
-                        .nickname(post.getUser().getNickname())
-                        .likes(post.getLikes())
-                        .view(post.getView())
-                        .category(post.getCategory())
-                        .imgList(imgList)
-                        .createdAt(post.getCreatedAt())
-                        .modifiedAt(post.getModifiedAt())
-                        .build()
+                PostResponseDto.DetailResponse.fromEntity(
+                        post, imgList, commentResponseDtoList)
         );
     }
+
     //게시글 업데이트
     @Transactional
-    public ResponseDto<PostResponseDto> updatePost(Long postId,
+    public ResponseDto<PostResponseDto.CreateResponse> updatePost(Long postId,
                                                    PostRequestDto requestDto,
                                                    User user,
                                                    List<String> imgPaths) {
 
-        Post post = isPresentPost(postId);
-        if (null == post) {
-            return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글입니다.");
-        }
-
-        if (post.validateUser(user)) {
-            return ResponseDto.fail("BAD_REQUEST", "작성자만 수정할 수 있습니다.");
-        }
-
+        Post post = assertValidatePost(postId);
+        validatePostUser(post, user);
 
         //저장된 이미지 리스트 가져오기
-        List<Img> findImgList = imgRepository.findByPost_Id(post.getId());
-        List<String> imgList = new ArrayList<>();
-        for (Img img : findImgList) {
-            imgList.add(img.getImageUrl());
-        }
-        if(imgPaths != null) {
-            //s3에 저장되어 있는 img list 삭제
-            for (String imgUrl : imgList) {
-                awsS3UploadService.deleteFile(AwsS3UploadService.getFileNameFromURL(imgUrl));
-            }
-            imgRepository.deleteByPost_Id(post.getId());
-//            String deleteImage = post.getImageUrl();
-//            awsS3UploadService.deleteFile(AwsS3UploadService.getFileNameFromURL(deleteImage));
-        }
-
-        List<String> newImgList = new ArrayList<>();
-        for (String imgUrl : imgPaths) {
-            Img img = new Img(imgUrl, post);
-            imgRepository.save(img);
-            newImgList.add(img.getImageUrl());
-        }
+        List<String> newImgList = imageUtil.updateImage(imgPaths, post);
 
         String modifiedAt = formatTime();
 
         post.update(requestDto);
         post.updateModified(modifiedAt);
         return ResponseDto.success(
-                PostResponseDto.builder()
-                        .postId(post.getId())
-                        .title(post.getTitle())
-                        .content(post.getContent())
-                        .nickname(post.getUser().getNickname())
-                        .imgList(newImgList)
-                        .view(post.getView())
-                        .category(post.getCategory())
-                        .likes(post.getLikes())
-                        .createdAt(post.getCreatedAt())
-                        .modifiedAt(post.getModifiedAt())
-                        .build()
+                PostResponseDto.CreateResponse.fromEntity(post, newImgList)
         );
     }
     //게시글 삭제
     @Transactional
     public ResponseDto<?> deletePost(Long postId, User user) {
 
-        Post post = isPresentPost(postId);
-        if (null == post) {
-            return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글입니다.");
-        }
-
-        if (post.validateUser(user)) {
-            return ResponseDto.fail("BAD_REQUEST", "작성자만 삭제할 수 있습니다.");
-        }
+        Post post = assertValidatePost(postId);
+        validatePostUser(post, user);
 
         postRepository.delete(post);
-        List<Img> findImgList = imgRepository.findByPost_Id(post.getId());
-        List<String> imgList = new ArrayList<>();
-        for (Img img : findImgList) {
-            imgList.add(img.getImageUrl());
-        }
-
-        for (String imgUrl : imgList) {
-            awsS3UploadService.deleteFile(AwsS3UploadService.getFileNameFromURL(imgUrl));
-        }
+        List<String> imgList = imageUtil.getListImage(post);
+        imageUtil.deleteImageList(post, imgList);
         return ResponseDto.success("delete success");
     }
 
@@ -276,6 +164,23 @@ public class PostService {
     public Post isPresentPost(Long postId) {
         Optional<Post> optionalPost = postRepository.findById(postId);
         return optionalPost.orElse(null);
+    }
+
+    public Post assertValidatePost(Long postId) {
+        Post post = isPresentPost(postId);
+        if (null == post) {
+            throw new CustomException(ErrorCode.POST_NOT_FOUND);
+        }
+        return post;
+    }
+
+
+
+
+    public void validatePostUser(Post post, User user) {
+        if (post.validateUser(user)) {
+            throw new CustomException(ErrorCode.INVALID_USER_MATCH);
+        }
     }
 
 }

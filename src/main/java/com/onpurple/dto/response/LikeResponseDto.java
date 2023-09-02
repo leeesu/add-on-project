@@ -19,4 +19,6 @@ public class LikeResponseDto {
     private String nickname;
 
 
+
+
 }
