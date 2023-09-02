@@ -33,8 +33,6 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
-    private final ImgRepository imgRepository;
-    private final AwsS3UploadService awsS3UploadService;
     private final ImageUtil imageUtil;
 
 
@@ -96,10 +94,7 @@ public class PostService {
 
         // 단건 조회 조회수 증가
         post.updateViewCount();
-
-        List<String> imgList = imgRepository.findByPost_Id(post.getId()).stream()
-                .map(Img::getImageUrl)
-                .collect(Collectors.toList());
+        List<String> imgList = imageUtil.getListImage(post);
 
         return ResponseDto.success(
                 PostResponseDto.DetailResponse.fromEntity(
@@ -114,14 +109,8 @@ public class PostService {
                                                    User user,
                                                    List<String> imgPaths) {
 
-        Post post = isPresentPost(postId);
-        if (null == post) {
-            return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글입니다.");
-        }
-
-        if (post.validateUser(user)) {
-            return ResponseDto.fail("BAD_REQUEST", "작성자만 수정할 수 있습니다.");
-        }
+        Post post = assertValidatePost(postId);
+        validatePostUser(post, user);
 
         //저장된 이미지 리스트 가져오기
         List<String> newImgList = imageUtil.updateImage(imgPaths, post);
@@ -138,25 +127,12 @@ public class PostService {
     @Transactional
     public ResponseDto<?> deletePost(Long postId, User user) {
 
-        Post post = isPresentPost(postId);
-        if (null == post) {
-            return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글입니다.");
-        }
-
-        if (post.validateUser(user)) {
-            return ResponseDto.fail("BAD_REQUEST", "작성자만 삭제할 수 있습니다.");
-        }
+        Post post = assertValidatePost(postId);
+        validatePostUser(post, user);
 
         postRepository.delete(post);
-        List<Img> findImgList = imgRepository.findByPost_Id(post.getId());
-        List<String> imgList = new ArrayList<>();
-        for (Img img : findImgList) {
-            imgList.add(img.getImageUrl());
-        }
-
-        for (String imgUrl : imgList) {
-            awsS3UploadService.deleteFile(AwsS3UploadService.getFileNameFromURL(imgUrl));
-        }
+        List<String> imgList = imageUtil.getListImage(post);
+        imageUtil.deleteImageList(post, imgList);
         return ResponseDto.success("delete success");
     }
 
