@@ -24,12 +24,12 @@ public class ReportController {
     @PostMapping( "/report")
     public ResponseDto<?> createReport(@RequestPart(value = "data",required = false) ReportRequestDto requestDto,
                                        @AuthenticationPrincipal UserDetailsImpl userDetails,
-                                       @RequestPart(value = "imageUrl",required = false) List<MultipartFile> multipartFiles) {
+                                       @RequestPart(value = "imageUrl",required = false) MultipartFile multipartFiles) {
 
         if (multipartFiles == null) {
             throw new NullPointerException("사진을 업로드해주세요");
         }
-        List<String> imgPaths = s3Service.upload(multipartFiles);
+        String imgPaths = s3Service.uploadOne(multipartFiles);
         return reportService.createReport(requestDto,userDetails.getUser(), imgPaths);
     }
 
