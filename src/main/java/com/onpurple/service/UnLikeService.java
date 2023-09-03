@@ -28,10 +28,7 @@ public class UnLikeService {
 
         List<UnLikesResponseDto> unLikesResponseDtoList = unLikesList
                 .stream()
-                .map(unLike -> UnLikesResponseDto.builder()
-                        .userId(unLike.getTarget().getId())
-                        .imageUrl(unLike.getTarget().getImageUrl())
-                        .build())
+                .map(unLike -> UnLikesResponseDto.fromEntity(unLike))
                 .collect(Collectors.toList());
 
         return ResponseDto.success(unLikesResponseDtoList);

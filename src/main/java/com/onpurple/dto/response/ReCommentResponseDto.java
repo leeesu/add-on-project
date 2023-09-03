@@ -1,5 +1,6 @@
 package com.onpurple.dto.response;
 
+import com.onpurple.model.ReComment;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,4 +18,16 @@ public class ReCommentResponseDto {
     private String reComment;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
+
+
+    public static ReCommentResponseDto fromEntity(ReComment reComment) {
+        return ReCommentResponseDto.builder()
+                .reCommentId(reComment.getId())
+                .nickname(reComment.getUser().getNickname())
+                .reComment(reComment.getReComment())
+                .createdAt(reComment.getCreatedAt())
+                .modifiedAt(reComment.getModifiedAt())
+                .build();
+
+    }
 }

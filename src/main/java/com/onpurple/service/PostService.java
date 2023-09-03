@@ -38,7 +38,7 @@ public class PostService {
 
     // 게시글 작성
     @Transactional
-    public ResponseDto<PostResponseDto.CreateResponse> createPost(PostRequestDto requestDto,
+    public ResponseDto<PostResponseDto> createPost(PostRequestDto requestDto,
                                                                   User user, List<String> imgPaths) {
         Post post = postFromRequest(requestDto, user);
         postRepository.save(post);
@@ -47,7 +47,7 @@ public class PostService {
         imgList = imageUtil.addImage(imgPaths, post);
 
         return ResponseDto.success(
-                PostResponseDto.CreateResponse.fromEntity(post, imgList));
+                PostResponseDto.fromEntity(post, imgList));
     }
 
     private Post postFromRequest(PostRequestDto postRequestDto, User user) {
@@ -71,7 +71,7 @@ public class PostService {
             // 이미지 가져오기
             List<String> imgList = imageUtil.getListImage(post);
             postResponseDto.add(
-                    PostResponseDto.GetAllResponse.fromEntity(post, imgList)
+                    PostResponseDto.GetAllFromEntity(post, imgList)
             );
         }
         return ResponseDto.success(postResponseDto);
@@ -82,7 +82,7 @@ public class PostService {
 
     // 게시글 단건 조회
     @Transactional// readOnly설정시 데이터가 Mapping되지 않는문제로 해제
-    public ResponseDto<PostResponseDto.DetailResponse> getPost(Long postId) {
+    public ResponseDto<?> getPost(Long postId) {
         Post post = isPresentPost(postId);
         if (null == post) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND);
@@ -97,14 +97,14 @@ public class PostService {
         List<String> imgList = imageUtil.getListImage(post);
 
         return ResponseDto.success(
-                PostResponseDto.DetailResponse.fromEntity(
+                PostResponseDto.DetailFromEntity(
                         post, imgList, commentResponseDtoList)
         );
     }
 
     //게시글 업데이트
     @Transactional
-    public ResponseDto<PostResponseDto.CreateResponse> updatePost(Long postId,
+    public ResponseDto<?> updatePost(Long postId,
                                                    PostRequestDto requestDto,
                                                    User user,
                                                    List<String> imgPaths) {
@@ -120,7 +120,7 @@ public class PostService {
         post.update(requestDto);
         post.updateModified(modifiedAt);
         return ResponseDto.success(
-                PostResponseDto.CreateResponse.fromEntity(post, newImgList)
+                PostResponseDto.fromEntity(post, newImgList)
         );
     }
     //게시글 삭제
