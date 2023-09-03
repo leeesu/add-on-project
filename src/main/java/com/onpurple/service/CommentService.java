@@ -45,8 +45,6 @@ public class CommentService {
             .user(user)
             .post(post)
             .comment(commentRequestDto.getComment())
-            .createdAt(formatTime())
-            .modifiedAt(formatTime())
             .build();
   }
 
@@ -73,10 +71,7 @@ public class CommentService {
       // user validate
       validateUser(comment, user);
 
-      String modifiedAt = formatTime();
-
       comment.update(requestDto);
-      comment.updateModified(modifiedAt);
 
       return ResponseDto.success(CommentResponseDto.fromEntity(comment));
   }
@@ -91,15 +86,6 @@ public class CommentService {
     return ResponseDto.success("success");
   }
 
-
-  //현재시간 추출 메소드
-  private String formatTime(){
-    Date now = new Date();         // 현재 날짜/시간 출력
-    // System.out.println(now); // Thu Jun 17 06:57:32 KST 2021
-    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    return formatter.format(now);
-
-  }
 
 
   @Transactional(readOnly = true)

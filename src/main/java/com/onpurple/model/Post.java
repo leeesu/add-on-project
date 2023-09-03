@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Post{
+public class Post extends Timestamped{
 
     @Id
     @Column(name = "postId")
@@ -57,21 +57,11 @@ public class Post{
     @Column
     private String imageUrl;
 
-    @Column // 생성일자임을 나타냅니다.
-    private String createdAt;
-
-    @Column // 마지막 수정일자임을 나타냅니다.
-    private String modifiedAt;
-
-
 
     public void update(PostRequestDto requestDto) {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
         this.category= requestDto.getCategory();
-    }
-    public void updateModified(String getTime){
-        this.modifiedAt = getTime;
     }
 
     // 회원정보 검증
@@ -92,10 +82,6 @@ public class Post{
     public void updateViewCount(){
         this.view +=1;
     }
-//  //리스트 첫번째 이미지 저장
-//  public void imageSave(String imageUrl){
-//        this.imageUrl = imageUrl;
-//    }
 }
 
 
