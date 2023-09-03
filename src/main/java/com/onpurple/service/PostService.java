@@ -56,8 +56,6 @@ public class PostService {
                 .title(postRequestDto.getTitle())
                 .content(postRequestDto.getContent())
                 .category(postRequestDto.getCategory())
-                .createdAt(formatTime())
-                .modifiedAt(formatTime())
                 .build();
     }
 
@@ -115,10 +113,8 @@ public class PostService {
         //저장된 이미지 리스트 가져오기
         List<String> newImgList = imageUtil.updateImage(imgPaths, post);
 
-        String modifiedAt = formatTime();
 
         post.update(requestDto);
-        post.updateModified(modifiedAt);
         return ResponseDto.success(
                 PostResponseDto.fromEntity(post, newImgList)
         );
@@ -151,14 +147,6 @@ public class PostService {
 //        return ResponseDto.success(postList);
 //
 //    }
-
-    private String formatTime(){
-        Date now = new Date();         // 현재 날짜/시간 출력
-        // System.out.println(now); // Thu Jun 17 06:57:32 KST 2021
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return formatter.format(now);
-
-    }
 
     @Transactional(readOnly = true)
     public Post isPresentPost(Long postId) {

@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Comment {
+public class Comment extends Timestamped{
 
   @Id
   @JoinColumn(name = "commentId", nullable = false)
@@ -38,19 +38,10 @@ public class Comment {
   @Column
   private int likes;
 
-  @Column // 생성일자임을 나타냅니다.
-  private String createdAt;
-
-  @Column // 마지막 수정일자임을 나타냅니다.
-  private String modifiedAt;
-
   public void update(CommentRequestDto commentRequestDto) {
     this.comment = commentRequestDto.getComment();
   }
 
-  public void updateModified(String getTime){
-    this.modifiedAt = getTime;
-  }
 
   public boolean validateUser(User user) {
     return !this.user.equals(user);
