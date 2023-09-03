@@ -8,11 +8,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public enum ErrorCode {
 
-    // BOARD
+    // POST
     POST_NOT_FOUND("해당 게시글이 존재하지 않습니다"),
     USER_NOT_FOUND("사용자를 찾을 수 없습니다."),
 
-    //User
+    // USER
     TOKEN_NOT_MATCHED("Token이 유효하지 않습니다."),
     INTERNAL_SERVER_ERROR("서버에 오류가 발생했습니다."),
     INVALID_REQUEST("잘못된 요청입니다."),
@@ -30,7 +30,8 @@ public enum ErrorCode {
     INVALID_USER_MATCH("작성자만 수정할 수 있습니다."),
     INVALID_SELF_LIKE("본인에게 좋아요 할 수 없습니다."),
     DUPLICATE_LIKE_FAIL("중복으로 좋아요 할  수 없습니다."),
-    INVALID_SELF_REPORT("신고대상이 올바르지 않습니다.");
+    INVALID_SELF_REPORT("신고대상이 올바르지 않습니다."),
+    REQUEST_FAILED_ERROR("요청에 실패했습니다.");
 
     private final String message;
 }
