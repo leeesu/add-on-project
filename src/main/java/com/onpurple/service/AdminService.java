@@ -7,6 +7,7 @@ import com.onpurple.repository.CommentRepository;
 import com.onpurple.repository.ImgRepository;
 import com.onpurple.repository.PostRepository;
 import com.onpurple.util.AwsS3UploadService;
+import com.onpurple.util.ImageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,7 @@ public class AdminService {
     private final ImgRepository imgRepository;
 
     private final AwsS3UploadService awsS3UploadService;
+    private final ImageUtil imageUtil;
 
 //    관리자 권한으로 게시글 삭제.
 //    토큰을 통해 해당 토큰의 정보를 확인. 이때 해당 정보의 Role 설정이 Admin일 경우  게시글 삭제가 가능하도록 설정.
@@ -43,15 +45,9 @@ public class AdminService {
             return ResponseDto.fail("INVALID_ADMIN", "관리자가 아닙니다");
         }
         postRepository.delete(post);
-        List<Img> findImgList = imgRepository.findByPost_Id(post.getId());
-        List<String> imgList = new ArrayList<>();
-        for (Img img : findImgList) {
-            imgList.add(img.getImageUrl());
-        }
+        List<String> imgList = imageUtil.getListImage(post);
 
-        for (String imgUrl : imgList) {
-            awsS3UploadService.deleteFile(AwsS3UploadService.getFileNameFromURL(imgUrl));
-        }
+        imageUtil.deleteImageList(post,imgList);
 
         return ResponseDto.success(("관리자에 의해 성공적으로 삭제되었습니다."));
     }

@@ -3,6 +3,7 @@ package com.onpurple.controller;
 import com.onpurple.dto.response.ResponseDto;
 import com.onpurple.security.UserDetailsImpl;
 import com.onpurple.service.LikeService;
+import com.onpurple.service.UnLikeService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class LikeController {
 
     private final LikeService likeService;
+    private final UnLikeService unLikeService;
 
 
     // 게시글 좋아요
@@ -52,6 +54,6 @@ public class LikeController {
 
     @GetMapping("/user/unLike")
     public ResponseDto<?> getUnLikeList(@AuthenticationPrincipal UserDetailsImpl userDetails){
-        return likeService.getUnLike(userDetails.getUser());
+        return unLikeService.getUnLike(userDetails.getUser());
     }
 }

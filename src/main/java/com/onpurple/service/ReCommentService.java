@@ -42,13 +42,7 @@ public class ReCommentService {
 
     reCommentRepository.save(reComment);
     return ResponseDto.success(
-            ReCommentResponseDto.builder()
-            .reCommentId(reComment.getId())
-            .nickname(reComment.getUser().getNickname())
-            .reComment(reComment.getReComment())
-            .createdAt(reComment.getCreatedAt())
-            .modifiedAt(reComment.getModifiedAt())
-            .build()
+            ReCommentResponseDto.fromEntity(reComment)
         );
 }
 
@@ -64,11 +58,7 @@ public class ReCommentService {
 
         for (ReComment reComment : reCommentList) {
             reCommentResponseDto.add(
-                    ReCommentResponseDto.builder()
-                            .reCommentId(reComment.getId())
-                            .nickname(reComment.getUser().getNickname())
-                            .reComment((reComment.getReComment()))
-                            .build()
+                    ReCommentResponseDto.fromEntity(reComment)
             );
         }
 
@@ -92,11 +82,7 @@ public class ReCommentService {
 
         reComment.update(requestDto);
         return ResponseDto.success(
-                ReCommentResponseDto.builder()
-                        .reCommentId(reComment.getId())
-                        .nickname(reComment.getUser().getNickname())
-                        .reComment(reComment.getReComment())
-                        .build()
+                ReCommentResponseDto.fromEntity(reComment)
         );
     }
 

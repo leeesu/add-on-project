@@ -108,13 +108,7 @@ public class UserService {
         }
 
         return ResponseDto.success(
-                UserResponseDto.builder()
-                        .userId(user.getId())
-                        .nickname(user.getNickname())
-                        .imageUrl(user.getImageUrl())
-                        .gender(user.getGender())
-                        .build()
-        );
+                UserResponseDto.createFromEntity(user));
 
     }
 
@@ -128,13 +122,7 @@ public class UserService {
     public ResponseDto<?> getUser(User user) {
 
         return ResponseDto.success(
-                UserResponseDto.builder()
-                        .userId(user.getId())
-                        .nickname(user.getNickname())
-                        .gender((user.getGender()))
-                        .imageUrl(user.getImageUrl())
-                        .role(String.valueOf(user.getRole()))
-                        .build()
+                UserResponseDto.getFromEntity(user)
         );
     }
 
