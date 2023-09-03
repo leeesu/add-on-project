@@ -13,13 +13,14 @@ import com.onpurple.repository.ReportRepository;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.util.AwsS3UploadService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReportService {
@@ -33,10 +34,11 @@ public class ReportService {
     public ResponseDto<?> createReport(ReportRequestDto requestDto,
                                        User user,
                                        String imgPaths) {
-
+        //신고하는 회원이 존재하는지 회원인지 확인
         User target = userRepository.findByNickname(requestDto.getReportNickname()).orElseThrow(
                 ()-> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
+        // 본인은 신고할 수 없도록 처리
         if(user == target) {
             throw new CustomException(ErrorCode.INVALID_SELF_REPORT);
         }
