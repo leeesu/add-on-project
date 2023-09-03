@@ -1,5 +1,6 @@
 package com.onpurple.dto.response;
 
+import com.onpurple.model.Report;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,4 +22,31 @@ public class ReportResponseDto {
     private String category;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
+
+    public static ReportResponseDto fromEntity(Report report) {
+        return ReportResponseDto.builder()
+                .reportId(report.getId())
+                .reportNickname(report.getReportNickname())
+                .title(report.getTitle())
+                .content(report.getContent())
+                .imageUrl(report.getImageUrl())
+                .category(report.getCategory())
+                .createdAt(report.getCreatedAt())
+                .modifiedAt(report.getModifiedAt())
+                .build();
+    }
+
+    public static ReportResponseDto AllFromEntity(Report report) {
+        return ReportResponseDto.builder()
+                .reportId(report.getId())
+                .reportNickname(report.getReportNickname())
+                .title(report.getTitle())
+                .imageUrl(report.getImageUrl())
+                .category(report.getCategory())
+                .createdAt(report.getCreatedAt())
+                .modifiedAt(report.getModifiedAt())
+                .build();
+    }
+
+
 }

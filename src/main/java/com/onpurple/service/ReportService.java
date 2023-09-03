@@ -50,17 +50,7 @@ public class ReportService {
         }
 
         report.imageSave(imgList.get(0));
-        return ResponseDto.success(
-                ReportResponseDto.builder()
-                        .reportId(report.getId())
-                        .reportNickname(report.getReportNickname())
-                        .title(report.getTitle())
-                        .content(report.getContent())
-                        .imageUrl(report.getImageUrl())
-                        .category(report.getCategory())
-                        .createdAt(report.getCreatedAt())
-                        .modifiedAt(report.getModifiedAt())
-                        .build()
+        return ResponseDto.success(ReportResponseDto.fromEntity(report)
         );
     }
 
@@ -73,16 +63,7 @@ public class ReportService {
         }
 
         return ResponseDto.success(
-                ReportResponseDto.builder()
-                        .reportId(report.getId())
-                        .title(report.getTitle())
-                        .content(report.getContent())
-                        .reportNickname(report.getReportNickname())
-                        .category(report.getCategory())
-                        .imageUrl(report.getImageUrl())
-                        .createdAt(report.getCreatedAt())
-                        .modifiedAt(report.getModifiedAt())
-                        .build()
+                ReportResponseDto.fromEntity(report)
         );
     }
 
@@ -93,16 +74,7 @@ public class ReportService {
         List<ReportResponseDto> reportResponseDto = new ArrayList<>();
         for (Report report : reportList) {
             reportResponseDto.add(
-                    ReportResponseDto.builder()
-                            .reportId(report.getId())
-                            .title(report.getTitle())
-                            .imageUrl(report.getImageUrl())
-                            .content(report.getContent())
-                            .category(report.getCategory())
-                            .reportNickname(report.getReportNickname())
-                            .createdAt(report.getCreatedAt())
-                            .modifiedAt(report.getModifiedAt())
-                            .build()
+                    ReportResponseDto.AllFromEntity(report)
             );
         }
 
