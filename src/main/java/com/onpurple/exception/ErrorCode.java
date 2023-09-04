@@ -31,7 +31,8 @@ public enum ErrorCode {
     INVALID_SELF_LIKE("본인에게 좋아요 할 수 없습니다."),
     DUPLICATE_LIKE_FAIL("중복으로 좋아요 할  수 없습니다."),
     INVALID_SELF_REPORT("신고대상이 올바르지 않습니다."),
-    REQUEST_FAILED_ERROR("요청에 실패했습니다.");
+    REQUEST_FAILED_ERROR("요청에 실패했습니다."),
+    INVALID_IMAGE_TYPE("올바르지 않은 이미지 확장자입니다.");
 
     private final String message;
 }

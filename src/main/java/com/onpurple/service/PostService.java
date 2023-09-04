@@ -81,10 +81,7 @@ public class PostService {
     // 게시글 단건 조회
     @Transactional// readOnly설정시 데이터가 Mapping되지 않는문제로 해제
     public ResponseDto<?> getPost(Long postId) {
-        Post post = isPresentPost(postId);
-        if (null == post) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND);
-        }
+        Post post = assertValidatePost(postId);
 
         List<CommentResponseDto> commentResponseDtoList = commentRepository.findAllByPost(post).stream()
                 .map(CommentResponseDto::fromEntity)
@@ -148,22 +145,13 @@ public class PostService {
 //
 //    }
 
-    @Transactional(readOnly = true)
-    public Post isPresentPost(Long postId) {
-        Optional<Post> optionalPost = postRepository.findById(postId);
-        return optionalPost.orElse(null);
-    }
-
+    @Transactional
     public Post assertValidatePost(Long postId) {
-        Post post = isPresentPost(postId);
-        if (null == post) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND);
-        }
+        Post post = postRepository.findById(postId).orElseThrow(
+                ()-> new CustomException(ErrorCode.POST_NOT_FOUND)
+        );
         return post;
     }
-
-
-
 
     public void validatePostUser(Post post, User user) {
         if (post.validateUser(user)) {
