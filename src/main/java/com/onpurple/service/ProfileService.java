@@ -4,10 +4,13 @@ package com.onpurple.service;
 import com.onpurple.dto.request.ProfileUpdateRequestDto;
 import com.onpurple.dto.response.ProfileResponseDto;
 import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.exception.CustomException;
+import com.onpurple.exception.ErrorCode;
 import com.onpurple.model.Img;
 import com.onpurple.model.User;
 import com.onpurple.repository.ImgRepository;
 import com.onpurple.repository.UserRepository;
+import com.onpurple.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,8 +26,7 @@ public class ProfileService {
 
 
     private final UserRepository userRepository;
-
-    private final ImgRepository imgRepository;
+    private final ValidationUtil validationUtil;
 
 
     //    전체 프로필 조회(메인페이지). user DB에 저장된 모든 내용을 찾은 후 리스트에 저장.
@@ -45,10 +47,8 @@ public class ProfileService {
     //    상세 프로필 조회(디테일페이지). userId를 찾아 해당 id가 있을 경우 해당 내용을 조회.
     @Transactional
     public ResponseDto<?> getProfile(Long userId) {
-        User user = isPresentProfile(userId);
-        if (null == user) {
-            return ResponseDto.fail("NOT_FOUND", "존재하지 않는 프로필입니다.");
-        }
+        User user = validationUtil.assertValidateProfile(userId);
+
         return ResponseDto.success(
                 ProfileResponseDto.detailFromEntity(user)
         );
@@ -61,11 +61,5 @@ public class ProfileService {
         user.update(requestDto);
         userRepository.save(user);
         return ResponseDto.success("프로필 정보 수정이 완료되었습니다!");
-    }
-
-    @Transactional(readOnly = true)
-    public User isPresentProfile(Long userId) {
-        Optional<User> optionalProfile = userRepository.findById(userId);
-        return optionalProfile.orElse(null);
     }
 }
