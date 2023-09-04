@@ -6,6 +6,7 @@ import com.onpurple.exception.CustomException;
 import com.onpurple.exception.ErrorCode;
 import com.onpurple.model.*;
 import com.onpurple.repository.*;
+import com.onpurple.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,13 +26,14 @@ public class LikeService {
     private final CommentRepository commentRepository;
     private final UnLikeRepository unLikeRepository;
     private final UserRepository userRepository;
+    private final ValidationUtil validationUtil;
 
     // 게시글 좋아요
     @Transactional
     public ResponseDto<?> PostLike(Long postId,
                                    User user) {
 
-        Post post = isPresentPost(postId);
+        Post post = validationUtil.assertValidatePost(postId);
         if (null == post) {
             return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글입니다.");
         }
@@ -65,7 +67,7 @@ public class LikeService {
     public ResponseDto<?> CommentLike(Long commentId,
                                       User user) {
         // 댓글 유효성 체크
-        Comment comment = assertValidateComment(commentId);
+        Comment comment = validationUtil.assertValidateComment(commentId);
         // 본인 댓글에 좋아요 할 수 없도록 예외처리
         validateCommentLikeUser(comment, user);
 
@@ -95,7 +97,7 @@ public class LikeService {
     public ResponseDto<?> UserLike(Long targetId,
                                    User user) {
 
-        User target = isPresentTarget(targetId);
+        User target = validationUtil.assertValidateUser(targetId);
         if (null == target)
             return ResponseDto.fail("PROFILE_NOT_FOUND", "타겟 유저를 찾을 수 없습니다.");
 
@@ -126,10 +128,7 @@ public class LikeService {
                                         User user) {
 
 
-        User target = isPresentTarget(targetId);
-        if (null == target)
-            return ResponseDto.fail("PROFILE_NOT_FOUND", "타겟 유저를 찾을 수 없습니다.");
-
+        User target = validationUtil.assertValidateUser(targetId);
 
         //좋아요 한 적 있는지 체크
         UnLike unLiked = unLikeRepository.findByUserAndTargetId(user, targetId).orElse(null);
@@ -191,35 +190,10 @@ public class LikeService {
 
 
 
-
-    @Transactional(readOnly = true)
-    public User isPresentTarget(Long targetId) {
-        Optional<User> optionalTarget = userRepository.findById(targetId);
-        return optionalTarget.orElse(null);
-    }
-
-    @Transactional(readOnly = true)
-    public Post isPresentPost(Long postId) {
-        Optional<Post> optionalPost = postRepository.findById(postId);
-        return optionalPost.orElse(null);
-    }
-
-    @Transactional(readOnly = true)
-    public Comment isPresentComment(Long commentId) {
-        Optional<Comment> optionalComment = commentRepository.findById(commentId);
-        return optionalComment.orElse(null);
-    }
-
     public void validatePostLikeUser(Post post, User user) {
         if (!post.validateUser(user)) {
             throw new CustomException(ErrorCode.INVALID_SELF_LIKE);
         }
-    }
-    public Comment assertValidateComment(Long commentId) {
-        Comment comment = isPresentComment(commentId);
-        if (null == comment)
-            throw new CustomException(ErrorCode.COMMENT_NOT_FOUND);
-        return comment;
     }
 
     public void validateCommentLikeUser(Comment comment, User user) {

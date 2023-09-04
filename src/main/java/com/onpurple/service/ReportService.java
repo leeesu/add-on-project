@@ -12,6 +12,7 @@ import com.onpurple.model.User;
 import com.onpurple.repository.ReportRepository;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.util.AwsS3UploadService;
+import com.onpurple.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

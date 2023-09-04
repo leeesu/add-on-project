@@ -11,6 +11,7 @@ import com.onpurple.model.Comment;
 import com.onpurple.model.Post;
 import com.onpurple.model.User;
 import com.onpurple.repository.CommentRepository;
+import com.onpurple.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,12 +27,12 @@ import java.util.stream.Collectors;
 public class CommentService {
 
   private final CommentRepository commentRepository;
-  private final PostService postService;
+  private final ValidationUtil validationUtil;
 
   @Transactional
   public ResponseDto<?> createComment(Long postId, CommentRequestDto commentRequestDto, User user) {
     // post 유효성 검사
-    Post post = validatePost(postId);
+    Post post = validationUtil.assertValidatePost(postId);
     Comment comment = commentFromRequest(commentRequestDto, post, user);
     commentRepository.save(comment);
     return ResponseDto.success(
@@ -50,7 +51,7 @@ public class CommentService {
 
   @Transactional(readOnly = true)
   public ResponseDto<?> getAllCommentsByPost(Long postId) {
-    Post post = validatePost(postId);
+    Post post = validationUtil.assertValidatePost(postId);
 
     List<CommentResponseDto> commentResponseDtoList = commentRepository
             .findAllByPost(post)
@@ -65,9 +66,9 @@ public class CommentService {
   public ResponseDto<?> updateComment(Long commentId, CommentRequestDto requestDto, User user) {
       // 이곳에서 validate 메서드에서 예외 발생 가능성이 있는 작업 수행
        // post validate
-      validatePost(requestDto.getPostId());
+      validationUtil.assertValidatePost(requestDto.getPostId());
       // comment validate
-      Comment comment = validateComment(commentId);
+      Comment comment = validationUtil.assertValidateComment(commentId);
       // user validate
       validateUser(comment, user);
 
@@ -79,36 +80,13 @@ public class CommentService {
 
   @Transactional
   public ResponseDto<?> deleteComment(Long commentId, User user) {
-    Comment comment = validateComment(commentId);
+    Comment comment = validationUtil.assertValidateComment(commentId);
     validateUser(comment, user);
 
     commentRepository.delete(comment);
     return ResponseDto.success("success");
   }
 
-
-
-  @Transactional(readOnly = true)
-  public Comment isPresentComment(Long commentId) {
-    Optional<Comment> optionalComment = commentRepository.findById(commentId);
-    return optionalComment.orElse(null);
-  }
-
-  public Post validatePost(Long postId) {
-    Post post = postService.isPresentPost(postId);
-    if (post == null) {
-      throw new CustomException(ErrorCode.POST_NOT_FOUND);
-    }
-    return post;
-  }
-
-  public Comment validateComment(Long commentId) {
-    Comment comment = isPresentComment(commentId);
-    if (comment == null) {
-      throw new CustomException(ErrorCode.COMMENT_NOT_FOUND);
-    }
-    return comment;
-  }
 
   public void validateUser(Comment comment, User user) {
     if (comment.validateUser(user)) {

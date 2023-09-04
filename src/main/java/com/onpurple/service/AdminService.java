@@ -2,13 +2,17 @@ package com.onpurple.service;
 
 
 import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.exception.CustomException;
+import com.onpurple.exception.ErrorCode;
 import com.onpurple.model.*;
 import com.onpurple.repository.CommentRepository;
 import com.onpurple.repository.ImgRepository;
 import com.onpurple.repository.PostRepository;
 import com.onpurple.util.AwsS3UploadService;
 import com.onpurple.util.ImageUtil;
+import com.onpurple.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,16 +22,16 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class AdminService {
 
     private final PostRepository postRepository;
 
     private final CommentRepository commentRepository;
 
-    private final ImgRepository imgRepository;
-
-    private final AwsS3UploadService awsS3UploadService;
     private final ImageUtil imageUtil;
+
+    private final ValidationUtil validationUtil;
 
 //    관리자 권한으로 게시글 삭제.
 //    토큰을 통해 해당 토큰의 정보를 확인. 이때 해당 정보의 Role 설정이 Admin일 경우  게시글 삭제가 가능하도록 설정.
@@ -36,14 +40,9 @@ public class AdminService {
     public ResponseDto<?> deletePostByAdmin(User user, Long postId) {
 
 
-        Post post = isPresentPost(postId);
-        if (null == post) {
-            return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글입니다.");
-        }
+        Post post = validationUtil.assertValidatePost(postId);
 
-        if (!user.getRole().equals(Authority.ADMIN)) {
-            return ResponseDto.fail("INVALID_ADMIN", "관리자가 아닙니다");
-        }
+        validationAdmin(user);
         postRepository.delete(post);
         List<String> imgList = imageUtil.getListImage(post);
 
@@ -57,28 +56,20 @@ public class AdminService {
     @Transactional
     public ResponseDto<?> deleteCommentByAdmin(User user, Long commentId) {
 
-        Comment comment = isPresentComment(commentId);
-        if (null == comment) {
-            return ResponseDto.fail("NOT_FOUND", "존재하지 않는 댓글입니다.");
-        }
+        Comment comment = validationUtil.assertValidateComment(commentId);
 
-        if (!user.getRole().equals(Authority.ADMIN)) {
-            return ResponseDto.fail("INVALID_ADMIN", "관리자가 아닙니다");
-        }
+        validationAdmin(user);
         commentRepository.delete(comment);
 
         return ResponseDto.success(("관리자에 의해 성공적으로 삭제되었습니다."));
     }
 
-    @Transactional(readOnly = true)
-    public Post isPresentPost(Long postId) {
-        Optional<Post> optionalPost = postRepository.findById(postId);
-        return optionalPost.orElse(null);
-    }
+    @Transactional
+    public void validationAdmin(User user) {
+        if (!user.getRole().equals(Authority.ADMIN)) {
+            log.error("{} 회원은 관리자가 아닙니다.", user);
+            throw new CustomException(ErrorCode.NOT_ADMIN_ERROR);
 
-    @Transactional(readOnly = true)
-    public Comment isPresentComment(Long commentId) {
-        Optional<Comment> optionalComment = commentRepository.findById(commentId);
-        return optionalComment.orElse(null);
+        }
     }
 }

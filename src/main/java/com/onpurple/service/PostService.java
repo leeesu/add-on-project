@@ -16,6 +16,7 @@ import com.onpurple.repository.ImgRepository;
 import com.onpurple.repository.PostRepository;
 import com.onpurple.util.AwsS3UploadService;
 import com.onpurple.util.ImageUtil;
+import com.onpurple.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final ImageUtil imageUtil;
+    private final ValidationUtil validationUtil;
 
 
     // 게시글 작성
@@ -81,10 +83,7 @@ public class PostService {
     // 게시글 단건 조회
     @Transactional// readOnly설정시 데이터가 Mapping되지 않는문제로 해제
     public ResponseDto<?> getPost(Long postId) {
-        Post post = isPresentPost(postId);
-        if (null == post) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND);
-        }
+        Post post = validationUtil.assertValidatePost(postId);
 
         List<CommentResponseDto> commentResponseDtoList = commentRepository.findAllByPost(post).stream()
                 .map(CommentResponseDto::fromEntity)
@@ -107,7 +106,7 @@ public class PostService {
                                                    User user,
                                                    List<String> imgPaths) {
 
-        Post post = assertValidatePost(postId);
+        Post post = validationUtil.assertValidatePost(postId);
         validatePostUser(post, user);
 
         //저장된 이미지 리스트 가져오기
@@ -123,7 +122,7 @@ public class PostService {
     @Transactional
     public ResponseDto<?> deletePost(Long postId, User user) {
 
-        Post post = assertValidatePost(postId);
+        Post post = validationUtil.assertValidatePost(postId);
         validatePostUser(post, user);
 
         postRepository.delete(post);
@@ -147,21 +146,6 @@ public class PostService {
 //        return ResponseDto.success(postList);
 //
 //    }
-
-    @Transactional(readOnly = true)
-    public Post isPresentPost(Long postId) {
-        Optional<Post> optionalPost = postRepository.findById(postId);
-        return optionalPost.orElse(null);
-    }
-
-    public Post assertValidatePost(Long postId) {
-        Post post = isPresentPost(postId);
-        if (null == post) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND);
-        }
-        return post;
-    }
-
 
 
 
