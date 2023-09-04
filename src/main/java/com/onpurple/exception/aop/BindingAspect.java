@@ -36,7 +36,7 @@ public class BindingAspect {
         List<Map<String, String>> errorMaps = List.of(args)
                 .stream()
                 //arg가 BindResult의 인스턴스 조건에 맞는지 확인
-                .filter(arg -> arg instanceof BindingResult)
+                .filter(arg -> BindingResult.class.isInstance(arg))
                 .map(arg -> (BindingResult) arg)
                 .filter(BindingResult::hasErrors)
                 .map(bindingResult -> {
