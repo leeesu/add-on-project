@@ -6,7 +6,8 @@ import com.onpurple.dto.response.ResponseDto;
 import com.onpurple.security.UserDetailsImpl;
 import com.onpurple.service.KakaoService;
 import com.onpurple.service.UserService;
-import com.onpurple.util.AwsS3UploadService;
+import com.onpurple.util.ValidationUtil;
+import com.onpurple.util.s3.AwsS3UploadService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -15,8 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -27,14 +26,13 @@ public class UserController {
     private final AwsS3UploadService s3Service;
 
     private final KakaoService kakaoService;
+    private final ValidationUtil validationUtil;
 
     @RequestMapping(value = "/user/signup", method = RequestMethod.POST)
     public ResponseDto<?> signup(@RequestPart(value = "info", required = false) @Valid SignupRequestDto requestDto,
                                  @RequestPart(value = "userInfo", required = false) UserInfoRequestDto userInfoRequestDto,
                                  @RequestPart(value = "imageUrl", required = false) MultipartFile multipartFiles, HttpServletResponse response) {
-        if (multipartFiles == null) {
-            throw new NullPointerException("사진을 업로드해주세요");
-        }
+        validationUtil.validateMultipartFile(multipartFiles);
         String imgPaths = s3Service.uploadOne(multipartFiles);
 
         return userService.createUser(requestDto, userInfoRequestDto, imgPaths, response);
@@ -63,9 +61,7 @@ public class UserController {
     public ResponseDto<?> imageUpdate(ImageUpdateRequestDto requestDto, @RequestPart("imageUrl") MultipartFile multipartFiles,
                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        if (multipartFiles == null) {
-            throw new NullPointerException("사진을 업로드해주세요");
-        }
+        validationUtil.validateMultipartFile(multipartFiles);
 
         String imgPaths = s3Service.uploadOne(multipartFiles);
         return userService.updateImage(userDetails.getUser(), imgPaths, requestDto);

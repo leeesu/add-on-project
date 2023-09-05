@@ -1,6 +1,5 @@
 package com.onpurple.security.jwt;
 
-import com.onpurple.constant.ExpiryConstants;
 import com.onpurple.dto.request.TokenDto;
 import com.onpurple.model.Authority;
 import com.onpurple.model.User;
@@ -22,7 +21,7 @@ import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
 
-import static com.onpurple.constant.ExpiryConstants.*;
+import static com.onpurple.enums.ExpireEnum.*;
 
 @Slf4j
 @Component
