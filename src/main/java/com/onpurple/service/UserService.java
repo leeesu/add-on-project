@@ -4,12 +4,11 @@ import com.onpurple.dto.request.*;
 import com.onpurple.dto.response.ResponseDto;
 import com.onpurple.dto.response.UserResponseDto;
 import com.onpurple.model.Authority;
-import com.onpurple.model.Img;
 import com.onpurple.model.User;
 import com.onpurple.repository.ImgRepository;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.security.jwt.JwtUtil;
-import com.onpurple.util.AwsS3UploadService;
+import com.onpurple.util.s3.AwsS3UploadService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,8 +18,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor

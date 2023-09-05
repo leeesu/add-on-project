@@ -13,7 +13,9 @@ import com.onpurple.repository.UserRepository;
 import com.onpurple.repository.post.PostCustomRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -64,5 +66,18 @@ public class ValidationUtil {
                 ()-> new CustomException(ErrorCode.NOT_FOUND_RECOMMENT)
         );
         return reComment;
+    }
+    @Transactional
+    public void validateMultipartFile(MultipartFile multipartFiles) {
+        if (multipartFiles == null) {
+            throw new NullPointerException("사진을 업로드해주세요");
+        }
+    }
+    @Transactional
+    public void validateMultipartFiles(List<MultipartFile> multipartFiles) {
+
+        if (multipartFiles == null) {
+            throw new NullPointerException("사진을 업로드해주세요");
+        }
     }
 }

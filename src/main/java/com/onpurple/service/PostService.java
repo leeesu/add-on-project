@@ -7,25 +7,18 @@ import com.onpurple.dto.response.PostResponseDto;
 import com.onpurple.dto.response.ResponseDto;
 import com.onpurple.exception.CustomException;
 import com.onpurple.exception.ErrorCode;
-import com.onpurple.model.Comment;
-import com.onpurple.model.Img;
 import com.onpurple.model.Post;
 import com.onpurple.model.User;
 import com.onpurple.repository.CommentRepository;
-import com.onpurple.repository.ImgRepository;
 import com.onpurple.repository.PostRepository;
-import com.onpurple.util.AwsS3UploadService;
 import com.onpurple.util.ImageUtil;
 import com.onpurple.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service

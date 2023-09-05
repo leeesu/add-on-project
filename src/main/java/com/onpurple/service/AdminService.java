@@ -6,9 +6,7 @@ import com.onpurple.exception.CustomException;
 import com.onpurple.exception.ErrorCode;
 import com.onpurple.model.*;
 import com.onpurple.repository.CommentRepository;
-import com.onpurple.repository.ImgRepository;
 import com.onpurple.repository.PostRepository;
-import com.onpurple.util.AwsS3UploadService;
 import com.onpurple.util.ImageUtil;
 import com.onpurple.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
