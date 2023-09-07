@@ -1,4 +1,4 @@
-package com.onpurple.util.dto;
+package com.onpurple.util.s3.dto;
 
 import lombok.Getter;
 import lombok.Setter;

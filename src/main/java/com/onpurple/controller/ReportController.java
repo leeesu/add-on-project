@@ -3,22 +3,20 @@ package com.onpurple.controller;
 import com.onpurple.dto.request.ReportRequestDto;
 import com.onpurple.dto.response.ResponseDto;
 import com.onpurple.security.UserDetailsImpl;
-import com.onpurple.security.UserDetailsServiceImpl;
 import com.onpurple.service.ReportService;
-import com.onpurple.util.AwsS3UploadService;
-import jakarta.servlet.http.HttpServletRequest;
+import com.onpurple.util.ValidationUtil;
+import com.onpurple.util.s3.AwsS3UploadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
 public class ReportController {
     private final ReportService reportService;
     private final AwsS3UploadService s3Service;
+    private final ValidationUtil validationUtil;
 
     // 신고글 작성
     @PostMapping( "/report")
@@ -26,9 +24,7 @@ public class ReportController {
                                        @AuthenticationPrincipal UserDetailsImpl userDetails,
                                        @RequestPart(value = "imageUrl",required = false) MultipartFile multipartFiles) {
 
-        if (multipartFiles == null) {
-            throw new NullPointerException("사진을 업로드해주세요");
-        }
+        validationUtil.validateMultipartFile(multipartFiles);
         String imgPaths = s3Service.uploadOne(multipartFiles);
         return reportService.createReport(requestDto,userDetails.getUser(), imgPaths);
     }

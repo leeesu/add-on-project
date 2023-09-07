@@ -3,10 +3,10 @@ package com.onpurple.util;
 import com.onpurple.model.Img;
 import com.onpurple.model.Post;
 import com.onpurple.repository.ImgRepository;
+import com.onpurple.util.s3.AwsS3UploadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,7 +19,6 @@ public class ImageUtil {
 
     // 이미지 저장
     public List<String> addImage(List<String> imgPaths, Post post) {
-        postBlankCheck(imgPaths);
 
         List<String> imgList = imgPaths.stream()
                 .map(imgUrl -> {
@@ -61,9 +60,4 @@ public class ImageUtil {
             imgRepository.deleteByPost_Id(post.getId());
     }
 
-    private void postBlankCheck(List<String> imgPaths) {
-        if(imgPaths == null || imgPaths.isEmpty()){ //.isEmpty()도 되는지 확인해보기
-            throw new NullPointerException("이미지를 등록해주세요(Blank Check)");
-        }
-    }
 }
