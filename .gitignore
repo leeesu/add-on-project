@@ -42,7 +42,9 @@ out/
 .env
 /db
 ### Aws S3 bucket ###
-awsS3.yml
+application-awsS3.yml
+## Mysql ##
+application-dev.yml
 
 ### setting ###
 src/main/resources/application.properties
