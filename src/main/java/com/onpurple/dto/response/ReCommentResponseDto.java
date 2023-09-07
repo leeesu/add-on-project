@@ -16,8 +16,8 @@ public class ReCommentResponseDto {
     private Long reCommentId;
     private String nickname;
     private String reComment;
-    private LocalDateTime createdAt;
-    private LocalDateTime modifiedAt;
+    private String createdAt;
+    private String modifiedAt;
 
 
     public static ReCommentResponseDto fromEntity(ReComment reComment) {
