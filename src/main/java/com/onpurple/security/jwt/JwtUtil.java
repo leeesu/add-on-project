@@ -1,11 +1,8 @@
 package com.onpurple.security.jwt;
 
 import com.onpurple.dto.request.TokenDto;
-import com.onpurple.exception.CustomException;
-import com.onpurple.exception.ErrorCode;
 import com.onpurple.model.Authority;
 import com.onpurple.model.User;
-import com.onpurple.util.RedisUtil;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -16,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.integration.IntegrationProperties;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -44,7 +40,7 @@ public class JwtUtil {
     private String secretKey;
     private Key key;
 
-    private final RedisUtil redisUtil;
+    private final RedisTemplate<String, String> redisTemplate;
     private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
     @PostConstruct
@@ -58,15 +54,12 @@ public class JwtUtil {
         String token = request.getHeader(tokenType);
         if (StringUtils.hasText(token) && token.startsWith(BEARER_PREFIX)) {
             return token.substring(7);
-        }else if(StringUtils.hasText(token) && tokenType.equals(REFRESH_TOKEN)){
-            return token;
         }
         return null;
     }
 
     public TokenDto createAllToken(String accessToken, String refreshToken) {
-        TokenDto tokenDto = TokenDto
-                .builder()
+        TokenDto tokenDto = TokenDto.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
@@ -75,34 +68,31 @@ public class JwtUtil {
 
     // ACCESS_TOKEN 생성
     public String createAccessToken(User user) {
-        Date date = new Date();
+        long now = (new Date().getTime());
 
-        String accessToken = BEARER_PREFIX + Jwts
-                .builder()
+        return BEARER_PREFIX + Jwts.builder()
                 .setSubject(user.getUsername())
                 .claim(AUTHORITIES_KEY, Authority.USER.toString())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(date.getTime() + ACCESS_EXPIRE.getTime()))
-                .signWith(key, signatureAlgorithm).compact();
-        log.info("발급된 Access Token의 만료시간은 {} 입니다", new Date(date.getTime() + ACCESS_EXPIRE.getTime()));
-
-        return accessToken;
+                .setExpiration(new Date(now + ACCESS_EXPIRE.getTime()))
+                .signWith(key, signatureAlgorithm)
+                .compact();
     }
-
     // REFRESH_TOKEN 생성
     public String createRefreshToken(User user) {
-        Date date = new Date();
+        long now = (new Date().getTime());
 
-        String refreshToken = Jwts
-                .builder()
-                .setSubject(user.getUsername())
+        String refreshToken = BEARER_PREFIX +
+                Jwts.builder()
+                .setSubject(String.valueOf(user.getId()))
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(date.getTime() + REFRESH_EXPIRE.getTime()))
-                .signWith(key, signatureAlgorithm).compact();
-        log.info("발급된 Refresh Token의 만료시간은 {} 입니다", new Date(date.getTime() + REFRESH_EXPIRE.getTime()));
+                .setExpiration(new Date(now + REFRESH_EXPIRE.getTime()))
+                .signWith(key, signatureAlgorithm)
+                .compact();
 
         return refreshToken;
     }
+
 
 
     public boolean validateToken(String token) {
@@ -125,26 +115,17 @@ public class JwtUtil {
 
     //RefreshToken 검증
     //DB에 저장돼 있는 토큰과 비교
-    public String validateRefreshToken(String token) {
+    public Boolean validateRefreshToken(String token) {
         //1차 토큰 검증
-        if (!validateToken(token)) throw new CustomException(ErrorCode.TOKEN_NOT_MATCHED);
+        if(!validateToken(token)) return false;
 
         //DB에 저장한 토큰 비교
-        Claims info = getUserInfoFromToken(token);
-        String redisRefreshToken = redisUtil.getToken(info.getSubject());
-        if(redisRefreshToken.isEmpty()) {
-            log.error("{} 리프레쉬 토큰 에러", info.getSubject());
-            throw new CustomException(ErrorCode.REDIS_REFRESH_TOKEN_NOT_FOUND);
-        }
-
-        if (redisRefreshToken.equals(token)) {
-            log.info("[SUCCESS] RefreshToken 2차 검증 성공");
-            return token;
-        } else {
-            logger.error("[FAIL] RefreshToken 2차 검증에 실패");
-            throw new CustomException(ErrorCode.REFRESH_TOKEN_NOT_MATCHED);
-        }
+        Claims claims = getUserInfoFromToken(token);
+        String redisRefreshToken = String.valueOf(redisTemplate.opsForValue().get(claims.getId()));
+        if(redisRefreshToken.equals(token)) return true;
+        else return false;
     }
+
 
 
     // 토큰에서 사용자 정보 가져오기
@@ -152,15 +133,16 @@ public class JwtUtil {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }
 
-    public void tokenSetHeaders(TokenDto tokenDto, HttpServletResponse response) {
-        response.setHeader(ACCESS_TOKEN, tokenDto.getAccessToken());
-        response.setHeader(REFRESH_TOKEN, tokenDto.getRefreshToken());
+    public void tokenAddHeaders(TokenDto tokenDto, HttpServletResponse response) {
+        response.addHeader(ACCESS_TOKEN, tokenDto.getAccessToken());
+        response.addHeader(REFRESH_TOKEN, tokenDto.getRefreshToken());
     }
 
     //JWT 토큰의 만료시간
-    public Long getExpiration(String accessToken) {
+    public Long getExpiration(String accessToken){
 
-        Date expiration = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody().getExpiration();
+        Date expiration = Jwts.parserBuilder().setSigningKey(key)
+                .build().parseClaimsJws(accessToken).getBody().getExpiration();
 
         long now = new Date().getTime();
         return expiration.getTime() - now;

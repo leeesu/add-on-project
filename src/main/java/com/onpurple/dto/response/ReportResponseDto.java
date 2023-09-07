@@ -20,8 +20,8 @@ public class ReportResponseDto {
     private String content;
     private String imageUrl;
     private String category;
-    private String createdAt;
-    private String modifiedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
 
     public static ReportResponseDto fromEntity(Report report) {
         return ReportResponseDto.builder()

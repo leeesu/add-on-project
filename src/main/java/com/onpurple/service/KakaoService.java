@@ -53,7 +53,7 @@ public class KakaoService {
         TokenDto tokenDto = jwtUtil.createAllToken(jwtUtil.createAccessToken(kakaoUser), jwtUtil.createRefreshToken(kakaoUser));
         // 헤더에 토큰 담기
         response.setContentType("application/json;charset=UTF-8");
-        jwtUtil.tokenSetHeaders(tokenDto, response);
+        jwtUtil.tokenAddHeaders(tokenDto, response);
 
         return kakaoUserInfo;
     }

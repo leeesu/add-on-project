@@ -97,7 +97,7 @@ public class LikeService {
     public ResponseDto<?> UserLike(Long targetId,
                                    User user) {
 
-        User target = validationUtil.assertValidateProfile(targetId);
+        User target = validationUtil.assertValidateUser(targetId);
         if (null == target)
             return ResponseDto.fail("PROFILE_NOT_FOUND", "타겟 유저를 찾을 수 없습니다.");
 
@@ -128,7 +128,7 @@ public class LikeService {
                                         User user) {
 
 
-        User target = validationUtil.assertValidateProfile(targetId);
+        User target = validationUtil.assertValidateUser(targetId);
 
         //좋아요 한 적 있는지 체크
         UnLike unLiked = unLikeRepository.findByUserAndTargetId(user, targetId).orElse(null);

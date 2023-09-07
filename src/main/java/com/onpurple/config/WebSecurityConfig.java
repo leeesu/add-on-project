@@ -7,7 +7,6 @@ import com.onpurple.security.UserDetailsServiceImpl;
 import com.onpurple.security.jwt.JwtAuthenticationFilter;
 import com.onpurple.security.jwt.JwtAuthorizationFilter;
 import com.onpurple.security.jwt.JwtUtil;
-import com.onpurple.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -35,7 +34,7 @@ public class WebSecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final UserRepository userRepository;
-    private final RedisUtil redisUtil;
+    private final RedisTemplate<String, String> redisTemplate;
     private final ObjectMapper objectMapper;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
@@ -47,7 +46,7 @@ public class WebSecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil, userRepository, redisUtil);
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil, userRepository, objectMapper);
         filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
         return filter;
     }
@@ -55,7 +54,7 @@ public class WebSecurityConfig {
 
     @Bean
     public JwtAuthorizationFilter jwtAuthorizationFilter() {
-        return new JwtAuthorizationFilter(jwtUtil, userDetailsService,userRepository, redisUtil);
+        return new JwtAuthorizationFilter(jwtUtil, userDetailsService,userRepository, redisTemplate);
     }
 
     private static final String[] PERMIT = {

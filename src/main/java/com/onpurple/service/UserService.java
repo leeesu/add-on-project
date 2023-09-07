@@ -5,14 +5,15 @@ import com.onpurple.dto.response.ResponseDto;
 import com.onpurple.dto.response.UserResponseDto;
 import com.onpurple.model.Authority;
 import com.onpurple.model.User;
+import com.onpurple.repository.ImgRepository;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.security.jwt.JwtUtil;
-import com.onpurple.util.RedisUtil;
 import com.onpurple.util.s3.AwsS3UploadService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,9 +26,10 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final RedisUtil redisUtil;
+    private final ImgRepository imgRepository;
     private final AwsS3UploadService awsS3UploadService;
     private final JwtUtil jwtUtil;
+    private final RedisTemplate<String, String> redisTemplate;
     private static final String ADMIN_TOKEN = ("AAABnvxRVklrnYxKZ0aHgTBcXukeZygoC");
 
     //    아이디 체크. DB에 저장되어 있는 usernaeme을 찾아 유저가 존재한다면 에러메시지 전송)
@@ -96,7 +98,7 @@ public class UserService {
 
 //        현재 서비스에서 회원가입 이후 바로 서비스를 이용할 수 있도록 설정하였기에 회원가입이 진행될 때 토큰이 발행되도록 설정
         TokenDto tokenDto = jwtUtil.createAllToken(jwtUtil.createAccessToken(user), jwtUtil.createRefreshToken(user));
-        jwtUtil.tokenSetHeaders(tokenDto, response);
+        jwtUtil.tokenAddHeaders(tokenDto, response);
 
         if (user.getRole().equals(Authority.ADMIN)) {
             return ResponseDto.success("관리자 회원가입이 완료되었습니다");
@@ -156,8 +158,7 @@ public class UserService {
 
     //  로그아웃. 토큰을 확인하여 일치할 경우 로그인 된 유저의 이미지와 토큰을 삭제.
     public ResponseDto<?> logout(HttpServletRequest request) {
-        // 리프레시 토큰 삭제, AccessToken 만료시간까지 저장
-        handleLogoutToken(request);
+        deleteToken(request);
         return ResponseDto.success("로그아웃이 완료되었습니다.");
     }
 
@@ -175,16 +176,17 @@ public class UserService {
     }
 
     @Transactional
-    public void handleLogoutToken(HttpServletRequest request) {
+    public void deleteToken(HttpServletRequest request) {
         String accessToken = jwtUtil.resolveToken(request, JwtUtil.ACCESS_TOKEN);
-        Claims info = jwtUtil.getUserInfoFromToken(accessToken);
-        // 엑세스 토큰 남은시간
+        String refreshToken = jwtUtil.resolveToken(request, JwtUtil.REFRESH_TOKEN);
+        Claims info = jwtUtil.getUserInfoFromToken(refreshToken);
         long remainMilliSeconds = jwtUtil.getExpiration(accessToken);
         // 액세스 토큰 만료시점 까지 저장
-        redisUtil.saveToken(accessToken, accessToken, remainMilliSeconds
+        redisTemplate.opsForValue().set(
+                "logout", accessToken, remainMilliSeconds
         );
         // refreshToken 삭제
-        redisUtil.deleteToken(info.getSubject());
+        redisTemplate.delete(info.getId());
     }
 
 }

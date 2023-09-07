@@ -42,8 +42,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
 	// AWS S3 이미지 업로드를 위한 디펜던시
-	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.112'
-	implementation 'javax.xml.bind:jaxb-api:2.3.1'
+	implementation('org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE')
 
 	//websocket
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
@@ -79,15 +78,6 @@ dependencies {
 	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
 	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
 	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
-	// AOP
-	implementation 'org.springframework:spring-aop'
-	//AWS Lambda
-	implementation 'com.amazonaws:aws-lambda-java-core:1.2.2'
-	implementation 'com.amazonaws:aws-lambda-java-events:3.11.1'
-	runtimeOnly 'com.amazonaws:aws-lambda-java-log4j2:1.5.1'
-	implementation 'com.amazonaws:aws-java-sdk-s3'
-	implementation platform('software.amazon.awssdk:bom:2.17.230')
-	implementation 'software.amazon.awssdk:s3'
 
 }
 
