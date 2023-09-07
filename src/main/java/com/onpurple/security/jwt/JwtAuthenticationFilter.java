@@ -3,21 +3,18 @@ package com.onpurple.security.jwt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onpurple.dto.request.LoginRequestDto;
 import com.onpurple.dto.request.TokenDto;
-import com.onpurple.dto.response.KakaoLoginResponseDto;
 import com.onpurple.dto.response.LoginResponseDto;
 import com.onpurple.exception.CustomException;
 import com.onpurple.exception.ErrorCode;
-import com.onpurple.exception.ErrorResponse;
 import com.onpurple.model.User;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.security.UserDetailsImpl;
+import com.onpurple.util.RedisUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -25,19 +22,21 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.io.IOException;
 
+import static com.onpurple.enums.ExpireEnum.REFRESH_EXPIRE;
+
 @Slf4j(topic = "로그인 및 JWT 생성")
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
-    private final ObjectMapper objectMapper;
+    private final RedisUtil redisUtil;
 
 
     public JwtAuthenticationFilter(
             JwtUtil jwtUtil, UserRepository userRepository,
-            ObjectMapper objectMapper) {
+            RedisUtil redisUtil) {
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
-        this.objectMapper = objectMapper;
+        this.redisUtil = redisUtil;
         // 로그인 처리를 여기서 처리한다.
         setFilterProcessesUrl("/user/login");
     }
@@ -74,8 +73,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         );
 
         TokenDto tokenDto = jwtUtil.createAllToken(jwtUtil.createAccessToken(user), jwtUtil.createRefreshToken(user));
+        // redis로 RTK 저장
+        redisUtil.saveToken(user.getUsername(), tokenDto.getRefreshToken(), REFRESH_EXPIRE.getTime());
         // header 로 토큰 send
-        jwtUtil.tokenAddHeaders(tokenDto, response);
+        jwtUtil.tokenSetHeaders(tokenDto, response);
+
         sendJsonResponse(response, user);
     }
     private void sendJsonResponse(HttpServletResponse response, User user) throws IOException {
