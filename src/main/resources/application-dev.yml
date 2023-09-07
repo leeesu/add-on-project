@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: admin
+    url: jdbc:mysql://localhost:3306/onpurple?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    password: admin
+  sql:
+    init:
+      mode: always
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        use_sql_comments: 'true'
+    hibernate:
+      ddl-auto: update
+  profiles:
+    active: secret

@@ -44,7 +44,7 @@ public class KakaoService {
         KakaoUserRequestDto kakaoUserInfo = getkakaoUserInfo(accessToken);
 
         // 3. 필요시에 회원가입
-       User kakaoUser = registerKakaoUserIfNeeded(kakaoUserInfo);
+        User kakaoUser = registerKakaoUserIfNeeded(kakaoUserInfo);
 
         UserDetails userDetails = new UserDetailsImpl(kakaoUser);
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
@@ -53,7 +53,7 @@ public class KakaoService {
         TokenDto tokenDto = jwtUtil.createAllToken(jwtUtil.createAccessToken(kakaoUser), jwtUtil.createRefreshToken(kakaoUser));
         // 헤더에 토큰 담기
         response.setContentType("application/json;charset=UTF-8");
-        jwtUtil.tokenAddHeaders(tokenDto, response);
+        jwtUtil.tokenSetHeaders(tokenDto, response);
 
         return kakaoUserInfo;
     }
