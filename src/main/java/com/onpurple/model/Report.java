@@ -2,6 +2,8 @@ package com.onpurple.model;
 
 
 import com.onpurple.dto.request.ReportRequestDto;
+import com.onpurple.enums.PostCategory;
+import com.onpurple.enums.ReportCategory;
 import jakarta.persistence.*;
 import lombok.*;
 @Builder
@@ -27,8 +29,8 @@ public class Report extends Timestamped{
     @Column(nullable = false)
     private String reportNickname;
 
-    @Column
-    private String category;
+    @Enumerated(EnumType.STRING)
+    private ReportCategory category;
 
 
     @Column

@@ -1,5 +1,6 @@
 package com.onpurple.dto.request;
 
+import com.onpurple.enums.ReportCategory;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,7 @@ public class ReportRequestDto {
     private String title;
     private String content;
     private String imageUrl;
-    private String category;
+    private ReportCategory category;
     private String reportNickname;
 
 
