@@ -1,5 +1,6 @@
 package com.onpurple.dto.response;
 
+import com.onpurple.enums.ReportCategory;
 import com.onpurple.model.Report;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,7 +20,7 @@ public class ReportResponseDto {
     private String reportNickname;
     private String content;
     private String imageUrl;
-    private String category;
+    private ReportCategory category;
     private String createdAt;
     private String modifiedAt;
 

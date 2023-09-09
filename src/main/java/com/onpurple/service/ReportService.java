@@ -1,11 +1,15 @@
 package com.onpurple.service;
 
 
+import com.onpurple.dto.request.PostRequestDto;
 import com.onpurple.dto.request.ReportRequestDto;
 import com.onpurple.dto.response.ReportResponseDto;
 import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.enums.PostCategory;
+import com.onpurple.enums.ReportCategory;
 import com.onpurple.exception.CustomException;
 import com.onpurple.exception.ErrorCode;
+import com.onpurple.model.Post;
 import com.onpurple.model.Report;
 import com.onpurple.model.User;
 import com.onpurple.repository.ReportRepository;
@@ -41,18 +45,25 @@ public class ReportService {
         if(user == target) {
             throw new CustomException(ErrorCode.INVALID_SELF_REPORT);
         }
-        Report report = Report.builder()
-                .user(user)
-                .reportNickname(requestDto.getReportNickname())
-                .title(requestDto.getTitle())
-                .imageUrl(imgPaths)
-                .content(requestDto.getContent())
-                .category(requestDto.getCategory())
-                .build();
+        // 카테고리 Business validation
+        validateReportCategory(requestDto.getCategory());
+        Report report = ReportFromRequest(requestDto, user, imgPaths);
 
         reportRepository.save(report);
         return ResponseDto.success(ReportResponseDto.fromEntity(report)
         );
+    }
+
+    private Report ReportFromRequest(ReportRequestDto reportRequestDto, User user, String imgPaths) {
+        Report report = Report.builder()
+                .user(user)
+                .reportNickname(reportRequestDto.getReportNickname())
+                .title(reportRequestDto.getTitle())
+                .content(reportRequestDto.getContent())
+                .imageUrl(imgPaths)
+                .category(reportRequestDto.getCategory())
+                .build();
+        return report;
     }
 
     // 신고글 단건 조회
@@ -108,6 +119,14 @@ public class ReportService {
     public Report isPresentReport(Long reportId) {
         Optional<Report> optionalReport = reportRepository.findById(reportId);
         return optionalReport.orElse(null);
+    }
+
+    public void validateReportCategory(ReportCategory category) {
+
+        if (!ReportCategory.isValidCategory(category)) {
+            log.error("[FAIL] {} 카테고리가 존재하지 않습니다.", category);
+            throw new CustomException(ErrorCode.POST_CATEGORY_NOT_FOUND);
+        }
     }
 
 

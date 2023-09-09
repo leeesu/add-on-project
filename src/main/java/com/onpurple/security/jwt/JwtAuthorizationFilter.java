@@ -41,25 +41,13 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
         // 토큰 검증 AccessToken
         String accessToken = jwtUtil.resolveToken(req, ACCESS_TOKEN);
-        String refreshToken = jwtUtil.resolveToken(req, REFRESH_TOKEN);
         if (StringUtils.hasText(accessToken) && !(redisUtil.checkValidateToken(accessToken))) {
             if (!jwtUtil.validateToken(accessToken)) {
-                log.info("[FAIL] AccessToken 검증 실패했습니다.");
-                if(StringUtils.hasText(refreshToken)) {
-                    log.info("[SUCCESS] RefreshToken이 존재합니다.");
-                    String token = jwtUtil.validateRefreshToken(refreshToken);
-                    log.info("[SUCCESS] RefreshToken 검증에 성공했습니다");
-                    Claims info = jwtUtil.getUserInfoFromToken(token);
-                    log.info("[SUCCESS] {} 회원의 토큰 재발급을 진행합니다", info.getSubject());
-                    User user = userRepository.findByUsername(info.getSubject()).orElseThrow(
-                            () -> new CustomException(ErrorCode.USER_NOT_FOUND)
-                    );
-                    // 기존 refreshToken 토큰 삭제
-                    redisUtil.deleteToken(user.getUsername());
-                    TokenDto tokenDto = reissueToken(user, res);
-                    accessToken = tokenDto.getAccessToken().substring(7);
-                    jwtUtil.tokenSetHeaders(tokenDto, res);
-                }
+                log.warn("[FAIL] AccessToken 검증 실패했습니다.");
+                String refreshToken = jwtUtil.resolveToken(req, REFRESH_TOKEN);
+                TokenDto tokenDto = handleRefreshToken(refreshToken);
+                accessToken = tokenDto.getAccessToken().substring(7);
+                jwtUtil.tokenSetHeaders(tokenDto, res);
             }
 
             Claims info = jwtUtil.getUserInfoFromToken(accessToken);
@@ -67,7 +55,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             try {
                 setAuthentication(info.getSubject());
             } catch (Exception e) {
-                log.error(e.getMessage());
+                log.error("{} 인증 객체를 생성할 수 없습니다", e.getMessage());
                 return;
             }
         }
@@ -90,17 +78,38 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
 
-    public void handlerRefreshTokenForAccessToken() {
+    public TokenDto handleRefreshToken(String refreshToken) {
 
-    }
+        try {
+            if (StringUtils.hasText(refreshToken)) {
+                log.info("[SUCCESS] RefreshToken이 존재합니다.");
+                refreshToken = jwtUtil.validateRefreshToken(refreshToken);
+                log.info("[SUCCESS] RefreshToken 검증에 성공했습니다");
+                Claims info = jwtUtil.getUserInfoFromToken(refreshToken);
+                log.info("[SUCCESS] {} 회원의 토큰 재발급을 진행합니다", info.getSubject());
+                TokenDto tokenDto = jwtUtil.reissueToken(info.getSubject());
+                return tokenDto;
+            }else {
+                log.error("Refresh 토큰이 존재하지 않습니다.");
+                throw new CustomException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);
+            }
+        } catch (Exception e) {
+            log.error("회원 토큰 재발급에 실패했습니다.", e.getMessage());
+            throw new CustomException(ErrorCode.REQUEST_FAILED_ERROR);
 
-    public TokenDto reissueToken(User user, HttpServletResponse response) {
-        TokenDto tokenDto = jwtUtil.createAllToken(jwtUtil.createAccessToken(user), jwtUtil.createRefreshToken(user));
-        // redis로 RTK 저장
-        redisUtil.saveToken(user.getUsername(), tokenDto.getRefreshToken(), REFRESH_EXPIRE.getTime());
-        log.info("{} 회원의 토큰이 재발급 되었습니다.", user.getUsername());
-        // header 로 토큰 send
-        return tokenDto;
+        }
     }
 
 }
+
+
+
+/*
+            try {
+                setAuthentication(info.getSubject());
+            } catch (Exception e) {
+                log.error("{} 인증 객체를 생성할 수 없습니다", e.getMessage());
+                return;
+            }
+        }
+ */

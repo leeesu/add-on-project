@@ -5,6 +5,7 @@ import com.onpurple.exception.CustomException;
 import com.onpurple.exception.ErrorCode;
 import com.onpurple.model.Authority;
 import com.onpurple.model.User;
+import com.onpurple.repository.UserRepository;
 import com.onpurple.util.RedisUtil;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -46,6 +47,7 @@ public class JwtUtil {
 
     private final RedisUtil redisUtil;
     private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
+    private final UserRepository userRepository;
 
     @PostConstruct
     public void init() {
@@ -56,6 +58,7 @@ public class JwtUtil {
     // header 토큰을 가져오기 Keys.hmacShaKeyFor(bytes);
     public String resolveToken(HttpServletRequest request, String tokenType) {
         String token = request.getHeader(tokenType);
+        log.info("{} 타입의 토큰을 가져옵니다.", tokenType);
         if (StringUtils.hasText(token) && token.startsWith(BEARER_PREFIX)) {
             return token.substring(7);
         }else if(StringUtils.hasText(token) && tokenType.equals(REFRESH_TOKEN)){
@@ -100,6 +103,11 @@ public class JwtUtil {
                 .setExpiration(new Date(date.getTime() + REFRESH_EXPIRE.getTime()))
                 .signWith(key, signatureAlgorithm).compact();
         log.info("발급된 Refresh Token의 만료시간은 {} 입니다", new Date(date.getTime() + REFRESH_EXPIRE.getTime()));
+        // redis로 RTK 저장
+        log.info("{} redis로 저장될 토큰 확인", refreshToken);
+        redisUtil.saveToken(user.getUsername(), refreshToken, REFRESH_EXPIRE.getTime());
+        log.info("redis로 RefreshToken이 저장되었습니다.");
+        log.info("{} : redis에 저장된 토큰 확인", redisUtil.getToken(user.getUsername()));
 
         return refreshToken;
     }
@@ -133,15 +141,15 @@ public class JwtUtil {
         Claims info = getUserInfoFromToken(token);
         String redisRefreshToken = redisUtil.getToken(info.getSubject());
         if(redisRefreshToken.isEmpty()) {
-            log.error("{} 리프레쉬 토큰 에러", info.getSubject());
+            log.error("[ERROR] Redis에 RefreshToken이 존재하지 않습니다.");
             throw new CustomException(ErrorCode.REDIS_REFRESH_TOKEN_NOT_FOUND);
         }
 
         if (redisRefreshToken.equals(token)) {
-            log.info("[SUCCESS] RefreshToken 2차 검증 성공");
+            log.info("[SUCCESS] RedisRefreshToken과 검증 성공");
             return token;
         } else {
-            logger.error("[FAIL] RefreshToken 2차 검증에 실패");
+            logger.error("[FAIL] RedisRefreshToken과 검증 실패");
             throw new CustomException(ErrorCode.REFRESH_TOKEN_NOT_MATCHED);
         }
     }
@@ -164,6 +172,16 @@ public class JwtUtil {
 
         long now = new Date().getTime();
         return expiration.getTime() - now;
+    }
+
+    public TokenDto reissueToken(String username) {
+        User user = userRepository.findByUsername(username).orElseThrow(
+                ()->new CustomException(ErrorCode.USER_NOT_FOUND)
+        );
+        TokenDto tokenDto = createAllToken(createAccessToken(user),createRefreshToken(user));
+        log.info("{} 회원의 토큰이 재발급 되었습니다.", user.getUsername());
+        // header 로 토큰 send
+        return tokenDto;
     }
 
 

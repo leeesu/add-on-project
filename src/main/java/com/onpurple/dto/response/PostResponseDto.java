@@ -1,5 +1,6 @@
 package com.onpurple.dto.response;
 
+import com.onpurple.enums.PostCategory;
 import com.onpurple.model.Post;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,7 +22,7 @@ public class PostResponseDto {
     private String imageUrl;
     private Integer likes;
     private Integer view;
-    private String category;
+    private PostCategory category;
     private List<String> imgList;
     private List<CommentResponseDto> commentResponseDtoList;
     private String createdAt;

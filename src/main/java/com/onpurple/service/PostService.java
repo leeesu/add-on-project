@@ -5,6 +5,7 @@ import com.onpurple.dto.request.PostRequestDto;
 import com.onpurple.dto.response.CommentResponseDto;
 import com.onpurple.dto.response.PostResponseDto;
 import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.enums.PostCategory;
 import com.onpurple.exception.CustomException;
 import com.onpurple.exception.ErrorCode;
 import com.onpurple.model.Post;
@@ -14,15 +15,19 @@ import com.onpurple.repository.PostRepository;
 import com.onpurple.util.ImageUtil;
 import com.onpurple.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j(topic = "커뮤니티 기능")
 public class PostService {
 
     private final PostRepository postRepository;
@@ -31,10 +36,13 @@ public class PostService {
     private final ValidationUtil validationUtil;
 
 
+
     // 게시글 작성
     @Transactional
     public ResponseDto<PostResponseDto> createPost(PostRequestDto requestDto,
                                                                   User user, List<String> imgPaths) {
+        // 카테고리 Business Validation
+        validateCategory(requestDto.getCategory());
         Post post = postFromRequest(requestDto, user);
         postRepository.save(post);
 
@@ -147,5 +155,15 @@ public class PostService {
             throw new CustomException(ErrorCode.INVALID_USER_MATCH);
         }
     }
+
+    public void validateCategory(PostCategory category) {
+
+        if (!PostCategory.isValidCategory(category)) {
+            log.error("[FAIL] {} 카테고리가 존재하지 않습니다.", category);
+            throw new CustomException(ErrorCode.POST_CATEGORY_NOT_FOUND);
+        }
+    }
+
+
 
 }
