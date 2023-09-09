@@ -1,6 +1,7 @@
 package com.onpurple.dto.request;
 
 import com.onpurple.dto.response.PostResponseDto;
+import com.onpurple.enums.PostCategory;
 import com.onpurple.model.Post;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +18,7 @@ public class PostRequestDto {
   private String title;
   private String content;
   private List<String> imgList;
-  private String category;
+  private PostCategory category;
   private String createdAt;
   private String modifiedAt;
 

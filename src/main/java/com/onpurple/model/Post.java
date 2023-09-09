@@ -1,6 +1,7 @@
 package com.onpurple.model;
 
 import com.onpurple.dto.request.PostRequestDto;
+import com.onpurple.enums.PostCategory;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -51,8 +52,8 @@ public class Post extends Timestamped{
     술집 bar,
     드라이브 drive
      */
-    @Column
-    private String category;
+    @Enumerated(EnumType.STRING)
+    private PostCategory category;
     //단일 게시글 리스트 이미지 처리를 위한 컬럼
     @Column
     private String imageUrl;
