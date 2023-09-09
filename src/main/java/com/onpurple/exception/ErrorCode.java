@@ -37,7 +37,9 @@ public enum ErrorCode {
     PROFILE_NOT_FOUND("프로필을 찾을 수 없습니다."),
     NOT_FOUND_RECOMMENT("해당 대댓글이 존재하지 않습니다."),
     REFRESH_TOKEN_NOT_MATCHED("리프레쉬 토큰이 올바르지 않습니다."),
-    REDIS_REFRESH_TOKEN_NOT_FOUND("레디스에서 리프레쉬 토큰을 찾을 수 없습니다.");
+    REDIS_REFRESH_TOKEN_NOT_FOUND("레디스에서 리프레쉬 토큰을 찾을 수 없습니다."),
+    POST_CATEGORY_NOT_FOUND("카테고리를 찾을 수 없습니다."),
+    REFRESH_TOKEN_NOT_FOUND("리프레시 토큰을 찾을 수 없습니다.");
 
     private final String message;
 }
