@@ -41,6 +41,8 @@ out/
 ### CUSTOM
 .env
 /db
+/build
+/gradle
 ### Aws S3 bucket ###
 application-awsS3.yml
 ## Mysql ##

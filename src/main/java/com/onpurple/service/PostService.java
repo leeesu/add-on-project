@@ -67,15 +67,15 @@ public class PostService {
     @Transactional(readOnly = true)
     public ResponseDto<?> getAllPost(String category) {
         List<Post> postList = postRepository.findAllByCategoryOrderByCreatedAtDesc(category);
-        List<PostResponseDto> postResponseDto = new ArrayList<>();
+        List<PostResponseDto> postResponseDtoList = new ArrayList<>();
         for (Post post : postList) {
             // 이미지 가져오기
             List<String> imgList = imageUtil.getListImage(post);
-            postResponseDto.add(
+            postResponseDtoList.add(
                     PostResponseDto.GetAllFromEntity(post, imgList)
             );
         }
-        return ResponseDto.success(postResponseDto);
+        return ResponseDto.success(postResponseDtoList);
 
     }
 
