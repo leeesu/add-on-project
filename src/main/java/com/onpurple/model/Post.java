@@ -1,11 +1,10 @@
 package com.onpurple.model;
 
 import com.onpurple.dto.request.PostRequestDto;
-import com.onpurple.enums.PostCategory;
+import com.onpurple.category.PostCategory;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 

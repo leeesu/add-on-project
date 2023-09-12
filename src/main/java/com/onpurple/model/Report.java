@@ -2,8 +2,7 @@ package com.onpurple.model;
 
 
 import com.onpurple.dto.request.ReportRequestDto;
-import com.onpurple.enums.PostCategory;
-import com.onpurple.enums.ReportCategory;
+import com.onpurple.category.ReportCategory;
 import jakarta.persistence.*;
 import lombok.*;
 @Builder

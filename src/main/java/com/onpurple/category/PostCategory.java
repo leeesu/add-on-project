@@ -1,7 +1,5 @@
-package com.onpurple.enums;
+package com.onpurple.category;
 
-import com.onpurple.exception.CustomException;
-import com.onpurple.exception.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
