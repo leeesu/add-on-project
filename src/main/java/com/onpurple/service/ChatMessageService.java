@@ -59,7 +59,7 @@ public class ChatMessageService {
             throw new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND);
         }
 
-        List<ChatMessage> chatMessageList = chatMessageRepository.findAllByChatRoomOrderByCreateAtAsc(chatRoom);
+        List<ChatMessage> chatMessageList = chatMessageRepository.findAllByChatRoomOrderByCreatedAtAsc(chatRoom);
         List<ChatMessageResponseDto> chatMessageResponseDtoList = new ArrayList<>();
 
         for (ChatMessage chatMessage : chatMessageList) {

@@ -39,7 +39,11 @@ public enum ErrorCode {
     REFRESH_TOKEN_NOT_MATCHED("리프레쉬 토큰이 올바르지 않습니다."),
     REDIS_REFRESH_TOKEN_NOT_FOUND("레디스에서 리프레쉬 토큰을 찾을 수 없습니다."),
     POST_CATEGORY_NOT_FOUND("카테고리를 찾을 수 없습니다."),
-    REFRESH_TOKEN_NOT_FOUND("리프레시 토큰을 찾을 수 없습니다.");
+    REFRESH_TOKEN_NOT_FOUND("리프레시 토큰을 찾을 수 없습니다."),
+    MATCHING_NOT_FOUND("해당 회원과 매칭정보를 찾을 수 없습니다"),
+    CHAT_ROOM_ALREADY_EXISTS("채팅방이 이미 존재합니다."),
+    CHAT_ROOM_NOT_FOUND("채팅방을 찾을 수 없습니다."),
+    CHAT_ROOM_NOT_VALILD_MEMBER("채팅방 멤버가 아닙니다.");
 
     private final String message;
 }
