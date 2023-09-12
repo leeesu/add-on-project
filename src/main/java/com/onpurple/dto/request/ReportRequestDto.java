@@ -1,6 +1,6 @@
 package com.onpurple.dto.request;
 
-import com.onpurple.enums.ReportCategory;
+import com.onpurple.category.ReportCategory;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

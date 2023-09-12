@@ -5,7 +5,7 @@ import com.onpurple.dto.request.PostRequestDto;
 import com.onpurple.dto.response.CommentResponseDto;
 import com.onpurple.dto.response.PostResponseDto;
 import com.onpurple.dto.response.ResponseDto;
-import com.onpurple.enums.PostCategory;
+import com.onpurple.category.PostCategory;
 import com.onpurple.exception.CustomException;
 import com.onpurple.exception.ErrorCode;
 import com.onpurple.model.Post;
@@ -20,9 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service

@@ -1,6 +1,6 @@
 package com.onpurple.dto.response;
 
-import com.onpurple.enums.PostCategory;
+import com.onpurple.category.PostCategory;
 import com.onpurple.model.Post;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

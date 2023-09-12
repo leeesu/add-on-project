@@ -1,4 +1,4 @@
-package com.onpurple.enums;
+package com.onpurple.category;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
