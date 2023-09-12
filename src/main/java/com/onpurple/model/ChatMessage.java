@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+
+
 @Entity
 @Getter
 @Builder
@@ -18,11 +20,11 @@ public class ChatMessage extends Timestamped {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "chatRoomId")
+    @JoinColumn(name = "chatroom_id")
     private ChatRoom chatRoom;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "senderId")
+    @JoinColumn(name = "sender_id")
     private User sender;
 
     @Column
