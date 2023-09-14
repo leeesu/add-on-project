@@ -60,7 +60,10 @@ public class WebSecurityConfig {
 
     private static final String[] PERMIT = {
             "/swagger-ui.html",
-            "/swagger-ui/**"
+            "/swagger-ui/**",
+            "/ws/chat",
+            "/pub/**",
+            "/sub/**"
     };
 
 

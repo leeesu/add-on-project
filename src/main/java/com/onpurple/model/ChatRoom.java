@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 
 // Stomp 를 통해 pub/sub 를 사용하면 구독자 관리가 알아서 된다!!
 // 따라서 따로 세션 관리를 하는 코드를 작성할 필도 없고,
@@ -15,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatRoom {
+public class ChatRoom implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JoinColumn(name = "roomId", nullable = false)

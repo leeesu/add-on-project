@@ -1,6 +1,7 @@
 package com.onpurple.service;
 
 import com.onpurple.dto.response.ChatRoomResponseDto;
+import com.onpurple.dto.response.ResponseDto;
 import com.onpurple.exception.CustomException;
 import com.onpurple.exception.ErrorCode;
 import com.onpurple.model.ChatMessage;
@@ -10,7 +11,9 @@ import com.onpurple.repository.ChatMessageRepository;
 import com.onpurple.repository.ChatRoomRepository;
 import com.onpurple.repository.LikeRepository;
 import com.onpurple.repository.UserRepository;
+import com.onpurple.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,6 +68,18 @@ public class ChatRoomService {
         return ChatRoomResponseDto.fromEntity(createRoom);
     }
 
+    public ResponseDto<?> getChatRoom(Long roomId, User user) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+
+        // 채팅방에 존재하는 회원인지 확인
+        if (!chatRoom.getUser().equals(user) && !chatRoom.getOtherUser().equals(user)) {
+            // 존재하지 않는다면 예외를 발생시긴다.
+            throw new CustomException(ErrorCode.USER_NOT_PARTICIPANT);
+        }
+        return ResponseDto.success(chatRoom);
+    }
+
     // 내가 참여한 채팅방 가져오기
     @Transactional(readOnly = true)
     public List<ChatRoomResponseDto> getRoomsForUser(User user) {
@@ -78,6 +93,22 @@ public class ChatRoomService {
             );
         }
         return chatRoomResponseDtoList;
+    }
+
+
+    public ResponseDto<?> deleteChatRoom(Long roomId, User user) {
+        // 해당 챗방이 존재하는지 확인
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+
+        // 채팅방에 존재하는 회원인지 확인
+        if (!chatRoom.getUser().equals(user) && !chatRoom.getOtherUser().equals(user)) {
+            // 존재하지 않는다면 예외를 발생시긴다.
+            throw new CustomException(ErrorCode.USER_NOT_PARTICIPANT);
+        }
+        chatRoomRepository.deleteById(roomId);
+        return ResponseDto.success(roomId + "번 채팅방 삭제 성공");
+
     }
 
 
