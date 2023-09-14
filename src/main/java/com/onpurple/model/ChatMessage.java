@@ -29,4 +29,8 @@ public class ChatMessage extends Timestamped {
 
     @Column
     private String message;
+
+    public enum MessageType {
+        ENTER, TALK
+    }
 }

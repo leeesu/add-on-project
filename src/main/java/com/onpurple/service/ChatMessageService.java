@@ -13,6 +13,7 @@ import com.onpurple.repository.UserRepository;
 import com.onpurple.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +27,7 @@ public class ChatMessageService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     @Transactional
     public ChatMessageResponseDto sendMessage(Long roomId, ChatMessageRequestDto chatMessageRequestDto) {
@@ -37,7 +39,6 @@ public class ChatMessageService {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(
                 () -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND)
         );
-
         ChatMessage chatMessage = ChatMessage.builder()
                 .chatRoom(chatRoom)
                 .sender(sender)
@@ -45,11 +46,10 @@ public class ChatMessageService {
                 .build();
 
         chatMessageRepository.save(chatMessage);
-
         return ChatMessageResponseDto.fromEntity(chatMessage);
     }
 
-    public ResponseEntity<?> getMessages(Long roomId, User user) {
+    public List<ChatMessageResponseDto> getMessages(Long roomId, User user) {
 
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(
                 () -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND)
@@ -67,7 +67,7 @@ public class ChatMessageService {
             );
         }
 
-        return ResponseEntity.ok(chatMessageResponseDtoList);
+        return chatMessageResponseDtoList;
     }
 
 

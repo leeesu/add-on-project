@@ -98,9 +98,6 @@ public class LikeService {
                                    User user) {
 
         User target = validationUtil.assertValidateProfile(targetId);
-        if (null == target)
-            return ResponseDto.fail("PROFILE_NOT_FOUND", "타겟 유저를 찾을 수 없습니다.");
-
 
         //좋아요 한 적 있는지 체크
         Likes liked = likeRepository.findByUserAndTargetId(user, targetId).orElse(null);

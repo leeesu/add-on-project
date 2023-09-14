@@ -1,7 +1,9 @@
 package com.onpurple.controller;
 
 import com.onpurple.dto.request.ChatMessageRequestDto;
+import com.onpurple.dto.response.ChatMessageResponseDto;
 import com.onpurple.dto.response.ChatRoomResponseDto;
+import com.onpurple.dto.response.ResponseDto;
 import com.onpurple.security.UserDetailsImpl;
 import com.onpurple.service.ChatMessageService;
 import com.onpurple.service.ChatRoomService;
@@ -22,9 +24,16 @@ public class ChatController {
     private final ChatMessageService chatMessageService;
     private final SimpMessagingTemplate simpMessagingTemplate;
 
+
     @PostMapping("/chat/rooms")
     public ChatRoomResponseDto createChatRoom(@RequestParam("userId") Long userId, @AuthenticationPrincipal UserDetailsImpl userDetails){
         return chatRoomService.createChatRoom(userId, userDetails.getUser());
+    }
+
+    @MessageMapping("/chat/rooms/{roomId}")
+    public void sendMessage(@PathVariable(name = "roomId") Long roomId, @Payload ChatMessageRequestDto chatMessageRequestDto){
+
+        simpMessagingTemplate.convertAndSend("/sub/chat/rooms/" + roomId, chatMessageService.sendMessage(roomId, chatMessageRequestDto));
     }
 
     @GetMapping("/chat/rooms")
@@ -33,12 +42,14 @@ public class ChatController {
     }
 
     @GetMapping("/chat/rooms/{roomId}")
-    public ResponseEntity<?> getChatMessages(@PathVariable(name = "roomId") Long roomId, @AuthenticationPrincipal UserDetailsImpl userDetails){
-        return chatMessageService.getMessages(roomId,userDetails.getUser() );
+    public List<ChatMessageResponseDto> getChatMessages(@PathVariable(name = "roomId") Long roomId, @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return chatMessageService.getMessages(roomId,userDetails.getUser());
     }
 
-    @MessageMapping("/chat/rooms/{roomId}")
-    public void sendMessage(@PathVariable(name = "roomId") Long roomId, @Payload ChatMessageRequestDto chatMessageRequestDto){
-        simpMessagingTemplate.convertAndSend("/chat/rooms" + roomId, chatMessageService.sendMessage(roomId, chatMessageRequestDto));
+    @GetMapping("/chat/rooms/{roomId}")
+    public ResponseDto<?> getChatRoom(@PathVariable(name = "roomId") Long roomId, @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return chatRoomService.getChatRoom(roomId,userDetails.getUser());
     }
+
+
 }

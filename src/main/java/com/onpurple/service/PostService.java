@@ -63,7 +63,7 @@ public class PostService {
 
     // 전체 게시글 조회
     @Transactional(readOnly = true)
-    public ResponseDto<?> getAllPost(String category) {
+    public ResponseDto<?> getAllPost(PostCategory category) {
         List<Post> postList = postRepository.findAllByCategoryOrderByCreatedAtDesc(category);
         List<PostResponseDto> postResponseDtoList = new ArrayList<>();
         for (Post post : postList) {

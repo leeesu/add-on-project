@@ -43,7 +43,8 @@ public enum ErrorCode {
     MATCHING_NOT_FOUND("해당 회원과 매칭정보를 찾을 수 없습니다"),
     CHAT_ROOM_ALREADY_EXISTS("채팅방이 이미 존재합니다."),
     CHAT_ROOM_NOT_FOUND("채팅방을 찾을 수 없습니다."),
-    CHAT_ROOM_NOT_VALILD_MEMBER("채팅방 멤버가 아닙니다.");
+    CHAT_ROOM_NOT_VALILD_MEMBER("채팅방 멤버가 아닙니다."),
+    USER_NOT_PARTICIPANT("채팅방의 참가자가 아닙니다.");
 
     private final String message;
 }

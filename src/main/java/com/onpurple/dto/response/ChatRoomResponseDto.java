@@ -42,8 +42,8 @@ public class ChatRoomResponseDto {
                 .otherUserId(chatRoom.getOtherUser().getId())
                 .otherUserNickname(chatRoom.getOtherUser().getNickname())
                 .otherUserProfileImage(chatRoom.getOtherUser().getImageUrl())
-                .recentChatMessage(recentChatMessage != null ? recentChatMessage.getMessage() : null)
-                .recentCreateAt(recentChatMessage != null ? recentChatMessage.getCreatedAt() : null)
+                .recentChatMessage(recentChatMessage != null ? recentChatMessage.getMessage() : "메세지가 존재하지 않습니다")
+                .recentCreateAt(recentChatMessage != null ? recentChatMessage.getCreatedAt() : "메세지가 존재하지 않습니다")
                 .build();
     }
 
