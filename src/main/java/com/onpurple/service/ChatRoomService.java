@@ -69,8 +69,7 @@ public class ChatRoomService {
     }
 
     public ResponseDto<?> getChatRoom(Long roomId, User user) {
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
-                .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+        ChatRoom chatRoom = assertValidateChatRoom(roomId);
 
         // 채팅방에 존재하는 회원인지 확인
         if (!chatRoom.getUser().equals(user) && !chatRoom.getOtherUser().equals(user)) {
@@ -98,8 +97,7 @@ public class ChatRoomService {
 
     public ResponseDto<?> deleteChatRoom(Long roomId, User user) {
         // 해당 챗방이 존재하는지 확인
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
-                .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+        ChatRoom chatRoom = assertValidateChatRoom(roomId);
 
         // 채팅방에 존재하는 회원인지 확인
         if (!chatRoom.getUser().equals(user) && !chatRoom.getOtherUser().equals(user)) {
@@ -110,6 +108,14 @@ public class ChatRoomService {
         return ResponseDto.success(roomId + "번 채팅방 삭제 성공");
 
     }
+
+    // 채팅방이 존재하는지 유효성 체크
+    public ChatRoom assertValidateChatRoom(Long roomId) {
+        return chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+    }
+
+
 
 
 }
