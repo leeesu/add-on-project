@@ -1,5 +1,6 @@
 package com.onpurple.controller;
 
+import com.onpurple.category.PostCategory;
 import com.onpurple.dto.request.PostRequestDto;
 import com.onpurple.dto.response.ResponseDto;
 import com.onpurple.security.UserDetailsImpl;
@@ -36,7 +37,7 @@ public class PostController {
 
   // 카테고리별 전체 게시글 가져오기
   @GetMapping //기본 카테고리 meet 번개
-  public ResponseDto<?> getAllPosts(@RequestParam(defaultValue = "meet", value="category")  String category) {
+  public ResponseDto<?> getAllPosts(@RequestParam(defaultValue = "MEET", value="category") PostCategory category) {
     return postService.getAllPost(category);
   }
 
