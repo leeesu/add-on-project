@@ -1,15 +1,10 @@
 package com.onpurple.dto.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
-@Builder
-@AllArgsConstructor
+@NoArgsConstructor
 public class ChatMessageRequestDto {
-
-    private Long senderId;
-    private String message;
-
+    private String receiver;    // 메세지 수신자
 }

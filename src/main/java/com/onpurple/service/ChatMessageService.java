@@ -1,72 +1,66 @@
 package com.onpurple.service;
 
-import com.onpurple.dto.request.ChatMessageRequestDto;
-import com.onpurple.exception.CustomException;
-import com.onpurple.exception.ErrorCode;
+import com.onpurple.dto.response.ChatMessageDto;
 import com.onpurple.model.ChatMessage;
-import com.onpurple.model.ChatRoom;
-import com.onpurple.model.User;
 import com.onpurple.repository.ChatMessageRepository;
 import com.onpurple.repository.ChatRoomRepository;
-import com.onpurple.dto.response.ChatMessageResponseDto;
-import com.onpurple.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatMessageService {
-
-    private final ChatRoomRepository chatRoomRepository;
-    private final UserRepository userRepository;
+    private final RedisTemplate<String, ChatMessageDto> redisTemplateMessage;
     private final ChatMessageRepository chatMessageRepository;
+    private final ChatRoomRepository chatRoomRepository;
 
-    @Transactional
-    public ChatMessageResponseDto sendMessage(Long roomId, ChatMessageRequestDto chatMessageRequestDto) {
-
-        User sender = userRepository.findById(chatMessageRequestDto.getSenderId()).orElseThrow(
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
-        );
-
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(
-                () -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND)
-        );
-        ChatMessage chatMessage = ChatMessage.builder()
-                .chatRoom(chatRoom)
-                .sender(sender)
-                .message(chatMessageRequestDto.getMessage())
-                .build();
-
+    // 대화 저장
+    public void saveMessage(ChatMessageDto messageDto) {
+        // DB 저장
+        ChatMessage chatMessage = new ChatMessage(messageDto.getSender(), messageDto.getRoomId(), messageDto.getMessage());
         chatMessageRepository.save(chatMessage);
 
-        return ChatMessageResponseDto.fromEntity(chatMessage);
+        // 1. 직렬화
+        redisTemplateMessage.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatMessage.class));
+
+        // 2. redis 저장
+        redisTemplateMessage.opsForList().rightPush(messageDto.getRoomId(), messageDto);
+
+        // 3. expire 을 이용해서, Key 를 만료시킬 수 있음
+        redisTemplateMessage.expire(messageDto.getRoomId(), 1, TimeUnit.MINUTES);
     }
 
-    public List<ChatMessageResponseDto> getMessages(Long roomId, User user) {
+    // 6. 대화 조회 - Redis & DB
+    public List<ChatMessageDto> loadMessage(String roomId) {
+        List<ChatMessageDto> messageList = new ArrayList<>();
 
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(
-                () -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND)
-        );
+        // Redis 에서 해당 채팅방의 메시지 100개 가져오기
+        List<ChatMessageDto> redisMessageList = redisTemplateMessage.opsForList().range(roomId, 0, 99);
 
-        if(!chatRoom.getUser().getId().equals(user.getId()) && !chatRoom.getOtherUser().getId().equals(user.getId())) {
-            throw new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND);
+        // 4. Redis 에서 가져온 메시지가 없다면, DB 에서 메시지 100개 가져오기
+        if (redisMessageList == null || redisMessageList.isEmpty()) {
+            // 5.
+            List<ChatMessage> dbMessageList = chatMessageRepository.findTop100ByRoomIdOrderByCreatedAtAsc(roomId);
+
+            for (ChatMessage message : dbMessageList) {
+                ChatMessageDto messageDto = new ChatMessageDto(message);
+                messageList.add(messageDto);
+                redisTemplateMessage.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatMessage.class));      // 직렬화
+                redisTemplateMessage.opsForList().rightPush(roomId, messageDto);                                // redis 저장
+            }
+        } else {
+            // 7.
+            messageList.addAll(redisMessageList);
         }
 
-        List<ChatMessage> chatMessageList = chatMessageRepository.findAllByChatRoomOrderByCreatedAtAsc(chatRoom);
-        List<ChatMessageResponseDto> chatMessageResponseDtoList = new ArrayList<>();
-
-        for (ChatMessage chatMessage : chatMessageList) {
-            chatMessageResponseDtoList.add(ChatMessageResponseDto.fromEntity(chatMessage)
-            );
-        }
-
-        return chatMessageResponseDtoList;
+        return messageList;
     }
-
-
 }
