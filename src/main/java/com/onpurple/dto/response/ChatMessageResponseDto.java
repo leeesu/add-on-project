@@ -1,32 +1,51 @@
 package com.onpurple.dto.response;
-import com.onpurple.model.ChatMessage;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.onpurple.model.ChatRoom;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Getter
-@Builder
-@AllArgsConstructor
+@NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ChatMessageResponseDto {
-
-    private Long chatMessageId;
-    private Long senderId;
-    private String profileImage;
-    private String nickname;
+    private Long id;
+    private String roomName;
+    private String sender;
+    private String roomId;
+    private String receiver;
     private String message;
-    private String createAt;
+    private String createdAt;
 
+    // 쪽지방 생성
+    public ChatMessageResponseDto(ChatRoom chatRoom) {
+        this.id = chatRoom.getId();
+        this.roomName = chatRoom.getRoomName();
+        this.sender = chatRoom.getSender();
+        this.roomId = chatRoom.getRoomId();
+        this.receiver = chatRoom.getReceiver();
+    }
 
-    public static ChatMessageResponseDto fromEntity(ChatMessage chatMessage) {
-        return ChatMessageResponseDto.builder()
-                .chatMessageId(chatMessage.getId())
-                .senderId(chatMessage.getSender().getId())
-                .profileImage(chatMessage.getSender().getImageUrl())
-                .nickname(chatMessage.getSender().getNickname())
-                .message(chatMessage.getMessage())
-                .createAt(chatMessage.getCreatedAt())
-                .build();
+    // 사용자 관련 쪽지방 전체 조회
+    public ChatMessageResponseDto(Long id, String roomName, String roomId, String sender, String receiver) {
+        this.id = id;
+        this.roomName = roomName;
+        this.roomId = roomId;
+        this.sender = sender;
+        this.receiver = receiver;
+    }
+
+    public ChatMessageResponseDto(String roomId) {
+        this.roomId = roomId;
+    }
+
+    public void setLatestChatMessageContent(String message) {
+        this.message = message;
+    }
+
+    public void setLatestChatMessageCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
     }
 }

@@ -8,8 +8,14 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
-    Optional<ChatRoom> findByUserAndOtherUser(User user, User otherUser);
-    List<ChatRoom> findAllByUserOrOtherUser(User user, User otherUser);
 
-    Optional<ChatRoom> findByUserOrOtherUser(User user, User OtherUser);
+    List<ChatRoom> findByUserOrReceiver(User user, String receiver);
+
+    ChatRoom findByIdAndUserOrIdAndReceiver(Long id, User user, Long id1, String nickname);
+
+    ChatRoom findBySenderAndReceiver(String nickname, String receiver);
+
+    ChatRoom findByRoomIdAndUserOrRoomIdAndReceiver(String roomId, User user, String roomId1, String nickname);
+
+    ChatRoom findByRoomId(String roomId);
 }
