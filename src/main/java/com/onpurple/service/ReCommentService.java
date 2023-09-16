@@ -31,7 +31,7 @@ public class ReCommentService {
     @Transactional
     public ResponseDto<?> createReComment(Long commentId, ReCommentRequestDto requestDto, User user) {
 
-        Comment comment = validationUtil.assertValidateComment(commentId);
+        Comment comment = validationUtil.validateComment(commentId);
 
         ReComment reComment = ReComment.builder()
                 .user(user)
@@ -49,7 +49,7 @@ public class ReCommentService {
     public ResponseDto<?> getAllReCommentsByComment(Long commentId) {
 
 
-        Comment comment = validationUtil.assertValidateComment(commentId);
+        Comment comment = validationUtil.validateComment(commentId);
 
         List<ReComment> reCommentList = reCommentRepository.findAllByComment(comment);
         List<ReCommentResponseDto> reCommentResponseDto = new ArrayList<>();
@@ -69,7 +69,7 @@ public class ReCommentService {
     public ResponseDto<?> updateReComment(Long reCommentId, ReCommentRequestDto requestDto, User user) {
 
 
-        ReComment reComment = validationUtil.assertValidateReComment(reCommentId);
+        ReComment reComment = validationUtil.validateReComment(reCommentId);
 
         validateReCommentUser(reComment, user);
 
@@ -82,7 +82,7 @@ public class ReCommentService {
     @Transactional
     public ResponseDto<?> deleteReComment(Long reCommentId, User user) {
 
-        ReComment reComment = validationUtil.assertValidateReComment(reCommentId);
+        ReComment reComment = validationUtil.validateReComment(reCommentId);
 
         validateReCommentUser(reComment, user);
 
