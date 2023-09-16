@@ -36,7 +36,7 @@ public class AdminService {
     public ResponseDto<?> deletePostByAdmin(User user, Long postId) {
 
 
-        Post post = validationUtil.assertValidatePost(postId);
+        Post post = validationUtil.validatePost(postId);
 
         validationAdmin(user);
         postRepository.delete(post);
@@ -52,7 +52,7 @@ public class AdminService {
     @Transactional
     public ResponseDto<?> deleteCommentByAdmin(User user, Long commentId) {
 
-        Comment comment = validationUtil.assertValidateComment(commentId);
+        Comment comment = validationUtil.validateComment(commentId);
 
         validationAdmin(user);
         commentRepository.delete(comment);

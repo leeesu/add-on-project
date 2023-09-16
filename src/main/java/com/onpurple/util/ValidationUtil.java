@@ -36,43 +36,46 @@ public class ValidationUtil {
     private final UserRepository userRepository;
     private final ReCommentRepository reCommentRepository;
 
+    // 게시글 정보가 없을 경우 에러 메시지 전송.
     @Transactional
-    public Post assertValidatePost(Long postId) {
+    public Post validatePost(Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(
                 ()-> new CustomException(ErrorCode.POST_NOT_FOUND)
         );
         return post;
     }
-
+    // 댓글 정보가 없을 경우 에러 메시지 전송.
     @Transactional(readOnly = true)
-    public Comment assertValidateComment (Long commentId) {
+    public Comment validateComment (Long commentId) {
         Comment comment = commentRepository.findById(commentId).orElseThrow(
                 ()-> new CustomException(ErrorCode.COMMENT_NOT_FOUND)
         );
         return comment;
     }
-
+    // 회원 정보가 없을 경우 에러 메시지 전송.
     @Transactional
-    public User assertValidateProfile(Long userId) {
+    public User validateProfile(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new CustomException(ErrorCode.PROFILE_NOT_FOUND)
         );
         return user;
     }
-
+    // 대댓글 정보가 없을 경우 에러 메시지 전송.
     @Transactional
-    public ReComment assertValidateReComment(Long reCommentId) {
+    public ReComment validateReComment(Long reCommentId) {
         ReComment reComment = reCommentRepository.findById(reCommentId).orElseThrow(
                 ()-> new CustomException(ErrorCode.NOT_FOUND_RECOMMENT)
         );
         return reComment;
     }
+    // 이미지 데이터가 없을 경우 에러 메시지 전송.
     @Transactional
     public void validateMultipartFile(MultipartFile multipartFiles) {
         if (multipartFiles == null) {
             throw new NullPointerException("사진을 업로드해주세요");
         }
     }
+    // 이미지 데이터(리스트)가 없을 경우 에러 메시지 전송.
     @Transactional
     public void validateMultipartFiles(List<MultipartFile> multipartFiles) {
 

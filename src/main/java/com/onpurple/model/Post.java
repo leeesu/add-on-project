@@ -82,6 +82,7 @@ public class Post extends Timestamped{
     public void updateViewCount(){
         this.view +=1;
     }
+
 }
 
 

@@ -47,7 +47,7 @@ public class ProfileService {
     //    상세 프로필 조회(디테일페이지). userId를 찾아 해당 id가 있을 경우 해당 내용을 조회.
     @Transactional
     public ResponseDto<?> getProfile(Long userId) {
-        User user = validationUtil.assertValidateProfile(userId);
+        User user = validationUtil.validateProfile(userId);
 
         return ResponseDto.success(
                 ProfileResponseDto.detailFromEntity(user)

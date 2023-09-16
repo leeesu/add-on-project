@@ -33,7 +33,7 @@ public class LikeService {
     public ResponseDto<?> PostLike(Long postId,
                                    User user) {
 
-        Post post = validationUtil.assertValidatePost(postId);
+        Post post = validationUtil.validatePost(postId);
         if (null == post) {
             return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글입니다.");
         }
@@ -67,7 +67,7 @@ public class LikeService {
     public ResponseDto<?> CommentLike(Long commentId,
                                       User user) {
         // 댓글 유효성 체크
-        Comment comment = validationUtil.assertValidateComment(commentId);
+        Comment comment = validationUtil.validateComment(commentId);
         // 본인 댓글에 좋아요 할 수 없도록 예외처리
         validateCommentLikeUser(comment, user);
 
@@ -97,7 +97,7 @@ public class LikeService {
     public ResponseDto<?> UserLike(Long targetId,
                                    User user) {
 
-        User target = validationUtil.assertValidateProfile(targetId);
+        User target = validationUtil.validateProfile(targetId);
 
         //좋아요 한 적 있는지 체크
         Likes liked = likeRepository.findByUserAndTargetId(user, targetId).orElse(null);
@@ -125,7 +125,7 @@ public class LikeService {
                                         User user) {
 
 
-        User target = validationUtil.assertValidateProfile(targetId);
+        User target = validationUtil.validateProfile(targetId);
 
         //좋아요 한 적 있는지 체크
         UnLike unLiked = unLikeRepository.findByUserAndTargetId(user, targetId).orElse(null);

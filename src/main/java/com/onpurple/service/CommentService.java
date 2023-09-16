@@ -32,7 +32,7 @@ public class CommentService {
   @Transactional
   public ResponseDto<?> createComment(Long postId, CommentRequestDto commentRequestDto, User user) {
     // post 유효성 검사
-    Post post = validationUtil.assertValidatePost(postId);
+    Post post = validationUtil.validatePost(postId);
     Comment comment = commentFromRequest(commentRequestDto, post, user);
     commentRepository.save(comment);
     return ResponseDto.success(
@@ -51,7 +51,7 @@ public class CommentService {
 
   @Transactional(readOnly = true)
   public ResponseDto<?> getAllCommentsByPost(Long postId) {
-    Post post = validationUtil.assertValidatePost(postId);
+    Post post = validationUtil.validatePost(postId);
 
     List<CommentResponseDto> commentResponseDtoList = commentRepository
             .findAllByPost(post)
@@ -66,9 +66,9 @@ public class CommentService {
   public ResponseDto<?> updateComment(Long commentId, CommentRequestDto requestDto, User user) {
       // 이곳에서 validate 메서드에서 예외 발생 가능성이 있는 작업 수행
        // post validate
-      validationUtil.assertValidatePost(requestDto.getPostId());
+      validationUtil.validatePost(requestDto.getPostId());
       // comment validate
-      Comment comment = validationUtil.assertValidateComment(commentId);
+      Comment comment = validationUtil.validateComment(commentId);
       // user validate
       validateUser(comment, user);
 
@@ -80,7 +80,7 @@ public class CommentService {
 
   @Transactional
   public ResponseDto<?> deleteComment(Long commentId, User user) {
-    Comment comment = validationUtil.assertValidateComment(commentId);
+    Comment comment = validationUtil.validateComment(commentId);
     validateUser(comment, user);
 
     commentRepository.delete(comment);

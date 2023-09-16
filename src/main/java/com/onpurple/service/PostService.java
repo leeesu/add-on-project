@@ -82,7 +82,7 @@ public class PostService {
     // 게시글 단건 조회
     @Transactional// readOnly설정시 데이터가 Mapping되지 않는문제로 해제
     public ResponseDto<?> getPost(Long postId) {
-        Post post = validationUtil.assertValidatePost(postId);
+        Post post = validationUtil.validatePost(postId);
 
         List<CommentResponseDto> commentResponseDtoList = commentRepository.findAllByPost(post).stream()
                 .map(CommentResponseDto::fromEntity)
@@ -105,7 +105,7 @@ public class PostService {
                                                    User user,
                                                    List<String> imgPaths) {
 
-        Post post = validationUtil.assertValidatePost(postId);
+        Post post = validationUtil.validatePost(postId);
         validatePostUser(post, user);
 
         //저장된 이미지 리스트 가져오기
@@ -121,7 +121,7 @@ public class PostService {
     @Transactional
     public ResponseDto<?> deletePost(Long postId, User user) {
 
-        Post post = validationUtil.assertValidatePost(postId);
+        Post post = validationUtil.validatePost(postId);
         validatePostUser(post, user);
 
         postRepository.delete(post);
