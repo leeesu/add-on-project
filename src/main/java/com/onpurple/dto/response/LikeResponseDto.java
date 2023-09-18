@@ -1,6 +1,7 @@
 package com.onpurple.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.onpurple.model.Likes;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,6 +18,17 @@ public class LikeResponseDto {
     private String imageUrl;
     private Integer likes;
     private String nickname;
+
+    public static LikeResponseDto fromPostLikesEntity(Likes postLikes) {
+        return LikeResponseDto.builder()
+                .likes(postLikes.getPost().getLikes())
+                .build();
+    }
+    public static LikeResponseDto fromCommentLikesEntity(Likes commentLikes){
+        return LikeResponseDto.builder()
+                .likes(commentLikes.getComment().getLikes())
+                .build();
+    }
 
 
 

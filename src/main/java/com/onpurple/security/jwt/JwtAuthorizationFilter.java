@@ -2,7 +2,7 @@ package com.onpurple.security.jwt;
 
 import com.onpurple.dto.request.TokenDto;
 import com.onpurple.exception.CustomException;
-import com.onpurple.exception.ErrorCode;
+import com.onpurple.enums.ErrorCode;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.security.UserDetailsServiceImpl;
 import com.onpurple.util.RedisUtil;

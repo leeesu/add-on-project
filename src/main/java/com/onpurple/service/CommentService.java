@@ -2,11 +2,11 @@ package com.onpurple.service;
 
 
 import com.onpurple.dto.request.CommentRequestDto;
-import com.onpurple.dto.request.PostRequestDto;
+import com.onpurple.dto.response.ApiResponseDto;
 import com.onpurple.dto.response.CommentResponseDto;
-import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.dto.response.MessageResponseDto;
 import com.onpurple.exception.CustomException;
-import com.onpurple.exception.ErrorCode;
+import com.onpurple.enums.ErrorCode;
 import com.onpurple.model.Comment;
 import com.onpurple.model.Post;
 import com.onpurple.model.User;
@@ -15,12 +15,11 @@ import com.onpurple.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
+
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.onpurple.enums.SuccessCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -30,12 +29,12 @@ public class CommentService {
   private final ValidationUtil validationUtil;
 
   @Transactional
-  public ResponseDto<?> createComment(Long postId, CommentRequestDto commentRequestDto, User user) {
+  public ApiResponseDto<CommentResponseDto> createComment(Long postId, CommentRequestDto commentRequestDto, User user) {
     // post 유효성 검사
     Post post = validationUtil.validatePost(postId);
     Comment comment = commentFromRequest(commentRequestDto, post, user);
     commentRepository.save(comment);
-    return ResponseDto.success(
+    return ApiResponseDto.success(COMMENT_REGISTER.getMessage(),
         CommentResponseDto.fromEntity(comment)
     );
   }
@@ -50,7 +49,7 @@ public class CommentService {
   }
 
   @Transactional(readOnly = true)
-  public ResponseDto<?> getAllCommentsByPost(Long postId) {
+  public ApiResponseDto<List<CommentResponseDto>> getAllCommentsByPost(Long postId) {
     Post post = validationUtil.validatePost(postId);
 
     List<CommentResponseDto> commentResponseDtoList = commentRepository
@@ -59,13 +58,15 @@ public class CommentService {
             .map(CommentResponseDto::fromEntity)
             .collect(Collectors.toList());
 
-    return ResponseDto.success(commentResponseDtoList);
+    return ApiResponseDto.success(
+            COMMENT_GET_ALL.getMessage(),
+            commentResponseDtoList);
   }
 
   @Transactional
-  public ResponseDto<?> updateComment(Long commentId, CommentRequestDto requestDto, User user) {
+  public ApiResponseDto<CommentResponseDto> updateComment(Long commentId, CommentRequestDto requestDto, User user) {
       // 이곳에서 validate 메서드에서 예외 발생 가능성이 있는 작업 수행
-       // post validate
+       // 게시글 유효성체크
       validationUtil.validatePost(requestDto.getPostId());
       // comment validate
       Comment comment = validationUtil.validateComment(commentId);
@@ -74,17 +75,17 @@ public class CommentService {
 
       comment.update(requestDto);
 
-      return ResponseDto.success(CommentResponseDto.fromEntity(comment));
+      return ApiResponseDto.success(COMMENT_EDIT.getMessage(),CommentResponseDto.fromEntity(comment));
   }
 
 
   @Transactional
-  public ResponseDto<?> deleteComment(Long commentId, User user) {
+  public ApiResponseDto<MessageResponseDto> deleteComment(Long commentId, User user) {
     Comment comment = validationUtil.validateComment(commentId);
     validateUser(comment, user);
 
     commentRepository.delete(comment);
-    return ResponseDto.success("success");
+    return ApiResponseDto.success(COMMENT_DELETE.getMessage());
   }
 
 

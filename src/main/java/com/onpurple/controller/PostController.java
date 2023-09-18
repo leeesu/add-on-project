@@ -2,7 +2,8 @@ package com.onpurple.controller;
 
 import com.onpurple.category.PostCategory;
 import com.onpurple.dto.request.PostRequestDto;
-import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.dto.response.ApiResponseDto;
+import com.onpurple.dto.response.PostResponseDto;
 import com.onpurple.security.UserDetailsImpl;
 import com.onpurple.service.PostService;
 import com.onpurple.util.ValidationUtil;
@@ -26,9 +27,9 @@ public class PostController {
 
   // 게시글 작성
   @PostMapping
-  public ResponseDto<?> createPost(@RequestPart(value = "data",required = false) PostRequestDto requestDto,
-                                   @AuthenticationPrincipal UserDetailsImpl userDetails,
-                                   @RequestPart(value = "imageUrl",required = false) List<MultipartFile> multipartFiles) {
+  public ApiResponseDto<PostResponseDto> createPost(@RequestPart(value = "data",required = false) PostRequestDto requestDto,
+                                                    @AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                    @RequestPart(value = "imageUrl",required = false) List<MultipartFile> multipartFiles) {
 
     validationUtil.validateMultipartFiles(multipartFiles);
     List<String> imgPaths = s3Service.upload(multipartFiles);
@@ -37,21 +38,21 @@ public class PostController {
 
   // 카테고리별 전체 게시글 가져오기
   @GetMapping //기본 카테고리 meet 번개
-  public ResponseDto<?> getAllPosts(@RequestParam(defaultValue = "MEET", value="category") PostCategory category) {
+  public ApiResponseDto<List<PostResponseDto>> getAllPosts(@RequestParam(defaultValue = "MEET", value="category") PostCategory category) {
     return postService.getAllPost(category);
   }
 
   
   // 상세 게시글 가져오기
   @GetMapping( "/{postId}")
-  public ResponseDto<?> getPost(@PathVariable Long postId) {
+  public ApiResponseDto<?> getPost(@PathVariable Long postId) {
     return postService.getPost(postId);
   }
 
 
   // 게시글 수정
   @PatchMapping ( "/{postId}")
-  public ResponseDto<?> updatePost(@PathVariable Long postId,
+  public ApiResponseDto<?> updatePost(@PathVariable Long postId,
                                    @RequestPart(value = "data") PostRequestDto requestDto,
                                    @RequestPart("imageUrl") List<MultipartFile> multipartFiles,
                                    @AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -63,7 +64,7 @@ public class PostController {
 
   //게시글 삭제
   @DeleteMapping( "/{postId}")
-  public ResponseDto<?> deletePost(@PathVariable Long postId,
+  public ApiResponseDto<?> deletePost(@PathVariable Long postId,
                                    @AuthenticationPrincipal UserDetailsImpl userDetails) {
     return postService.deletePost(postId, userDetails.getUser());
   }

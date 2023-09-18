@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
 
 import com.onpurple.exception.CustomException;
-import com.onpurple.exception.ErrorCode;
+import com.onpurple.enums.ErrorCode;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;

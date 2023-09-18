@@ -1,4 +1,4 @@
-package com.onpurple.exception;
+package com.onpurple.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -44,7 +44,10 @@ public enum ErrorCode {
     CHAT_ROOM_ALREADY_EXISTS("채팅방이 이미 존재합니다."),
     CHAT_ROOM_NOT_FOUND("채팅방을 찾을 수 없습니다."),
     CHAT_ROOM_NOT_VALILD_MEMBER("채팅방 멤버가 아닙니다."),
-    USER_NOT_PARTICIPANT("채팅방의 참가자가 아닙니다.");
+    USER_NOT_PARTICIPANT("채팅방의 참가자가 아닙니다."),
+    DUPLICATED_USERNAME("중복된 사용자명 입니다"),
+    PASSWORD_CONFIRM_NOT_MATCHED("비밀번호와 비밀번호 확인이 일치하지 않습니다."),
+    REPORT_POST_NOT_FOUND("신고글을 찾을 수 없습니다.");
 
     private final String message;
 }

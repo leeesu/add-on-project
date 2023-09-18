@@ -1,10 +1,10 @@
 package com.onpurple.controller;
 
 
+import com.onpurple.dto.response.ApiResponseDto;
 import com.onpurple.dto.response.ResponseDto;
 import com.onpurple.security.UserDetailsImpl;
 import com.onpurple.service.AdminService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,13 +18,15 @@ public class AdminController {
     private final AdminService adminService;
 
     @DeleteMapping( "/admin/post/{postId}")
-    public ResponseDto<?> deletePost(@PathVariable Long postId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ApiResponseDto<?> deletePost(@PathVariable Long postId,
+                                        @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         return adminService.deletePostByAdmin(userDetails.getUser(), postId);
     }
 
     @DeleteMapping( "/admin/comment/{commentId}")
-    public ResponseDto<?> deleteComment(@PathVariable Long commentId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ApiResponseDto<?> deleteComment(@PathVariable Long commentId,
+                                        @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         return adminService.deleteCommentByAdmin(userDetails.getUser(), commentId);
     }

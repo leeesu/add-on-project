@@ -15,6 +15,7 @@ public class ApiResponseDto<T> {
     }
 
     public static <T> ApiResponseDto<T> success(String message) {
+
         return new ApiResponseDto<>(true, message, null);
     }
 }

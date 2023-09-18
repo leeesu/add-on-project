@@ -39,7 +39,7 @@ public class ChatRoomService {
     private final RedisSubscriber redisSubscriber;
 
     // 1. redis
-    private static final String Message_Rooms = "MESSAGE_ROOM";
+    private static final String Chat_Rooms = "CHAT_ROOM";
     private final RedisTemplate<String, Object> redisTemplate;
     private HashOperations<String, String, ChatRoomDto> opsHashMessageRoom;
 
@@ -62,7 +62,7 @@ public class ChatRoomService {
         // 5. 처음 채팅방 생성 또는 이미 생성된 채팅방이 아닌 경우
         if ((chatRoom == null) || (chatRoom != null && (!user.getNickname().equals(chatRoom.getSender()) && !chatMessageRequestDto.getReceiver().equals(chatRoom.getReceiver())))) {
             ChatRoomDto chatRoomDto = ChatRoomDto.create(chatMessageRequestDto, user);
-            opsHashMessageRoom.put(Message_Rooms, chatRoomDto.getRoomId(), chatRoomDto);      // redis hash 에 채팅방 저장해서, 서버간 채팅방 공유
+            opsHashMessageRoom.put(Chat_Rooms, chatRoomDto.getRoomId(), chatRoomDto);      // redis hash 에 채팅방 저장해서, 서버간 채팅방 공유
             chatRoom = chatRoomRepository.save(new ChatRoom(chatRoomDto.getId(), chatRoomDto.getRoomName(), chatRoomDto.getSender(), chatRoomDto.getRoomId(), chatRoomDto.getReceiver(), user));
 
             return new ChatMessageResponseDto(chatRoom);
@@ -150,7 +150,7 @@ public class ChatRoomService {
         // sender 가 삭제할 경우
         if (user.getNickname().equals(chatRoom.getSender())) {
             chatRoomRepository.delete(chatRoom);
-            opsHashMessageRoom.delete(Message_Rooms, chatRoom.getRoomId());
+            opsHashMessageRoom.delete(Chat_Rooms, chatRoom.getRoomId());
             // receiver 가 삭제할 경우
         } else if (user.getNickname().equals(chatRoom.getReceiver())) {
             chatRoom.setReceiver("Not_Exist_Receiver");
