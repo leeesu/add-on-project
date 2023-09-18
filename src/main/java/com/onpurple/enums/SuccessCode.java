@@ -16,6 +16,10 @@ public enum SuccessCode {
     ADMIN_COMMENT_DELETE("관리자 권한으로 댓글이 성공적으로 삭제되었습니다."),
     ADMIN_POST_DELETE("관리자에 권한으로 게시글이 성공적으로 삭제되었습니다."),
 
+    // 회원 관련 메시지
+    GET_USER("회원정보 조회가 성공적으로 완료되었습니다."),
+    PASSWORD_CHANGE("비밀번호가 성공적으로 변경되었습니다."),
+
     // 로그인 및 회원가입 관련 메시지
     LOGIN("로그인이 성공적으로 완료되었습니다."),
     SIGNUP("회원가입이 성공적으로 완료되었습니다."),
@@ -52,6 +56,7 @@ public enum SuccessCode {
     MATCHING_FOUND("매칭정보를 성공적으로 찾았습니다."),
     LIKE_USER_FOUND("좋아요한 유저를 성공적으로 찾았습니다."),
     UN_LIKE_USER_FOUND("싫어요한 유저를 성공적으로 찾았습니다."),
-    MY_PAGE_GET("마이페이지 조회가 성공적으로 완료되었습니다.");
+    MY_PAGE_GET("마이페이지 조회가 성공적으로 완료되었습니다."),
+    PROFILE_IMG_UPDATE("프로필 사진 수정이 완료되었습니다!");
     private final String message;
 }

@@ -2,7 +2,10 @@ package com.onpurple.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.onpurple.dto.request.*;
+import com.onpurple.dto.response.ApiResponseDto;
+import com.onpurple.dto.response.MessageResponseDto;
 import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.dto.response.UserResponseDto;
 import com.onpurple.security.UserDetailsImpl;
 import com.onpurple.service.KakaoService;
 import com.onpurple.service.UserService;
@@ -29,7 +32,7 @@ public class UserController {
     private final ValidationUtil validationUtil;
 
     @RequestMapping(value = "/user/signup", method = RequestMethod.POST)
-    public ResponseDto<?> signup(@RequestPart(value = "info", required = false) @Valid SignupRequestDto requestDto,
+    public ApiResponseDto<UserResponseDto> signup(@RequestPart(value = "info", required = false) @Valid SignupRequestDto requestDto,
                                  @RequestPart(value = "userInfo", required = false) UserInfoRequestDto userInfoRequestDto,
                                  @RequestPart(value = "imageUrl", required = false) MultipartFile multipartFiles, HttpServletResponse response) {
         validationUtil.validateMultipartFile(multipartFiles);
@@ -40,7 +43,7 @@ public class UserController {
 
     // login Filter단에서 이루어지게 구현
     @PostMapping("/user/idCheck/{username}")
-    public ResponseDto<?> checkUser(@PathVariable String username) {
+    public ApiResponseDto<?> checkUser(@PathVariable String username) {
 
         return userService.checkUser(username);
     }
@@ -52,30 +55,30 @@ public class UserController {
     }
 
     @RequestMapping(value = "/mypage/password", method = RequestMethod.PUT)
-    public ResponseDto<?> passwordUpdate(@RequestBody UserUpdateRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ApiResponseDto<MessageResponseDto> passwordUpdate(@RequestBody UserUpdateRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         return userService.updatePassword(requestDto, userDetails.getUser());
     }
 
     @RequestMapping(value = "/mypage/image", method = RequestMethod.PUT)
-    public ResponseDto<?> imageUpdate(ImageUpdateRequestDto requestDto, @RequestPart("imageUrl") MultipartFile multipartFiles,
+    public ApiResponseDto<MessageResponseDto> imageUpdate(@RequestPart("imageUrl") MultipartFile multipartFiles,
                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         validationUtil.validateMultipartFile(multipartFiles);
 
         String imgPaths = s3Service.uploadOne(multipartFiles);
-        return userService.updateImage(userDetails.getUser(), imgPaths, requestDto);
+        return userService.updateImage(userDetails.getUser(), imgPaths);
     }
 
 
     @RequestMapping(value = "/user/me", method = RequestMethod.GET)
-    public ResponseDto<?> getUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ApiResponseDto<UserResponseDto> getUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         return userService.getUser(userDetails.getUser());
     }
 
     @RequestMapping(value = "/user/logout", method = RequestMethod.POST)
-    public ResponseDto<?> logout(HttpServletRequest request) {
+    public ApiResponseDto<MessageResponseDto> logout(HttpServletRequest request) {
 
         return userService.logout(request);
     }
