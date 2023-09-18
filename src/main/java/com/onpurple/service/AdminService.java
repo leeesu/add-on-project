@@ -1,7 +1,9 @@
 package com.onpurple.service;
 
 
+import com.onpurple.dto.response.ApiResponseDto;
 import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.enums.SuccessCode;
 import com.onpurple.exception.CustomException;
 import com.onpurple.exception.ErrorCode;
 import com.onpurple.model.*;
@@ -18,7 +20,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Service
-@Slf4j
+@Slf4j(topic = "관리자 기능")
 public class AdminService {
 
     private final PostRepository postRepository;
@@ -33,7 +35,7 @@ public class AdminService {
 //    토큰을 통해 해당 토큰의 정보를 확인. 이때 해당 정보의 Role 설정이 Admin일 경우  게시글 삭제가 가능하도록 설정.
 //    반대로 해당 정보의 Role 설정이 User인 경우 게시글 삭제가 진행되지 않도록 에러메시지 전송.
     @Transactional
-    public ResponseDto<?> deletePostByAdmin(User user, Long postId) {
+    public ApiResponseDto<?> deletePostByAdmin(User user, Long postId) {
 
 
         Post post = validationUtil.validatePost(postId);
@@ -44,20 +46,22 @@ public class AdminService {
 
         imageUtil.deleteImageList(post,imgList);
 
-        return ResponseDto.success(("관리자에 의해 성공적으로 삭제되었습니다."));
+        return ApiResponseDto.success(
+                SuccessCode.ADMIN_COMMENT_DELETE.getMessage()
+        );
     }
 
 //    관리자 권한으로 댓글 삭제.
 //    관리자 권한으로 게시글 삭제와 동일한 로직으로 구현.
     @Transactional
-    public ResponseDto<?> deleteCommentByAdmin(User user, Long commentId) {
+    public ApiResponseDto<?> deleteCommentByAdmin(User user, Long commentId) {
 
         Comment comment = validationUtil.validateComment(commentId);
 
         validationAdmin(user);
         commentRepository.delete(comment);
 
-        return ResponseDto.success(("관리자에 의해 성공적으로 삭제되었습니다."));
+        return ApiResponseDto.success(SuccessCode..getMessage());
     }
 
     @Transactional
