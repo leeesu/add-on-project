@@ -1,7 +1,7 @@
 package com.onpurple.util;
 
 import com.onpurple.exception.CustomException;
-import com.onpurple.exception.ErrorCode;
+import com.onpurple.enums.ErrorCode;
 import com.onpurple.model.Comment;
 import com.onpurple.model.Post;
 import com.onpurple.model.ReComment;
@@ -10,13 +10,11 @@ import com.onpurple.repository.CommentRepository;
 import com.onpurple.repository.PostRepository;
 import com.onpurple.repository.ReCommentRepository;
 import com.onpurple.repository.UserRepository;
-import com.onpurple.repository.post.PostCustomRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 
 @Component
 public class ValidationUtil {

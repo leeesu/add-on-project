@@ -1,4 +1,4 @@
-package com.onpurple.exception;
+package com.onpurple.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

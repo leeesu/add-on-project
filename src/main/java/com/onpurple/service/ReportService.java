@@ -6,7 +6,7 @@ import com.onpurple.dto.response.ReportResponseDto;
 import com.onpurple.dto.response.ResponseDto;
 import com.onpurple.category.ReportCategory;
 import com.onpurple.exception.CustomException;
-import com.onpurple.exception.ErrorCode;
+import com.onpurple.enums.ErrorCode;
 import com.onpurple.model.Report;
 import com.onpurple.model.User;
 import com.onpurple.repository.ReportRepository;

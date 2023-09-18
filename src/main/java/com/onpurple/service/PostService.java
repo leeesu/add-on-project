@@ -7,7 +7,7 @@ import com.onpurple.dto.response.PostResponseDto;
 import com.onpurple.dto.response.ResponseDto;
 import com.onpurple.category.PostCategory;
 import com.onpurple.exception.CustomException;
-import com.onpurple.exception.ErrorCode;
+import com.onpurple.enums.ErrorCode;
 import com.onpurple.model.Post;
 import com.onpurple.model.User;
 import com.onpurple.repository.CommentRepository;

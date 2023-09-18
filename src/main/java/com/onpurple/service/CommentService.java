@@ -2,14 +2,11 @@ package com.onpurple.service;
 
 
 import com.onpurple.dto.request.CommentRequestDto;
-import com.onpurple.dto.request.PostRequestDto;
 import com.onpurple.dto.response.ApiResponseDto;
 import com.onpurple.dto.response.CommentResponseDto;
 import com.onpurple.dto.response.MessageResponseDto;
-import com.onpurple.dto.response.ResponseDto;
-import com.onpurple.enums.SuccessCode;
 import com.onpurple.exception.CustomException;
-import com.onpurple.exception.ErrorCode;
+import com.onpurple.enums.ErrorCode;
 import com.onpurple.model.Comment;
 import com.onpurple.model.Post;
 import com.onpurple.model.User;
@@ -18,11 +15,8 @@ import com.onpurple.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
+
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.onpurple.enums.SuccessCode.*;

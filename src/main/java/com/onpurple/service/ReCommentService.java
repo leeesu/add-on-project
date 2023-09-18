@@ -5,21 +5,18 @@ import com.onpurple.dto.request.ReCommentRequestDto;
 import com.onpurple.dto.response.ReCommentResponseDto;
 import com.onpurple.dto.response.ResponseDto;
 import com.onpurple.exception.CustomException;
-import com.onpurple.exception.ErrorCode;
+import com.onpurple.enums.ErrorCode;
 import com.onpurple.model.Comment;
 import com.onpurple.model.ReComment;
 import com.onpurple.model.User;
-import com.onpurple.repository.CommentRepository;
 import com.onpurple.repository.ReCommentRepository;
 import com.onpurple.util.ValidationUtil;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

@@ -4,20 +4,15 @@ package com.onpurple.service;
 import com.onpurple.dto.request.ProfileUpdateRequestDto;
 import com.onpurple.dto.response.ProfileResponseDto;
 import com.onpurple.dto.response.ResponseDto;
-import com.onpurple.exception.CustomException;
-import com.onpurple.exception.ErrorCode;
-import com.onpurple.model.Img;
 import com.onpurple.model.User;
-import com.onpurple.repository.ImgRepository;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.ArrayList;
+
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor

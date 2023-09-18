@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-import static com.onpurple.exception.ErrorCode.ACCESS_DENIED;
+import static com.onpurple.enums.ErrorCode.ACCESS_DENIED;
 
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
