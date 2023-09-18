@@ -57,6 +57,9 @@ public enum SuccessCode {
     LIKE_USER_FOUND("좋아요한 유저를 성공적으로 찾았습니다."),
     UN_LIKE_USER_FOUND("싫어요한 유저를 성공적으로 찾았습니다."),
     MY_PAGE_GET("마이페이지 조회가 성공적으로 완료되었습니다."),
-    PROFILE_IMG_UPDATE("프로필 사진 수정이 완료되었습니다!");
+    PROFILE_IMG_UPDATE("프로필 사진 수정이 완료되었습니다!"),
+    PROFILE_GET_ALL("프로필 리스트 조회가 성공적으로 완료되었습니다."),
+    PROFILE_GET_DETAIL("프로필 상세조회에 성공했습니다."),
+    PROFILE_EDIT("프로필 수정에 성공했습니다.");
     private final String message;
 }
