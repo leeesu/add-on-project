@@ -39,5 +39,3 @@ public class ChatMessageController {
         return ResponseEntity.ok(chatMessageService.loadMessage(roomId)); // 해당 채팅방의 모든 메시지를 반환
     }
 }
-
-}

@@ -1,5 +1,6 @@
 package com.onpurple.exception;
 
+import com.onpurple.enums.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
