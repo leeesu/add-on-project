@@ -2,6 +2,7 @@ package com.onpurple.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.onpurple.dto.request.*;
+import com.onpurple.dto.response.ApiResponseDto;
 import com.onpurple.dto.response.MessageResponseDto;
 import com.onpurple.dto.response.ResponseDto;
 import com.onpurple.dto.response.UserResponseDto;
@@ -32,8 +33,8 @@ public class UserController {
 
     @RequestMapping(value = "/user/signup", method = RequestMethod.POST)
     public ApiResponseDto<UserResponseDto> signup(@RequestPart(value = "info", required = false) @Valid SignupRequestDto requestDto,
-                                 @RequestPart(value = "userInfo", required = false) UserInfoRequestDto userInfoRequestDto,
-                                 @RequestPart(value = "imageUrl", required = false) MultipartFile multipartFiles, HttpServletResponse response) {
+                                                  @RequestPart(value = "userInfo", required = false) UserInfoRequestDto userInfoRequestDto,
+                                                  @RequestPart(value = "imageUrl", required = false) MultipartFile multipartFiles, HttpServletResponse response) {
         validationUtil.validateMultipartFile(multipartFiles);
         String imgPaths = s3Service.uploadOne(multipartFiles);
 

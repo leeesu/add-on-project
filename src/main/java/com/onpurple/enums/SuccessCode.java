@@ -64,6 +64,12 @@ public enum SuccessCode {
     RECOMMENT_EDIT("대댓글 수정에 성공했습니다."),
     RECOMMENT_DELETE("대댓글 삭제에 성공했습니다."),
     RECOMMENT_REGISTER("대댓글 등록에 성공했습니다."),
-    RECOMMENT_GET_ALL("대댓글 전체 조회에 성공했습니다.");
+    RECOMMENT_GET_ALL("대댓글 전체 조회에 성공했습니다."),
+    REPORT_REGISTER ("신고글이 성공적으로 등록되었습니다."),
+    REPORT_GET_DETAIL("신고글 조회가 성공적으로 완료되었습니다."),
+    REPORT_GET_ALL("신고글 전체 조회가 성공적으로 완료되었습니다."),
+    REPORT_DELETE("신고글이 성공적으로 삭제되었습니다."),
+
+    ;
     private final String message;
 }

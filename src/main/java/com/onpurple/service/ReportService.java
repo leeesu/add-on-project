@@ -2,9 +2,12 @@ package com.onpurple.service;
 
 
 import com.onpurple.dto.request.ReportRequestDto;
+import com.onpurple.dto.response.ApiResponseDto;
+import com.onpurple.dto.response.MessageResponseDto;
 import com.onpurple.dto.response.ReportResponseDto;
 import com.onpurple.dto.response.ResponseDto;
 import com.onpurple.category.ReportCategory;
+import com.onpurple.enums.SuccessCode;
 import com.onpurple.exception.CustomException;
 import com.onpurple.enums.ErrorCode;
 import com.onpurple.model.Report;
@@ -31,9 +34,9 @@ public class ReportService {
 
     // 신고글 작성
     @Transactional
-    public ResponseDto<?> createReport(ReportRequestDto requestDto,
-                                       User user,
-                                       String imgPaths) {
+    public ApiResponseDto<ReportResponseDto> createReport(ReportRequestDto requestDto,
+                                          User user,
+                                          String imgPaths) {
         //신고하는 회원이 존재하는지 회원인지 확인
         User target = userRepository.findByNickname(requestDto.getReportNickname()).orElseThrow(
                 ()-> new CustomException(ErrorCode.USER_NOT_FOUND)
@@ -47,7 +50,9 @@ public class ReportService {
         Report report = ReportFromRequest(requestDto, user, imgPaths);
 
         reportRepository.save(report);
-        return ResponseDto.success(ReportResponseDto.fromEntity(report)
+        return ApiResponseDto.success(
+                SuccessCode.REPORT_REGISTER.getMessage(),
+                ReportResponseDto.fromEntity(report)
         );
     }
 
@@ -65,20 +70,21 @@ public class ReportService {
 
     // 신고글 단건 조회
     @Transactional// readOnly설정시 데이터가 Mapping되지 않는문제로 해제
-    public ResponseDto<?> getReport(Long reportId) {
+    public ApiResponseDto<ReportResponseDto> getReport(Long reportId) {
         Report report = isPresentReport(reportId);
         if (null == report) {
-            return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글입니다.");
+            throw new CustomException(ErrorCode.REPORT_POST_NOT_FOUND);
         }
 
-        return ResponseDto.success(
+        return ApiResponseDto.success(
+                SuccessCode.REPORT_GET_DETAIL.getMessage(),
                 ReportResponseDto.fromEntity(report)
         );
     }
 
     // 전체 신고글 조회
     @Transactional(readOnly = true)
-    public ResponseDto<?> getAllReport() {
+    public ApiResponseDto<List<ReportResponseDto>> getAllReport() {
         List<Report> reportList = reportRepository.findAllByOrderByModifiedAtDesc();
         List<ReportResponseDto> reportResponseDto = new ArrayList<>();
         for (Report report : reportList) {
@@ -87,28 +93,30 @@ public class ReportService {
             );
         }
 
-        return ResponseDto.success(reportResponseDto);
+        return ApiResponseDto.success(
+                SuccessCode.REPORT_GET_ALL.getMessage(),
+                reportResponseDto);
 
     }
 
     @Transactional
-    public ResponseDto<?> deleteReport(Long reportId, User user) {
+    public ApiResponseDto<MessageResponseDto> deleteReport(Long reportId, User user) {
 
 
         Report report = isPresentReport(reportId);
         if (null == report) {
-            return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글입니다.");
+            throw new CustomException(ErrorCode.REPORT_POST_NOT_FOUND);
         }
 
         if (report.validateUser(user)) {
-            return ResponseDto.fail("BAD_REQUEST", "작성자만 삭제할 수 있습니다.");
+            throw new CustomException(ErrorCode.INVALID_USER_MATCH);
         }
 
         reportRepository.delete(report);
         String deleteImage = report.getImageUrl();
         awsS3UploadService.deleteFile(AwsS3UploadService.getFileNameFromURL(deleteImage));
 
-        return ResponseDto.success("delete success");
+        return ApiResponseDto.success(SuccessCode.REPORT_DELETE.getMessage());
     }
 
 
