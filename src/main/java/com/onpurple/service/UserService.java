@@ -56,7 +56,7 @@ public class UserService {
     //    회원가입. SingupRequsetDto에 선언한 내용을 입력하여 회원가입
     @Transactional
     public ApiResponseDto<UserResponseDto> createUser(SignupRequestDto requestDto, UserInfoRequestDto userInfoRequestDto,
-                                     String imgPaths, HttpServletResponse response) {
+                                                      String imgPaths, HttpServletResponse response) {
         if (!requestDto.getPassword().equals(requestDto.getPasswordConfirm())) {
             throw new CustomException(ErrorCode.PASSWORD_CONFIRM_NOT_MATCHED);
         }

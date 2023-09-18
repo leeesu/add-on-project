@@ -60,6 +60,10 @@ public enum SuccessCode {
     PROFILE_IMG_UPDATE("프로필 사진 수정이 완료되었습니다!"),
     PROFILE_GET_ALL("프로필 리스트 조회가 성공적으로 완료되었습니다."),
     PROFILE_GET_DETAIL("프로필 상세조회에 성공했습니다."),
-    PROFILE_EDIT("프로필 수정에 성공했습니다.");
+    PROFILE_EDIT("프로필 수정에 성공했습니다."),
+    RECOMMENT_EDIT("대댓글 수정에 성공했습니다."),
+    RECOMMENT_DELETE("대댓글 삭제에 성공했습니다."),
+    RECOMMENT_REGISTER("대댓글 등록에 성공했습니다."),
+    RECOMMENT_GET_ALL("대댓글 전체 조회에 성공했습니다.");
     private final String message;
 }

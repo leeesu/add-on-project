@@ -2,7 +2,6 @@ package com.onpurple.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.onpurple.dto.request.*;
-import com.onpurple.dto.response.ApiResponseDto;
 import com.onpurple.dto.response.MessageResponseDto;
 import com.onpurple.dto.response.ResponseDto;
 import com.onpurple.dto.response.UserResponseDto;

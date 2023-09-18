@@ -2,8 +2,11 @@ package com.onpurple.service;
 
 
 import com.onpurple.dto.request.ReCommentRequestDto;
+import com.onpurple.dto.response.ApiResponseDto;
+import com.onpurple.dto.response.MessageResponseDto;
 import com.onpurple.dto.response.ReCommentResponseDto;
 import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.enums.SuccessCode;
 import com.onpurple.exception.CustomException;
 import com.onpurple.enums.ErrorCode;
 import com.onpurple.model.Comment;
@@ -26,24 +29,31 @@ public class ReCommentService {
     private final ReCommentRepository reCommentRepository;
 
     @Transactional
-    public ResponseDto<?> createReComment(Long commentId, ReCommentRequestDto requestDto, User user) {
+    public ApiResponseDto<ReCommentResponseDto> createReComment(Long commentId, ReCommentRequestDto requestDto, User user) {
 
         Comment comment = validationUtil.validateComment(commentId);
 
-        ReComment reComment = ReComment.builder()
-                .user(user)
-                .comment(comment)
-                .reComment(requestDto.getReComment())
-                .build();
+        ReComment reComment = recommentFromRequest(requestDto, user, comment);
 
         reCommentRepository.save(reComment);
-        return ResponseDto.success(
+        return ApiResponseDto.success(
+                SuccessCode.RECOMMENT_REGISTER.getMessage(),
                 ReCommentResponseDto.fromEntity(reComment)
         );
+
+    }
+
+    private ReComment recommentFromRequest(ReCommentRequestDto reCommentRequestDto,
+                                           User user, Comment comment) {
+        return ReComment.builder()
+                .user(user)
+                .comment(comment)
+                .reComment(reCommentRequestDto.getReComment())
+                .build();
     }
 
     @Transactional(readOnly = true)
-    public ResponseDto<?> getAllReCommentsByComment(Long commentId) {
+    public ApiResponseDto<List<ReCommentResponseDto>> getAllReCommentsByComment(Long commentId) {
 
 
         Comment comment = validationUtil.validateComment(commentId);
@@ -57,13 +67,15 @@ public class ReCommentService {
             );
         }
 
-        return ResponseDto.success(reCommentResponseDto);
+        return ApiResponseDto.success(
+                SuccessCode.RECOMMENT_GET_ALL.getMessage(),
+                reCommentResponseDto);
 
     }
 
 
     @Transactional
-    public ResponseDto<?> updateReComment(Long reCommentId, ReCommentRequestDto requestDto, User user) {
+    public ApiResponseDto<ReCommentResponseDto> updateReComment(Long reCommentId, ReCommentRequestDto requestDto, User user) {
 
 
         ReComment reComment = validationUtil.validateReComment(reCommentId);
@@ -71,20 +83,21 @@ public class ReCommentService {
         validateReCommentUser(reComment, user);
 
         reComment.update(requestDto);
-        return ResponseDto.success(
+        return ApiResponseDto.success(
+                SuccessCode.RECOMMENT_EDIT.getMessage(),
                 ReCommentResponseDto.fromEntity(reComment)
         );
     }
 
     @Transactional
-    public ResponseDto<?> deleteReComment(Long reCommentId, User user) {
+    public ApiResponseDto<MessageResponseDto> deleteReComment(Long reCommentId, User user) {
 
         ReComment reComment = validationUtil.validateReComment(reCommentId);
 
         validateReCommentUser(reComment, user);
 
         reCommentRepository.delete(reComment);
-        return ResponseDto.success("delete success");
+        return ApiResponseDto.success("delete success");
     }
 
     public void validateReCommentUser(ReComment reComment, User user) {

@@ -5,7 +5,6 @@ import com.onpurple.dto.response.ApiResponseDto;
 import com.onpurple.dto.response.ResponseDto;
 import com.onpurple.security.UserDetailsImpl;
 import com.onpurple.service.AdminService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
