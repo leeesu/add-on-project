@@ -51,6 +51,7 @@ public enum SuccessCode {
 
     MATCHING_FOUND("매칭정보를 성공적으로 찾았습니다."),
     LIKE_USER_FOUND("좋아요한 유저를 성공적으로 찾았습니다."),
-    UN_LIKE_USER_FOUND("싫어요한 유저를 성공적으로 찾았습니다.");
+    UN_LIKE_USER_FOUND("싫어요한 유저를 성공적으로 찾았습니다."),
+    MY_PAGE_GET("마이페이지 조회가 성공적으로 완료되었습니다.");
     private final String message;
 }
