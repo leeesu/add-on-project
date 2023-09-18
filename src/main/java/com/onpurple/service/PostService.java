@@ -2,10 +2,9 @@ package com.onpurple.service;
 
 
 import com.onpurple.dto.request.PostRequestDto;
-import com.onpurple.dto.response.CommentResponseDto;
-import com.onpurple.dto.response.PostResponseDto;
-import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.dto.response.*;
 import com.onpurple.category.PostCategory;
+import com.onpurple.enums.SuccessCode;
 import com.onpurple.exception.CustomException;
 import com.onpurple.enums.ErrorCode;
 import com.onpurple.model.Post;
@@ -37,8 +36,8 @@ public class PostService {
 
     // 게시글 작성
     @Transactional
-    public ResponseDto<PostResponseDto> createPost(PostRequestDto requestDto,
-                                                                  User user, List<String> imgPaths) {
+    public ApiResponseDto<PostResponseDto> createPost(PostRequestDto requestDto,
+                                                      User user, List<String> imgPaths) {
         // 카테고리 Business Validation
         validateCategory(requestDto.getCategory());
         Post post = postFromRequest(requestDto, user);
@@ -47,7 +46,8 @@ public class PostService {
         List<String> imgList;
         imgList = imageUtil.addImage(imgPaths, post);
 
-        return ResponseDto.success(
+        return ApiResponseDto.success(
+                SuccessCode.POST_REGISTER.getMessage(),
                 PostResponseDto.fromEntity(post, imgList));
     }
 
@@ -63,7 +63,7 @@ public class PostService {
 
     // 전체 게시글 조회
     @Transactional(readOnly = true)
-    public ResponseDto<?> getAllPost(PostCategory category) {
+    public ApiResponseDto<List<PostResponseDto>> getAllPost(PostCategory category) {
         List<Post> postList = postRepository.findAllByCategoryOrderByCreatedAtDesc(category);
         List<PostResponseDto> postResponseDtoList = new ArrayList<>();
         for (Post post : postList) {
@@ -73,7 +73,9 @@ public class PostService {
                     PostResponseDto.GetAllFromEntity(post, imgList)
             );
         }
-        return ResponseDto.success(postResponseDtoList);
+        return ApiResponseDto.success(
+                SuccessCode.POST_GET_ALL.getMessage(),
+                postResponseDtoList);
 
     }
 
@@ -81,7 +83,7 @@ public class PostService {
 
     // 게시글 단건 조회
     @Transactional// readOnly설정시 데이터가 Mapping되지 않는문제로 해제
-    public ResponseDto<?> getPost(Long postId) {
+    public ApiResponseDto<PostResponseDto> getPost(Long postId) {
         Post post = validationUtil.validatePost(postId);
 
         List<CommentResponseDto> commentResponseDtoList = commentRepository.findAllByPost(post).stream()
@@ -92,7 +94,8 @@ public class PostService {
         post.updateViewCount();
         List<String> imgList = imageUtil.getListImage(post);
 
-        return ResponseDto.success(
+        return ApiResponseDto.success(
+                SuccessCode.POST_GET_DETAIL.getMessage(),
                 PostResponseDto.DetailFromEntity(
                         post, imgList, commentResponseDtoList)
         );
@@ -100,7 +103,7 @@ public class PostService {
 
     //게시글 업데이트
     @Transactional
-    public ResponseDto<?> updatePost(Long postId,
+    public ApiResponseDto<PostResponseDto> updatePost(Long postId,
                                                    PostRequestDto requestDto,
                                                    User user,
                                                    List<String> imgPaths) {
@@ -113,13 +116,14 @@ public class PostService {
 
 
         post.update(requestDto);
-        return ResponseDto.success(
+        return ApiResponseDto.success(
+                SuccessCode.POST_EDIT.getMessage(),
                 PostResponseDto.fromEntity(post, newImgList)
         );
     }
     //게시글 삭제
     @Transactional
-    public ResponseDto<?> deletePost(Long postId, User user) {
+    public ApiResponseDto<MessageResponseDto> deletePost(Long postId, User user) {
 
         Post post = validationUtil.validatePost(postId);
         validatePostUser(post, user);
@@ -127,7 +131,7 @@ public class PostService {
         postRepository.delete(post);
         List<String> imgList = imageUtil.getListImage(post);
         imageUtil.deleteImageList(post, imgList);
-        return ResponseDto.success("delete success");
+        return ApiResponseDto.success(SuccessCode.POST_DELETE.getMessage());
     }
 
     //    // 카테고리 조회, 검색
