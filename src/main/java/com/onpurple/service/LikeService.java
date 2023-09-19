@@ -47,14 +47,14 @@ public class LikeService {
                     .build();
             likeRepository.save(postLike);
             post.addLike();
-            return ApiResponseDto.success(POST_LIKE.getMessage(),
+            return ApiResponseDto.success(SUCCESS_POST_LIKE.getMessage(),
                     LikeResponseDto.fromPostLikesEntity(postLike)
             );
         } else {
             likeRepository.delete(liked);
             post.minusLike();
             log.info("{} 번 게시글 좋아요가 취소되었습니다.",post.getId());
-            return ApiResponseDto.success(POST_LIKE_CANCEL.getMessage());
+            return ApiResponseDto.success(SUCCESS_POST_LIKE_CANCEL.getMessage());
 
         }
     }
@@ -79,12 +79,12 @@ public class LikeService {
             likeRepository.save(commentLike);
             comment.addLike();
             return ApiResponseDto.success(
-                    COMMENT_LIKE.getMessage(),
+                    SUCCESS_COMMENT_LIKE.getMessage(),
                     LikeResponseDto.fromCommentLikesEntity(commentLike));
         } else {
             likeRepository.delete(liked);
             comment.minusLike();
-            return ApiResponseDto.success(COMMENT_LIKE_CANCEL.getMessage());
+            return ApiResponseDto.success(SUCCESS_COMMENT_LIKE_CANCEL.getMessage());
         }
     }
 
@@ -106,12 +106,12 @@ public class LikeService {
             likeRepository.save(userLike);
             int addLike = likeRepository.countByTargetId(targetId);
             target.addLike(addLike);
-            return ApiResponseDto.success(USER_LIKE.getMessage());
+            return ApiResponseDto.success(SUCCESS_USER_LIKE.getMessage());
         } else {
             likeRepository.delete(liked);
             int cancelLike = likeRepository.countByTargetId(targetId);
             target.minusLike(cancelLike);
-            return ApiResponseDto.success(USER_LIKE_CANCEL.getMessage());
+            return ApiResponseDto.success(SUCCESS_USER_LIKE_CANCEL.getMessage());
         }
     }
 
@@ -132,7 +132,7 @@ public class LikeService {
                 .map(UserResponseDto::createFromEntity)
                 .collect(Collectors.toList());
 
-        return ApiResponseDto.success(MATCHING_FOUND.getMessage(),userResponseDto);
+        return ApiResponseDto.success(SUCCESS_MATCHING_FOUND.getMessage(),userResponseDto);
     }
 
 
@@ -148,7 +148,7 @@ public class LikeService {
                 .map(LikesResponseDto::fromEntity)
                 .collect(Collectors.toList());
 
-        return ApiResponseDto.success(LIKE_USER_FOUND.getMessage(),likesResponseDtoList);
+        return ApiResponseDto.success(SUCCESS_LIKE_USER_FOUND.getMessage(),likesResponseDtoList);
     }
 
 

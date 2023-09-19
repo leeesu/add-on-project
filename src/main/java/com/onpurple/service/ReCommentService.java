@@ -21,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.onpurple.enums.SuccessCode.*;
+
 @Service
 @RequiredArgsConstructor
 public class ReCommentService {
@@ -37,7 +39,7 @@ public class ReCommentService {
 
         reCommentRepository.save(reComment);
         return ApiResponseDto.success(
-                SuccessCode.RECOMMENT_REGISTER.getMessage(),
+                SUCCESS_RECOMMENT_REGISTER.getMessage(),
                 ReCommentResponseDto.fromEntity(reComment)
         );
 
@@ -68,7 +70,7 @@ public class ReCommentService {
         }
 
         return ApiResponseDto.success(
-                SuccessCode.RECOMMENT_GET_ALL.getMessage(),
+                SUCCESS_RECOMMENT_GET_ALL.getMessage(),
                 reCommentResponseDto);
 
     }
@@ -84,7 +86,7 @@ public class ReCommentService {
 
         reComment.update(requestDto);
         return ApiResponseDto.success(
-                SuccessCode.RECOMMENT_EDIT.getMessage(),
+                SUCCESS_RECOMMENT_EDIT.getMessage(),
                 ReCommentResponseDto.fromEntity(reComment)
         );
     }

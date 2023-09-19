@@ -1,6 +1,5 @@
 package com.onpurple.model;
 
-import com.onpurple.model.Post;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,7 +11,7 @@ import java.util.List;
 @Entity
 @Setter
 @Getter
-@Table(name = "ChatRoom")
+@Table(name = "chatRoom")
 @NoArgsConstructor
 public class ChatRoom {
     @Id
@@ -28,7 +27,7 @@ public class ChatRoom {
 
     private String receiver;        // 채팅방 수신자
 
-    @OneToMany(mappedBy = "messageRoom", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.REMOVE)
     private List<ChatMessage> ChatMessageList = new ArrayList<>();
 
     @ManyToOne

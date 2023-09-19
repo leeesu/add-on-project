@@ -4,6 +4,8 @@ import com.onpurple.category.PostCategory;
 import com.onpurple.dto.request.PostRequestDto;
 import com.onpurple.dto.response.ApiResponseDto;
 import com.onpurple.dto.response.PostResponseDto;
+import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.model.Post;
 import com.onpurple.security.UserDetailsImpl;
 import com.onpurple.service.PostService;
 import com.onpurple.util.ValidationUtil;
@@ -36,11 +38,6 @@ public class PostController {
     return postService.createPost(requestDto,userDetails.getUser(), imgPaths);
   }
 
-  // 카테고리별 전체 게시글 가져오기
-  @GetMapping //기본 카테고리 meet 번개
-  public ApiResponseDto<List<PostResponseDto>> getAllPosts(@RequestParam(defaultValue = "MEET", value="category") PostCategory category) {
-    return postService.getAllPost(category);
-  }
 
   
   // 상세 게시글 가져오기
@@ -69,25 +66,22 @@ public class PostController {
     return postService.deletePost(postId, userDetails.getUser());
   }
 
-  // 카테고리별 전체 게시글 검색
-//  @GetMapping("/post/search") //기본 카테고리 meet 번개
-//  public ResponseDto<?> getAllPostSearch(@RequestParam String keyword) {
-//    return postService.getAllPostSearch(keyword);
-//  }
+    // 카테고리별 전체 게시글 가져오기
+  @GetMapping("/post") //기본 카테고리 MEET 번개
+  public ApiResponseDto<?> getAllPosts(
+          @RequestParam(defaultValue = "MEET", value="category") PostCategory category,
+                                    @RequestParam int page, @RequestParam int size) {
+    return postService.getAllPost(category,page,size);
+  }
 
-//    // 카테고리별 전체 게시글 가져오기
-//  @GetMapping("/post") //기본 카테고리 meet 번개
-//  public ResponseDto<?> getAllPosts(@RequestParam(defaultValue = "meet", value="category")  String category,
-//                                    @RequestParam int page, @RequestParam int size) {
-//    return postService.getAllPost(category,page,size);
-//  }
-//
-//  // 카테고리별 전체 게시글 검색
-//  @GetMapping("/post/search") //기본 카테고리 meet 번개
-//  public ResponseDto<?> getAllPosts(@RequestParam(defaultValue = "meet", value="category")  String category,
-//                                    @RequestParam String keyword, @RequestParam int page, @RequestParam int size) {
-//    return postService.getAllPostSearch(category, keyword,page,size);
-//  }
+  // 카테고리별 전체 게시글 검색
+  @GetMapping("/post/search") //기본 카테고리 MEET 번개
+  public ApiResponseDto<?> getAllPosts(
+          @RequestParam(defaultValue = "MEET", value="category")  PostCategory category,
+                                    @RequestParam String keyword, @RequestParam int page,
+          @RequestParam int size) {
+    return postService.getAllCategorySearch(category, keyword,page,size);
+  }
 
   }
 

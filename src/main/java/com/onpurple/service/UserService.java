@@ -24,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+import static com.onpurple.enums.SuccessCode.*;
+
 @RequiredArgsConstructor
 @Service
 public class UserService {
@@ -103,11 +105,11 @@ public class UserService {
         jwtUtil.tokenSetHeaders(tokenDto, response);
 
         if (user.getRole().equals(Authority.ADMIN)) {
-            return ApiResponseDto.success(SuccessCode.ADMIN_SIGNUP.getMessage());
+            return ApiResponseDto.success(SUCCESS_ADMIN_SIGNUP.getMessage());
         }
 
         return ApiResponseDto.success(
-                SuccessCode.SIGNUP.getMessage(),
+                SUCCESS_SIGNUP.getMessage(),
                 UserResponseDto.createFromEntity(user));
 
     }
@@ -122,7 +124,7 @@ public class UserService {
     public ApiResponseDto<UserResponseDto> getUser(User user) {
 
         return ApiResponseDto.success(
-                SuccessCode.GET_USER.getMessage(),
+                SUCCESS_GET_USER.getMessage(),
                 UserResponseDto.getFromEntity(user)
         );
     }
@@ -142,7 +144,7 @@ public class UserService {
         userRepository.save(user);
 
         return ApiResponseDto.success(
-                SuccessCode.PASSWORD_CHANGE.getMessage());
+                SUCCESS_PASSWORD_CHANGE.getMessage());
     }
 
     //    이미지 수정

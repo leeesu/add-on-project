@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table(name = "message")
+@Table(name = "chatMessage")
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ChatMessage extends Timestamped {

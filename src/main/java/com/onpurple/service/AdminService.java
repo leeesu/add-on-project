@@ -47,7 +47,7 @@ public class AdminService {
         imageUtil.deleteImageList(post,imgList);
 
         return ApiResponseDto.success(
-                SuccessCode.ADMIN_COMMENT_DELETE.getMessage()
+                SuccessCode.SUCCESS_ADMIN_COMMENT_DELETE.getMessage()
         );
     }
 
@@ -61,7 +61,7 @@ public class AdminService {
         validationAdmin(user);
         commentRepository.delete(comment);
 
-        return ApiResponseDto.success(SuccessCode.ADMIN_COMMENT_DELETE.getMessage());
+        return ApiResponseDto.success(SuccessCode.SUCCESS_ADMIN_COMMENT_DELETE.getMessage());
     }
 
     @Transactional

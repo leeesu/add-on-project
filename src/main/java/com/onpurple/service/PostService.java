@@ -15,12 +15,17 @@ import com.onpurple.util.ImageUtil;
 import com.onpurple.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.onpurple.enums.SuccessCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -47,7 +52,7 @@ public class PostService {
         imgList = imageUtil.addImage(imgPaths, post);
 
         return ApiResponseDto.success(
-                SuccessCode.POST_REGISTER.getMessage(),
+                SUCCESS_POST_REGISTER.getMessage(),
                 PostResponseDto.fromEntity(post, imgList));
     }
 
@@ -61,21 +66,36 @@ public class PostService {
     }
 
 
-    // 전체 게시글 조회
+    // 카테고리 전체 게시글 조회
     @Transactional(readOnly = true)
-    public ApiResponseDto<List<PostResponseDto>> getAllPost(PostCategory category) {
-        List<Post> postList = postRepository.findAllByCategoryOrderByCreatedAtDesc(category);
-        List<PostResponseDto> postResponseDtoList = new ArrayList<>();
-        for (Post post : postList) {
-            // 이미지 가져오기
-            List<String> imgList = imageUtil.getListImage(post);
-            postResponseDtoList.add(
-                    PostResponseDto.GetAllFromEntity(post, imgList)
-            );
+    public ApiResponseDto<Slice<PostResponseDto>> getAllPost(PostCategory category, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Slice<PostResponseDto> postList = postRepository.findAllByCategory(category, pageable);
+        if (postList.isEmpty()) {
+            throw new CustomException(ErrorCode.POST_NOT_FOUND);
+
         }
         return ApiResponseDto.success(
-                SuccessCode.POST_GET_ALL.getMessage(),
-                postResponseDtoList);
+                SUCCESS_POST_GET_ALL_CATEGORY.getMessage(),
+                postList);
+
+    }
+
+
+    // 카테고리 검색
+    @Transactional(readOnly = true)
+    public ApiResponseDto<Slice<PostResponseDto>> getAllCategorySearch(PostCategory category, String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Slice<PostResponseDto> postList = postRepository.findAllByCategorySearchScroll(category, keyword, pageable);
+        if (postList.isEmpty()) {
+            throw new CustomException(ErrorCode.POST_NOT_FOUND);
+
+        }
+        return ApiResponseDto.success(
+                SUCCESS_POST_GET_ALL_CATEGORY_SEARCH.getMessage(),
+                postList);
 
     }
 
@@ -95,7 +115,7 @@ public class PostService {
         List<String> imgList = imageUtil.getListImage(post);
 
         return ApiResponseDto.success(
-                SuccessCode.POST_GET_DETAIL.getMessage(),
+                SUCCESS_POST_GET_DETAIL.getMessage(),
                 PostResponseDto.DetailFromEntity(
                         post, imgList, commentResponseDtoList)
         );
@@ -117,7 +137,7 @@ public class PostService {
 
         post.update(requestDto);
         return ApiResponseDto.success(
-                SuccessCode.POST_EDIT.getMessage(),
+                SUCCESS_POST_EDIT.getMessage(),
                 PostResponseDto.fromEntity(post, newImgList)
         );
     }
@@ -131,25 +151,8 @@ public class PostService {
         postRepository.delete(post);
         List<String> imgList = imageUtil.getListImage(post);
         imageUtil.deleteImageList(post, imgList);
-        return ApiResponseDto.success(SuccessCode.POST_DELETE.getMessage());
+        return ApiResponseDto.success(SUCCESS_POST_DELETE.getMessage());
     }
-
-    //    // 카테고리 조회, 검색
-//    @Transactional(readOnly = true)
-//    public ResponseDto<?> getAllPostSearch(String keyword) {
-//        if((keyword).isEmpty()){
-//            return ResponseDto.fail("KEYWORD_NOT_FOUND","검색어가 존재하지 않습니다");
-//        }
-//
-//        List<PostResponseDto> postList = postRepository.findAllByCategorySearch(keyword);
-//        if (postList.isEmpty()) {
-//            return ResponseDto.fail("POST_NOT_FOUND", "존재하지 않는 게시글입니다.");
-//
-//        }
-//        return ResponseDto.success(postList);
-//
-//    }
-
 
 
     public void validatePostUser(Post post, User user) {
