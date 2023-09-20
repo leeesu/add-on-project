@@ -67,20 +67,20 @@ public class PostController {
   }
 
     // 카테고리별 전체 게시글 가져오기
-  @GetMapping("/post") //기본 카테고리 MEET 번개
-  public ApiResponseDto<?> getAllPosts(
+  @GetMapping //기본 카테고리 MEET 번개
+  public ApiResponseDto<?> getAllPost(
           @RequestParam(defaultValue = "MEET", value="category") PostCategory category,
                                     @RequestParam int page, @RequestParam int size) {
-    return postService.getAllPost(category,page,size);
+    return postService.getAllPostCategory(category,page,size);
   }
 
   // 카테고리별 전체 게시글 검색
-  @GetMapping("/post/search") //기본 카테고리 MEET 번개
+  @GetMapping("/search") //기본 카테고리 MEET 번개
   public ApiResponseDto<?> getAllPosts(
           @RequestParam(defaultValue = "MEET", value="category")  PostCategory category,
                                     @RequestParam String keyword, @RequestParam int page,
           @RequestParam int size) {
-    return postService.getAllCategorySearch(category, keyword,page,size);
+    return postService.getAllPostCategorySearch(category, keyword,page,size);
   }
 
   }

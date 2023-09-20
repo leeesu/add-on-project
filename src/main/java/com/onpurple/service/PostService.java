@@ -50,6 +50,7 @@ public class PostService {
 
         List<String> imgList;
         imgList = imageUtil.addImage(imgPaths, post);
+        post.saveImage(imgList.get(0));
 
         return ApiResponseDto.success(
                 SUCCESS_POST_REGISTER.getMessage(),
@@ -68,7 +69,7 @@ public class PostService {
 
     // 카테고리 전체 게시글 조회
     @Transactional(readOnly = true)
-    public ApiResponseDto<Slice<PostResponseDto>> getAllPost(PostCategory category, int page, int size) {
+    public ApiResponseDto<Slice<PostResponseDto>> getAllPostCategory(PostCategory category, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
         Slice<PostResponseDto> postList = postRepository.findAllByCategory(category, pageable);
@@ -85,7 +86,7 @@ public class PostService {
 
     // 카테고리 검색
     @Transactional(readOnly = true)
-    public ApiResponseDto<Slice<PostResponseDto>> getAllCategorySearch(PostCategory category, String keyword, int page, int size) {
+    public ApiResponseDto<Slice<PostResponseDto>> getAllPostCategorySearch(PostCategory category, String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
         Slice<PostResponseDto> postList = postRepository.findAllByCategorySearchScroll(category, keyword, pageable);

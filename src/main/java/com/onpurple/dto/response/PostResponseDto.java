@@ -70,11 +70,11 @@ public class PostResponseDto {
 
 
     public static PostResponseDto GetAllFromEntity(
-            Post post, List<String> imgList) {
+            Post post) {
         return PostResponseDto.builder()
                 .postId(post.getId())
                 .title(post.getTitle())
-                .imageUrl(imgList.get(0))
+                .imageUrl(post.getImageUrl())
                 .content(post.getContent())
                 .likes(post.getLikes())
                 .view(post.getView())

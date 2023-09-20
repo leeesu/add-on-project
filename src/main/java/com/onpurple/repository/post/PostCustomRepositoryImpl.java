@@ -14,6 +14,7 @@ import org.springframework.data.domain.SliceImpl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class PostCustomRepositoryImpl implements PostCustomRepository {
@@ -31,26 +32,13 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
 
-        List<PostResponseDto> responseDtoList = new ArrayList<>();
-
-        for(Post post : postResult){
-            responseDtoList.add(PostResponseDto.builder()
-                    .postId(post.getId())
-                    .title(post.getTitle())
-                    .content(post.getContent())
-                    .view(post.getView())
-                    .likes(post.getLikes())
-                    .category(post.getCategory())
-                    .nickname(post.getUser().getNickname())
-                    .imageUrl(post.getImageUrl())
-                    .createdAt(post.getCreatedAt())
-                    .modifiedAt(post.getModifiedAt())
-                    .build());
-        }
+        List<PostResponseDto> responseDtoList = postResult.stream()
+                .map(PostResponseDto::GetAllFromEntity)
+                .collect(Collectors.toList());
 
         boolean hasNext = false;
         if(responseDtoList.size() >pageable.getPageSize()) {
-            responseDtoList.remove(pageable.getPageSize());
+            responseDtoList.remove(pageable.getPageSize()-1); // 마지막 항목 제거
             hasNext = true;
         }
         return new SliceImpl<>(responseDtoList, pageable, hasNext);
@@ -68,22 +56,9 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
 
-        List<PostResponseDto> responseDtoList = new ArrayList<>();
-
-        for(Post post : postResult){
-            responseDtoList.add(PostResponseDto.builder()
-                    .postId(post.getId())
-                    .title(post.getTitle())
-                    .content(post.getContent())
-                    .view(post.getView())
-                    .likes(post.getLikes())
-                    .category(post.getCategory())
-                    .nickname(post.getUser().getNickname())
-                    .imageUrl(post.getImageUrl())
-                    .createdAt(post.getCreatedAt())
-                    .modifiedAt(post.getModifiedAt())
-                    .build());
-        }
+        List<PostResponseDto> responseDtoList = postResult.stream()
+                .map(PostResponseDto::GetAllFromEntity)
+                .collect(Collectors.toList());
 
         boolean hasNext = false;
         if(responseDtoList.size() >pageable.getPageSize()) {
