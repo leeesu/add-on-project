@@ -159,7 +159,7 @@ public class UserService {
 //        수정된 이미지를 imgList의 첫번째 배열에 저장한 후 user에 저장.
         user.imageSave(imgPaths);
 
-        return ApiResponseDto.success(SuccessCode.PROFILE_IMG_UPDATE.getMessage());
+        return ApiResponseDto.success(SUCCESS_PROFILE_IMG_UPDATE.getMessage());
     }
 
     //  로그아웃. 토큰을 확인하여 일치할 경우 로그인 된 유저의 이미지와 토큰을 삭제.

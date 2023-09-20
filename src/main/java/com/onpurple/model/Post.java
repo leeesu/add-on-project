@@ -83,6 +83,9 @@ public class Post extends Timestamped{
         this.view +=1;
     }
 
+    public void saveImage(String s) {
+        this.imageUrl = s;
+    }
 }
 
 
