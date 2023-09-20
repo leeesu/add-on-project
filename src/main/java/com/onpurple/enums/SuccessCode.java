@@ -61,16 +61,19 @@ public enum SuccessCode {
     SUCCESS_PROFILE_GET_ALL("프로필 리스트 조회가 성공적으로 완료되었습니다."),
     SUCCESS_PROFILE_GET_DETAIL("프로필 상세조회에 성공했습니다."),
     SUCCESS_PROFILE_EDIT("프로필 수정에 성공했습니다."),
-    SUCCESS_RECOMMENT_EDIT("대댓글 수정에 성공했습니다."),
-    SUCCESS_RECOMMENT_DELETE("대댓글 삭제에 성공했습니다."),
-    SUCCESS_RECOMMENT_REGISTER("대댓글 등록에 성공했습니다."),
-    SUCCESS_RECOMMENT_GET_ALL("대댓글 전체 조회에 성공했습니다."),
+
     SUCCESS_REPORT_REGISTER ("신고글이 성공적으로 등록되었습니다."),
     SUCCESS_REPORT_GET_DETAIL("신고글 조회가 성공적으로 완료되었습니다."),
     SUCCESS_REPORT_GET_ALL("신고글 전체 조회가 성공적으로 완료되었습니다."),
     SUCCESS_REPORT_DELETE("신고글이 성공적으로 삭제되었습니다."),
     SUCCESS_POST_GET_ALL_CATEGORY_SEARCH("게시글 카테고리별 검색이 성공적으로 완료되었습니다."),
     SUCCESS_UN_LIKE_CANCEL("유저 싫어요 취소가 성공적으로 완료되었습니다."),
+
+    //대댓글 관련 메세지
+    SUCCESS_RECOMMENT_EDIT("대댓글 수정에 성공했습니다."),
+    SUCCESS_RECOMMENT_DELETE("대댓글 삭제에 성공했습니다."),
+    SUCCESS_RECOMMENT_REGISTER("대댓글 등록에 성공했습니다."),
+    SUCCESS_RECOMMENT_GET_ALL("대댓글 전체 조회에 성공했습니다."),
 
     ;
     private final String message;
