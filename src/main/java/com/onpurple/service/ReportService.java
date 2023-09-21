@@ -23,6 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static com.onpurple.enums.SuccessCode.*;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -51,7 +54,7 @@ public class ReportService {
 
         reportRepository.save(report);
         return ApiResponseDto.success(
-                SuccessCode.REPORT_REGISTER.getMessage(),
+                SUCCESS_REPORT_REGISTER.getMessage(),
                 ReportResponseDto.fromEntity(report)
         );
     }
@@ -77,7 +80,7 @@ public class ReportService {
         }
 
         return ApiResponseDto.success(
-                SuccessCode.REPORT_GET_DETAIL.getMessage(),
+                SUCCESS_REPORT_GET_DETAIL.getMessage(),
                 ReportResponseDto.fromEntity(report)
         );
     }
@@ -94,7 +97,7 @@ public class ReportService {
         }
 
         return ApiResponseDto.success(
-                SuccessCode.REPORT_GET_ALL.getMessage(),
+                SUCCESS_REPORT_GET_ALL.getMessage(),
                 reportResponseDto);
 
     }
@@ -116,7 +119,7 @@ public class ReportService {
         String deleteImage = report.getImageUrl();
         awsS3UploadService.deleteFile(AwsS3UploadService.getFileNameFromURL(deleteImage));
 
-        return ApiResponseDto.success(SuccessCode.REPORT_DELETE.getMessage());
+        return ApiResponseDto.success(SUCCESS_REPORT_DELETE.getMessage());
     }
 
 

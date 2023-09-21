@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.onpurple.enums.SuccessCode.*;
+
 @Service
 @Slf4j(topic = "싫어요 기능")
 public class UnLikeService {
@@ -51,7 +53,7 @@ public class UnLikeService {
             int cancelUnLike = unLikeRepository.countByTargetId(targetId);
             log.info("지금 싫어요 수 : "+cancelUnLike);
             target.minusUnLike(cancelUnLike);
-            return ApiResponseDto.success("싫어요가 취소되었습니다.");
+            return ApiResponseDto.success(SUCCESS_UN_LIKE_CANCEL.getMessage());
         }
     }
 
@@ -67,7 +69,7 @@ public class UnLikeService {
                 .collect(Collectors.toList());
 
         return ApiResponseDto.success(
-                SuccessCode.UN_LIKE_USER_FOUND.getMessage(),
+                SUCCESS_UN_LIKE_USER_FOUND.getMessage(),
                 unLikesResponseDtoList);
     }
 }

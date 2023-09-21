@@ -18,6 +18,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.onpurple.enums.SuccessCode.*;
+
 @RequiredArgsConstructor
 @Service
 public class ProfileService {
@@ -40,7 +42,7 @@ public class ProfileService {
         Collections.shuffle(profileResponseDto);
 
         return ApiResponseDto.success(
-                SuccessCode.PROFILE_GET_ALL.getMessage(),
+                SUCCESS_PROFILE_GET_ALL.getMessage(),
                 profileResponseDto);
     }
 
@@ -50,7 +52,7 @@ public class ProfileService {
         User user = validationUtil.validateProfile(userId);
 
         return ApiResponseDto.success(
-                SuccessCode.PROFILE_GET_DETAIL.getMessage(),
+                SUCCESS_PROFILE_GET_DETAIL.getMessage(),
                 ProfileResponseDto.detailFromEntity(user)
         );
     }
@@ -61,6 +63,7 @@ public class ProfileService {
 
         user.update(requestDto);
         userRepository.save(user);
-        return ApiResponseDto.success(SuccessCode.PROFILE_EDIT.getMessage());
+        return ApiResponseDto.success(
+                SUCCESS_PROFILE_EDIT.getMessage());
     }
 }

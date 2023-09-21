@@ -39,11 +39,6 @@ public class LikeController {
         return likeService.UserLike(targetId, userDetails.getUser());
     }
 
-    // 회원 싫어요
-    @PostMapping( "/user/unlike/{targetId}")
-    public ApiResponseDto<MessageResponseDto> createUserUnLike(@PathVariable Long targetId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return unLikeService.UserUnLike(targetId, userDetails.getUser());
-    }
 
     @PostMapping( "/user/match/{userId}")
     public ApiResponseDto<List<UserResponseDto>> createCheckUser(@PathVariable Long userId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -54,8 +49,4 @@ public class LikeController {
         return likeService.getLike(userDetails.getUser());
     }
 
-    @GetMapping("/user/unLike")
-    public ApiResponseDto<List<UnLikesResponseDto>> getUnLikeList(@AuthenticationPrincipal UserDetailsImpl userDetails){
-        return unLikeService.getUnLike(userDetails.getUser());
-    }
 }

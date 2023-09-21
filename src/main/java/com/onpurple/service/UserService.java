@@ -24,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+import static com.onpurple.enums.SuccessCode.*;
+
 @RequiredArgsConstructor
 @Service
 public class UserService {
@@ -103,11 +105,11 @@ public class UserService {
         jwtUtil.tokenSetHeaders(tokenDto, response);
 
         if (user.getRole().equals(Authority.ADMIN)) {
-            return ApiResponseDto.success(SuccessCode.ADMIN_SIGNUP.getMessage());
+            return ApiResponseDto.success(SUCCESS_ADMIN_SIGNUP.getMessage());
         }
 
         return ApiResponseDto.success(
-                SuccessCode.SIGNUP.getMessage(),
+                SUCCESS_SIGNUP.getMessage(),
                 UserResponseDto.createFromEntity(user));
 
     }
@@ -122,7 +124,7 @@ public class UserService {
     public ApiResponseDto<UserResponseDto> getUser(User user) {
 
         return ApiResponseDto.success(
-                SuccessCode.GET_USER.getMessage(),
+                SUCCESS_GET_USER.getMessage(),
                 UserResponseDto.getFromEntity(user)
         );
     }
@@ -142,7 +144,7 @@ public class UserService {
         userRepository.save(user);
 
         return ApiResponseDto.success(
-                SuccessCode.PASSWORD_CHANGE.getMessage());
+                SUCCESS_PASSWORD_CHANGE.getMessage());
     }
 
     //    이미지 수정
@@ -157,7 +159,7 @@ public class UserService {
 //        수정된 이미지를 imgList의 첫번째 배열에 저장한 후 user에 저장.
         user.imageSave(imgPaths);
 
-        return ApiResponseDto.success(SuccessCode.PROFILE_IMG_UPDATE.getMessage());
+        return ApiResponseDto.success(SUCCESS_PROFILE_IMG_UPDATE.getMessage());
     }
 
     //  로그아웃. 토큰을 확인하여 일치할 경우 로그인 된 유저의 이미지와 토큰을 삭제.

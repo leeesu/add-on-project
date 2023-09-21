@@ -54,7 +54,7 @@ public class WebSecurityConfig {
 
     @Bean
     public JwtAuthorizationFilter jwtAuthorizationFilter() {
-        return new JwtAuthorizationFilter(jwtUtil, userDetailsService,userRepository, redisUtil);
+        return new JwtAuthorizationFilter(jwtUtil, userDetailsService,redisUtil);
     }
 
     private static final String[] PERMIT = {
@@ -90,7 +90,13 @@ public class WebSecurityConfig {
         http.authorizeRequests()
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 .requestMatchers("/user/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/post/**").permitAll()
+                .requestMatchers("/post/**").permitAll()
+                .requestMatchers("/comment/**").permitAll()
+                .requestMatchers("/reComment/**").permitAll()
+                .requestMatchers("/profile/**").permitAll()
+                .requestMatchers("/report/**").permitAll()
+                .requestMatchers("/room/**", "rooms/**").permitAll()
+                .requestMatchers("/like/**").permitAll()
                 .requestMatchers(PERMIT).permitAll()
                 .anyRequest().authenticated();
         http.exceptionHandling((exceptionHandling) ->

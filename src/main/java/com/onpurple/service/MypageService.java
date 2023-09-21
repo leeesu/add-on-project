@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.onpurple.enums.SuccessCode.*;
+
 @RequiredArgsConstructor
 @Service
 public class MypageService {
@@ -53,7 +55,7 @@ public class MypageService {
         }
 
         return ApiResponseDto.success(
-                SuccessCode.MY_PAGE_GET.getMessage(),
+                SUCCESS_MY_PAGE_GET.getMessage(),
                 MypageResponseDto.fromEntity(
                 user, likedResponseDtoList,otherLikeResponseDtoList));
 

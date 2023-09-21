@@ -34,7 +34,7 @@ public class CommentService {
     Post post = validationUtil.validatePost(postId);
     Comment comment = commentFromRequest(commentRequestDto, post, user);
     commentRepository.save(comment);
-    return ApiResponseDto.success(COMMENT_REGISTER.getMessage(),
+    return ApiResponseDto.success(SUCCESS_COMMENT_REGISTER.getMessage(),
         CommentResponseDto.fromEntity(comment)
     );
   }
@@ -59,7 +59,7 @@ public class CommentService {
             .collect(Collectors.toList());
 
     return ApiResponseDto.success(
-            COMMENT_GET_ALL.getMessage(),
+            SUCCESS_COMMENT_GET_ALL.getMessage(),
             commentResponseDtoList);
   }
 
@@ -75,7 +75,7 @@ public class CommentService {
 
       comment.update(requestDto);
 
-      return ApiResponseDto.success(COMMENT_EDIT.getMessage(),CommentResponseDto.fromEntity(comment));
+      return ApiResponseDto.success(SUCCESS_COMMENT_EDIT.getMessage(),CommentResponseDto.fromEntity(comment));
   }
 
 
@@ -85,7 +85,7 @@ public class CommentService {
     validateUser(comment, user);
 
     commentRepository.delete(comment);
-    return ApiResponseDto.success(COMMENT_DELETE.getMessage());
+    return ApiResponseDto.success(SUCCESS_COMMENT_DELETE.getMessage());
   }
 
 

@@ -39,8 +39,8 @@ public class ImageUtil {
             // 이미지 삭제
             deleteImageList(post, imgList);
         }
-
         imgList = addImage(imgPaths, post);
+        post.saveImage(imgList.get(0));
         return imgList;
     }
     //이미지 리스트 가져오기
@@ -52,7 +52,7 @@ public class ImageUtil {
     }
     // 이미지 삭제
     public void deleteImageList(Post post, List<String> imgList) {
-
+            // aws s3에서 이미지 삭제
             imgList.stream()
                     .map(AwsS3UploadService::getFileNameFromURL)
                     .forEach(awsS3UploadService::deleteFile);

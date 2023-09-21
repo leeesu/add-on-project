@@ -32,8 +32,8 @@ import org.slf4j.LoggerFactory;
 
 import static com.onpurple.enums.ResizeEnum.*;
 
-public class LambdaResizeHandler implements RequestHandler<S3Event, String> {
-    private static final Logger logger = LoggerFactory.getLogger(LambdaResizeHandler.class);
+public class Handler2 implements RequestHandler<S3Event, String> {
+    private static final Logger logger = LoggerFactory.getLogger(Handler2.class);
     private final String REGEX = ".*\\.([^\\.]*)";
     private final String JPG_TYPE = "jpg";
     private final String JPG_MIME = "image/jpeg";

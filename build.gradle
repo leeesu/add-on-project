@@ -38,9 +38,6 @@ dependencies {
 	//  validation
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-	// Thymeleaf (뷰 템플릿 엔진)
-	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-
 	// AWS S3 이미지 업로드를 위한 디펜던시
 	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.112'
 	implementation 'javax.xml.bind:jaxb-api:2.3.1'
@@ -56,24 +53,12 @@ dependencies {
 	//stomp 라이브러리
 	implementation 'org.webjars:stomp-websocket:2.3.3-1'
 
-	//front - 채팅 웹 화면 구현위해 필요한 JS로드하기 위해 선언, stomp방식 js 추가
-	implementation 'org.webjars.bower:bootstrap:4.3.1'
-	implementation 'org.springframework.boot:spring-boot-starter-freemarker'
-	implementation 'org.webjars.bower:vue:2.5.16'
-	implementation 'org.webjars.bower:axios:0.17.1'
-	implementation 'org.webjars:sockjs-client:1.1.2'
-	implementation 'com.google.code.gson:gson:2.8.0'
-
 	//Redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
 	implementation 'org.springframework.boot:spring-boot-starter-cache'
 	//embedded-redis
 	implementation group: 'it.ozimov', name: 'embedded-redis', version: '0.7.2'
-	//image resize aws lambda
-	implementation 'com.github.downgoon:marvin:1.5.5'
-	implementation 'com.github.downgoon:MarvinPlugins:1.5.5'
-	implementation 'org.springframework:spring-test'
 	// QueryDSL 적용을 위한 의존성 (SpringBoot3.0 부터는 jakarta 사용해야함)
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
 	annotationProcessor 'com.querydsl:querydsl-apt:5.0.0:jakarta'
@@ -88,9 +73,6 @@ dependencies {
 	implementation 'com.amazonaws:aws-java-sdk-s3'
 	implementation platform('software.amazon.awssdk:bom:2.17.230')
 	implementation 'software.amazon.awssdk:s3'
-	// Kafka
-	implementation 'org.springframework.kafka:spring-kafka'
-	testImplementation 'org.springframework.kafka:spring-kafka-test'
 	// websocket
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
@@ -99,3 +81,31 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+task packageBig(type: Zip) {
+	from compileJava
+	from processResources
+	into('lib') {
+		from configurations.runtimeClasspath
+	}
+}
+task packageLibs(type: Zip) {
+	into('java/lib') {
+		from configurations.runtimeClasspath
+	}
+}
+task packageSmall(type: Zip) {
+	from compileJava
+	from processResources
+}
+java {
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
+}
+task buildZip(type: Zip) {
+	from compileJava
+	from processResources
+	into('lib') {
+		from configurations.runtimeClasspath
+	}
+}
+build.dependsOn buildZip

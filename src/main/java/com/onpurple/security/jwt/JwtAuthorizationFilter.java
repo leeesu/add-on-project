@@ -32,7 +32,6 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
-    private final UserRepository userRepository;
     private final RedisUtil redisUtil;
 
     @Override
@@ -99,15 +98,3 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     }
 
 }
-
-
-
-/*
-            try {
-                setAuthentication(info.getSubject());
-            } catch (Exception e) {
-                log.error("{} 인증 객체를 생성할 수 없습니다", e.getMessage());
-                return;
-            }
-        }
- */
