@@ -11,6 +11,8 @@ import com.onpurple.service.PostService;
 import com.onpurple.util.ValidationUtil;
 import com.onpurple.util.s3.AwsS3UploadService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,30 +31,29 @@ public class PostController {
 
   // 게시글 작성
   @PostMapping
-  public ApiResponseDto<PostResponseDto> createPost(@RequestPart(value = "data",required = false) PostRequestDto requestDto,
+  public ApiResponseDto<PostResponseDto> createPost(@RequestPart(value = "data", required = false) PostRequestDto requestDto,
                                                     @AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                    @RequestPart(value = "imageUrl",required = false) List<MultipartFile> multipartFiles) {
+                                                    @RequestPart(value = "imageUrl", required = false) List<MultipartFile> multipartFiles) {
 
     validationUtil.validateMultipartFiles(multipartFiles);
     List<String> imgPaths = s3Service.upload(multipartFiles);
-    return postService.createPost(requestDto,userDetails.getUser(), imgPaths);
+    return postService.createPost(requestDto, userDetails.getUser(), imgPaths);
   }
 
 
-  
   // 상세 게시글 가져오기
-  @GetMapping( "/{postId}")
+  @GetMapping("/{postId}")
   public ApiResponseDto<?> getPost(@PathVariable Long postId) {
     return postService.getPost(postId);
   }
 
 
   // 게시글 수정
-  @PatchMapping ( "/{postId}")
+  @PatchMapping("/{postId}")
   public ApiResponseDto<?> updatePost(@PathVariable Long postId,
-                                   @RequestPart(value = "data") PostRequestDto requestDto,
-                                   @RequestPart("imageUrl") List<MultipartFile> multipartFiles,
-                                   @AuthenticationPrincipal UserDetailsImpl userDetails) {
+                                      @RequestPart(value = "data") PostRequestDto requestDto,
+                                      @RequestPart("imageUrl") List<MultipartFile> multipartFiles,
+                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
     validationUtil.validateMultipartFiles(multipartFiles);
     List<String> imgPaths = s3Service.upload(multipartFiles);
@@ -60,28 +61,32 @@ public class PostController {
   }
 
   //게시글 삭제
-  @DeleteMapping( "/{postId}")
+  @DeleteMapping("/{postId}")
   public ApiResponseDto<?> deletePost(@PathVariable Long postId,
-                                   @AuthenticationPrincipal UserDetailsImpl userDetails) {
+                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
     return postService.deletePost(postId, userDetails.getUser());
   }
 
-    // 카테고리별 전체 게시글 가져오기
+  // 카테고리별 전체 게시글 가져오기
   @GetMapping //기본 카테고리 MEET 번개
   public ApiResponseDto<?> getAllPost(
-          @RequestParam(defaultValue = "MEET", value="category") PostCategory category,
-                                    @RequestParam int page, @RequestParam int size) {
-    return postService.getAllPostCategory(category,page,size);
+          @RequestParam(defaultValue = "MEET", value = "category") PostCategory category,
+          @RequestParam int page, @RequestParam int size) {
+    Pageable pageable = PageRequest.of(page, size);
+
+    return postService.getAllPostCategory(category, pageable);
   }
 
   // 카테고리별 전체 게시글 검색
   @GetMapping("/search") //기본 카테고리 MEET 번개
   public ApiResponseDto<?> getAllPosts(
-          @RequestParam(defaultValue = "MEET", value="category")  PostCategory category,
-                                    @RequestParam String keyword, @RequestParam int page,
+          @RequestParam(defaultValue = "MEET", value = "category") PostCategory category,
+          @RequestParam String keyword, @RequestParam int page,
           @RequestParam int size) {
-    return postService.getAllPostCategorySearch(category, keyword,page,size);
+    Pageable pageable = PageRequest.of(page, size);
+
+    return postService.getAllPostCategorySearch(category, keyword, pageable);
   }
 
-  }
+}
 

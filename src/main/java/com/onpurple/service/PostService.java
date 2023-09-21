@@ -69,8 +69,7 @@ public class PostService {
 
     // 카테고리 전체 게시글 조회
     @Transactional(readOnly = true)
-    public ApiResponseDto<Slice<PostResponseDto>> getAllPostCategory(PostCategory category, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public ApiResponseDto<Slice<PostResponseDto>> getAllPostCategory(PostCategory category, Pageable pageable){
 
         Slice<PostResponseDto> postList = postRepository.findAllByCategory(category, pageable);
         if (postList.isEmpty()) {
@@ -86,10 +85,11 @@ public class PostService {
 
     // 카테고리 검색
     @Transactional(readOnly = true)
-    public ApiResponseDto<Slice<PostResponseDto>> getAllPostCategorySearch(PostCategory category, String keyword, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public ApiResponseDto<Slice<PostResponseDto>> getAllPostCategorySearch(
+            PostCategory category, String keyword, Pageable pageable) {
 
-        Slice<PostResponseDto> postList = postRepository.findAllByCategorySearchScroll(category, keyword, pageable);
+        Slice<PostResponseDto> postList =
+                postRepository.findAllByCategorySearchScroll(category, keyword, pageable);
         if (postList.isEmpty()) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND);
 

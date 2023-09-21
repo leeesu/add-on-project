@@ -56,7 +56,6 @@ public class JwtUtil {
     // header 토큰을 가져오기 Keys.hmacShaKeyFor(bytes);
     public String resolveToken(HttpServletRequest request, String tokenType) {
         String token = request.getHeader(tokenType);
-        log.info("{} 타입의 토큰을 가져옵니다.", tokenType);
         if (StringUtils.hasText(token) && token.startsWith(BEARER_PREFIX)) {
             return token.substring(7);
         }else if(StringUtils.hasText(token) && tokenType.equals(REFRESH_TOKEN)){
