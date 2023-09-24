@@ -10,6 +10,7 @@ import com.onpurple.util.RedisUtil;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
@@ -158,7 +161,7 @@ public class JwtUtil {
 
     public void tokenSetHeaders(TokenDto tokenDto, HttpServletResponse response) {
         response.setHeader(ACCESS_TOKEN, tokenDto.getAccessToken());
-        response.setHeader(REFRESH_TOKEN, tokenDto.getRefreshToken());
+        addJwtToCookie(tokenDto.getRefreshToken(), response);
     }
 
     //JWT 토큰의 만료시간
@@ -178,6 +181,14 @@ public class JwtUtil {
         log.info("{} 회원의 토큰이 재발급 되었습니다.", user.getUsername());
         // header 로 토큰 send
         return tokenDto;
+    }
+
+    public void addJwtToCookie(String token, HttpServletResponse res){
+            Cookie cookie = new Cookie(REFRESH_TOKEN, token); // Name-Value
+            cookie.setPath("/");
+
+            // Response 객체에 Cookie 추가
+            res.addCookie(cookie);
     }
 
 
