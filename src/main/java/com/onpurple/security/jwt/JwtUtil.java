@@ -31,7 +31,6 @@ import static com.onpurple.enums.ExpireEnum.*;
 @RequiredArgsConstructor
 public class JwtUtil {
     private static final String BEARER_PREFIX = "Bearer ";
-
     public static final String ACCESS_TOKEN = "AccessToken";
     public static final String REFRESH_TOKEN = "RefreshToken";
     private static final String AUTHORITIES_KEY = "auth";

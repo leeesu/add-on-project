@@ -17,22 +17,18 @@ import java.util.stream.Collectors;
 
 import static com.onpurple.enums.SuccessCode.*;
 
-@Slf4j
 @RequiredArgsConstructor
 @Service
 public class LikeService {
 
     private final LikeRepository likeRepository;
-    private final PostRepository postRepository;
-    private final CommentRepository commentRepository;
-    private final UnLikeRepository unLikeRepository;
     private final UserRepository userRepository;
     private final ValidationUtil validationUtil;
 
     // 게시글 좋아요
     @Transactional
-    public ApiResponseDto<LikeResponseDto> PostLike(Long postId,
-                                   User user) {
+    public ApiResponseDto<LikeResponseDto> postLike(Long postId,
+                                                    User user) {
         // 게시글 유효성 체크
         Post post = validationUtil.validatePost(postId);
         // 본인에게 좋아요 할 수 없도록 예외처리
@@ -53,7 +49,6 @@ public class LikeService {
         } else {
             likeRepository.delete(liked);
             post.minusLike();
-            log.info("{} 번 게시글 좋아요가 취소되었습니다.",post.getId());
             return ApiResponseDto.success(SUCCESS_POST_LIKE_CANCEL.getMessage());
 
         }
@@ -61,8 +56,8 @@ public class LikeService {
 
     // 댓글 좋아요
     @Transactional
-    public ApiResponseDto<LikeResponseDto> CommentLike(Long commentId,
-                                      User user) {
+    public ApiResponseDto<LikeResponseDto> commentLike(Long commentId,
+                                                       User user) {
         // 댓글 유효성 체크
         Comment comment = validationUtil.validateComment(commentId);
         // 본인 댓글에 좋아요 할 수 없도록 예외처리
@@ -90,8 +85,8 @@ public class LikeService {
 
     //회원 좋아요
     @Transactional
-    public ApiResponseDto<MessageResponseDto> UserLike(Long targetId,
-                                   User user) {
+    public ApiResponseDto<MessageResponseDto> userLike(Long targetId,
+                                                       User user) {
 
         User target = validationUtil.validateProfile(targetId);
 

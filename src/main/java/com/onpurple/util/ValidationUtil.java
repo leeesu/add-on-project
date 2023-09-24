@@ -10,6 +10,7 @@ import com.onpurple.repository.CommentRepository;
 import com.onpurple.repository.PostRepository;
 import com.onpurple.repository.ReCommentRepository;
 import com.onpurple.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,17 +18,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class ValidationUtil {
-
-    public ValidationUtil(PostRepository postRepository,
-                          CommentRepository commentRepository,
-                          UserRepository userRepository,
-                          ReCommentRepository reCommentRepository) {
-        this.postRepository = postRepository;
-        this.commentRepository = commentRepository;
-        this.userRepository = userRepository;
-        this.reCommentRepository = reCommentRepository;
-    }
 
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;

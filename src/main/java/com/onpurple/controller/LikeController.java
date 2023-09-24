@@ -4,7 +4,6 @@ import com.onpurple.dto.response.*;
 import com.onpurple.security.UserDetailsImpl;
 import com.onpurple.service.LikeService;
 import com.onpurple.service.UnLikeService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,18 +24,18 @@ public class LikeController {
     // 게시글 좋아요
     @PostMapping( "/post/like/{postId}")
     public ApiResponseDto<LikeResponseDto> createPostLike(@PathVariable Long postId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return likeService.PostLike(postId, userDetails.getUser());
+        return likeService.postLike(postId, userDetails.getUser());
     }
     // 댓글 좋아요
     @PostMapping( "/comment/like/{commentId}")
     public ApiResponseDto<LikeResponseDto> createCommentLike(@PathVariable Long commentId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return likeService.CommentLike(commentId, userDetails.getUser());
+        return likeService.commentLike(commentId, userDetails.getUser());
     }
 
     // 회원 좋아요
     @PostMapping( "/user/like/{targetId}")
     public ApiResponseDto<MessageResponseDto> createUserLike(@PathVariable Long targetId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return likeService.UserLike(targetId, userDetails.getUser());
+        return likeService.userLike(targetId, userDetails.getUser());
     }
 
 
