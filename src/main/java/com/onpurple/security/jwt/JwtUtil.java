@@ -1,15 +1,18 @@
 package com.onpurple.security.jwt;
 
 import com.onpurple.dto.request.TokenDto;
+import com.onpurple.enums.RedisKeyEnum;
 import com.onpurple.exception.CustomException;
 import com.onpurple.enums.ErrorCode;
 import com.onpurple.model.Authority;
 import com.onpurple.model.User;
 import com.onpurple.repository.UserRepository;
+import com.onpurple.service.UserService;
 import com.onpurple.util.RedisUtil;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -20,11 +23,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
+import java.util.Optional;
 
 import static com.onpurple.enums.ExpireEnum.*;
+import static com.onpurple.enums.RedisKeyEnum.*;
 
 @Slf4j
 @Component
@@ -34,6 +43,8 @@ public class JwtUtil {
     public static final String ACCESS_TOKEN = "AccessToken";
     public static final String REFRESH_TOKEN = "RefreshToken";
     private static final String AUTHORITIES_KEY = "auth";
+
+    private final UserService userService;
 
     // 로그 설정
     public static final Logger logger = LoggerFactory.getLogger("JWT 로그");
@@ -63,6 +74,24 @@ public class JwtUtil {
         return null;
     }
 
+    /*
+     * httpOnly, Secure설정이 되어있는 쿠키 -> 자바스크립트에서 접근 불가
+     * RefreshToken을 가져와서 헤더로 보낸다.
+     */
+    public String refreshSetHeader(HttpServletRequest request, HttpServletResponse response) {
+
+        response.setHeader(REFRESH_TOKEN, refreshCookieRequest(request));
+        String refreshToken = resolveToken(request, REFRESH_TOKEN);
+        return refreshToken;
+    }
+    private String refreshCookieRequest(HttpServletRequest request){
+        return getRefreshTokenFromRequest(request);
+    }
+
+    /*
+    * AccessToken, RefreshToken을 생성하여 TokenDto에 담아서 반환
+     */
+
     public TokenDto createAllToken(String accessToken, String refreshToken) {
         TokenDto tokenDto = TokenDto
                 .builder()
@@ -72,43 +101,39 @@ public class JwtUtil {
         return tokenDto;
     }
 
-    // ACCESS_TOKEN 생성
-    public String createAccessToken(User user) {
-        Date date = new Date();
+    private String createToken(User user, long expireTimeMillis, String tokenType) {
+        Date now = new Date();
+        Date expireTime = new Date(now.getTime() + expireTimeMillis);
 
-        String accessToken = BEARER_PREFIX + Jwts
-                .builder()
+        String token = Jwts.builder()
                 .setSubject(user.getUsername())
                 .claim(AUTHORITIES_KEY, Authority.USER.toString())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(date.getTime() + ACCESS_EXPIRE.getTime()))
+                .setIssuedAt(now)
+                .setExpiration(expireTime)
                 .signWith(key, signatureAlgorithm).compact();
-        log.info("발급된 Access Token의 만료시간은 {} 입니다", new Date(date.getTime() + ACCESS_EXPIRE.getTime()));
 
-        return accessToken;
+        log.info("발급된 {}의 만료시간은 {} 입니다", tokenType, expireTime);
+
+        return token;
     }
 
-    // REFRESH_TOKEN 생성
-    public String createRefreshToken(User user) {
-        Date date = new Date();
+    public String createAccessToken(User user) {
+        return BEARER_PREFIX + createToken(user, ACCESS_EXPIRE.getTime(), ACCESS_TOKEN);
+    }
 
-        String refreshToken = Jwts
-                .builder()
-                .setSubject(user.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(date.getTime() + REFRESH_EXPIRE.getTime()))
-                .signWith(key, signatureAlgorithm).compact();
-        log.info("발급된 Refresh Token의 만료시간은 {} 입니다", new Date(date.getTime() + REFRESH_EXPIRE.getTime()));
-        // redis로 RTK 저장
-        log.info("{} redis로 저장될 토큰 확인", refreshToken);
-        redisUtil.saveToken(user.getUsername(), refreshToken, REFRESH_EXPIRE.getTime());
-        log.info("redis로 RefreshToken이 저장되었습니다.");
-        log.info("{} : redis에 저장된 토큰 확인", redisUtil.getToken(user.getUsername()));
+    public String createRefreshToken(User user) {
+        String refreshToken = createToken(user, REFRESH_EXPIRE.getTime(), REFRESH_TOKEN);
+
+        redisUtil.saveData(REFRESH_TOKEN_KEY.getDesc()+user.getUsername(), refreshToken,
+                REFRESH_EXPIRE.getTime());
+
+        log.info("Redis에 RefreshToken이 저장되었습니다.");
+        log.info("{} : Redis에 저장된 토큰 확인", redisUtil.getData(REFRESH_TOKEN_KEY.getDesc())+user.getUsername());
 
         return refreshToken;
     }
 
-
+    //AccessToken, RefreshToken 검증
     public boolean validateToken(String token) {
 
         try {
@@ -135,7 +160,12 @@ public class JwtUtil {
 
         //DB에 저장한 토큰 비교
         Claims info = getUserInfoFromToken(token);
-        String redisRefreshToken = redisUtil.getToken(info.getSubject());
+        String redisRefreshToken = redisUtil.getData(REFRESH_TOKEN_KEY.getDesc()+info.getSubject());
+        return refreshRedisValidate(redisRefreshToken, token);
+
+    }
+    private String refreshRedisValidate(String redisRefreshToken, String token) {
+
         if(redisRefreshToken.isEmpty()) {
             log.error("[ERROR] Redis에 RefreshToken이 존재하지 않습니다.");
             throw new CustomException(ErrorCode.REDIS_REFRESH_TOKEN_NOT_FOUND);
@@ -158,7 +188,9 @@ public class JwtUtil {
 
     public void tokenSetHeaders(TokenDto tokenDto, HttpServletResponse response) {
         response.setHeader(ACCESS_TOKEN, tokenDto.getAccessToken());
-        response.setHeader(REFRESH_TOKEN, tokenDto.getRefreshToken());
+        // 토큰 지워주기 -> 어차피 Redis에 새로운 토큰이 발급 되기 떄문에 굳이 헤더로 필요없는 토큰이 가는걸 막는 코드
+        response.setHeader(REFRESH_TOKEN, null);
+        addJwtToCookie(tokenDto.getRefreshToken(), response);
     }
 
     //JWT 토큰의 만료시간
@@ -175,10 +207,81 @@ public class JwtUtil {
                 ()->new CustomException(ErrorCode.USER_NOT_FOUND)
         );
         TokenDto tokenDto = createAllToken(createAccessToken(user),createRefreshToken(user));
-        log.info("{} 회원의 토큰이 재발급 되었습니다.", user.getUsername());
+        log.info("{} 회원의 토큰이 발급 되었습니다.", user.getUsername());
         // header 로 토큰 send
         return tokenDto;
     }
 
+    // JWT Cookie 에 저장
+    public void addJwtToCookie(String token, HttpServletResponse res) {
+        try {
+            token = URLEncoder.encode(token, StandardCharsets.UTF_8.toString());
+            Cookie cookie = new Cookie(REFRESH_TOKEN, token);
+            cookie.setPath("/");
+            cookie.setHttpOnly(true);
+            cookie.setSecure(true);
+            res.addCookie(cookie);
+        } catch (UnsupportedEncodingException e) {
+            log.error("Unsupported Encoding Exception: ", e.getMessage());
+            throw new CustomException(ErrorCode.UNSUPPORTED_ENCODING_ERROR);
+        }
+    }
 
+    // HttpServletRequest 에서 Cookie Value : JWT 가져오기
+    public String getRefreshTokenFromRequest(HttpServletRequest req) {
+        Cookie[] cookies = req.getCookies();
+        if(cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals(REFRESH_TOKEN)) {
+                    try {
+                        return URLDecoder.decode(cookie.getValue(), StandardCharsets.UTF_8.toString());
+                    } catch (UnsupportedEncodingException e) {
+                        log.error("Unsupported Encoding Exception: ", e.getMessage());
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    public TokenDto handleRefreshToken(String refreshToken, HttpServletRequest request) {
+
+        try {
+            String validRefreshTokn = checkAndValidateToken(refreshToken);
+            Claims userInfo = extractUserInfoFromToken(validRefreshTokn);
+
+            return reissueUserTokens(userInfo.getSubject());
+
+        } catch (Exception e) {
+
+            log.error("회원 토큰 재발급에 실패했습니다.", e.getMessage());
+
+            // 재발급 실패시 로그아웃
+            userService.logout(request);
+            throw new CustomException(ErrorCode.REQUEST_FAILED_ERROR);
+        }
+    }
+
+    // 1. 토큰의 존재 확인 및 유효성 검증
+    public String checkAndValidateToken(String refreshToken) {
+        if (StringUtils.hasText(refreshToken)) {
+            log.info("[SUCCESS] RefreshToken이 존재합니다.");
+            refreshToken = validateRefreshToken(refreshToken);
+            log.info("[SUCCESS] RefreshToken 검증에 성공했습니다");
+            return refreshToken;
+        } else {
+            log.error("Refresh 토큰이 존재하지 않습니다.");
+            throw new CustomException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);
+        }
+    }
+
+    // 2. 토큰에서 사용자 정보 추출
+    public Claims extractUserInfoFromToken(String token) {
+        return getUserInfoFromToken(token);
+    }
+    // 3. 토큰 재발급
+    public TokenDto reissueUserTokens(String username) {
+        TokenDto tokenDto = reissueToken(username);
+        log.info("{} 회원의 토큰이 발급 되었습니다.", username);
+        return tokenDto;
+    }
 }

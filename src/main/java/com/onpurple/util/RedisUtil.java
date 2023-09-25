@@ -6,8 +6,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.onpurple.enums.ExpireEnum.*;
-
 @Component
 @RequiredArgsConstructor
 public class RedisUtil {
@@ -15,20 +13,20 @@ public class RedisUtil {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    public void saveToken(String key, String value, long time) {
+    public void saveData(String key, String value, long time) {
         redisTemplate.opsForValue().set(key, value);
         redisTemplate.expire(key, time, TimeUnit.MILLISECONDS);
     }
 
-    public String getToken(String key) {
+    public String getData(String key) {
         return (String) redisTemplate.opsForValue().get(key);
     }
 
-    public boolean checkValidateToken(String key) {
+    public boolean checkValidateData(String key) {
         return redisTemplate.hasKey(key);
     }
 
-    public void deleteToken(String key) {
+    public void deleteData(String key) {
         redisTemplate.delete(key);
     }
 }

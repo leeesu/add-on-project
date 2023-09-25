@@ -71,13 +71,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         User user = userRepository.findByUsername(username).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
-
-        TokenDto tokenDto = jwtUtil.createAllToken(jwtUtil.createAccessToken(user), jwtUtil.createRefreshToken(user));
-        // redis로 RTK 저장
-        redisUtil.saveToken(user.getUsername(), tokenDto.getRefreshToken(), REFRESH_EXPIRE.getTime());
+        // 토큰 발급
+        TokenDto tokenDto = jwtUtil.reissueToken(username);
         // header 로 토큰 send
-        jwtUtil.tokenSetHeaders(tokenDto, response);
-
+        jwtUtil.tokenSetHeaders(tokenDto, response); // AccessToken header, RefreshToken cookie
+        // 응답
         sendJsonResponse(response, user);
     }
     private void sendJsonResponse(HttpServletResponse response, User user) throws IOException {

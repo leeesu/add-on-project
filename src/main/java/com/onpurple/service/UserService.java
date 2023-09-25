@@ -6,7 +6,7 @@ import com.onpurple.dto.response.MessageResponseDto;
 import com.onpurple.dto.response.ResponseDto;
 import com.onpurple.dto.response.UserResponseDto;
 import com.onpurple.enums.ErrorCode;
-import com.onpurple.enums.SuccessCode;
+import com.onpurple.enums.RedisKeyEnum;
 import com.onpurple.exception.CustomException;
 import com.onpurple.model.Authority;
 import com.onpurple.model.User;
@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+import static com.onpurple.enums.RedisKeyEnum.*;
 import static com.onpurple.enums.SuccessCode.*;
 
 @RequiredArgsConstructor
@@ -165,7 +166,7 @@ public class UserService {
     //  로그아웃. 토큰을 확인하여 일치할 경우 로그인 된 유저의 이미지와 토큰을 삭제.
     public ApiResponseDto<MessageResponseDto> logout(HttpServletRequest request) {
         // 리프레시 토큰 삭제, AccessToken 만료시간까지 저장
-        handleLogoutToken(request);
+        logoutBlackListToken(request);
         return ApiResponseDto.success("로그아웃이 완료되었습니다.");
     }
 
@@ -183,16 +184,15 @@ public class UserService {
     }
 
     @Transactional
-    public void handleLogoutToken(HttpServletRequest request) {
+    public void logoutBlackListToken(HttpServletRequest request) {
         String accessToken = jwtUtil.resolveToken(request, JwtUtil.ACCESS_TOKEN);
         Claims info = jwtUtil.getUserInfoFromToken(accessToken);
         // 엑세스 토큰 남은시간
         long remainMilliSeconds = jwtUtil.getExpiration(accessToken);
         // 액세스 토큰 만료시점 까지 저장
-        redisUtil.saveToken(accessToken, accessToken, remainMilliSeconds
-        );
+        redisUtil.saveData(accessToken, accessToken, remainMilliSeconds);
         // refreshToken 삭제
-        redisUtil.deleteToken(info.getSubject());
+        redisUtil.deleteData(REFRESH_TOKEN_KEY.getDesc()+info.getSubject());
     }
 
 }
