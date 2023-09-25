@@ -30,6 +30,7 @@ public enum ErrorCode {
     REDIS_REFRESH_TOKEN_NOT_FOUND("Redis에서 RefreshToken을 찾을 수 없습니다."),
     REFRESH_TOKEN_NOT_FOUND("리프레시 토큰을 찾을 수 없습니다."),
     PROFILE_NOT_FOUND("프로필을 찾을 수 없습니다."),
+    TOKEN_REISSUE_SCHEDULING_FAILURE("토큰 재발급 스케줄링에 실패했습니다."),
 
     // Image
     IMAGE_NOT_FOUND("이미지를 찾을 수 없습니다."),
@@ -49,7 +50,7 @@ public enum ErrorCode {
     NOT_FOUND_RECOMMENT("대댓글을 찾을 수 없습니다."),
 
 
-
+    // Chat
     MATCHING_NOT_FOUND("회원과의 매칭 정보를 찾을 수 없습니다."),
     CHAT_ROOM_ALREADY_EXISTS("채팅방이 이미 존재합니다."),
     CHAT_ROOM_NOT_FOUND("채팅방을 찾을 수 없습니다."),
@@ -62,8 +63,11 @@ public enum ErrorCode {
 
     // Report
     INVALID_SELF_REPORT("신고 대상이 올바르지 않습니다."),
-    REPORT_POST_NOT_FOUND("신고글을 찾을 수 없습니다.");
+    REPORT_POST_NOT_FOUND("신고글을 찾을 수 없습니다."),
 
+
+    UNSUPPORTED_ENCODING_ERROR("인코딩을 지원하지 않는 문자열입니다."),
+;
 
     private final String message;
 }
