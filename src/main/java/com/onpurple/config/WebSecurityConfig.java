@@ -6,13 +6,13 @@ import com.onpurple.repository.UserRepository;
 import com.onpurple.security.UserDetailsServiceImpl;
 import com.onpurple.security.jwt.JwtAuthenticationFilter;
 import com.onpurple.security.jwt.JwtAuthorizationFilter;
-import com.onpurple.security.jwt.JwtUtil;
+import com.onpurple.security.jwt.JwtRefreshTokenUtil;
+import com.onpurple.security.jwt.JwtTokenUtil;
 import com.onpurple.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -30,7 +30,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class WebSecurityConfig {
 
-    private final JwtUtil jwtUtil;
+    private final JwtTokenUtil jwtTokenUtil;
+    private final JwtRefreshTokenUtil jwtRefreshTokenUtil;
     private final UserDetailsServiceImpl userDetailsService;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final UserRepository userRepository;
@@ -46,7 +47,7 @@ public class WebSecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil, userRepository, redisUtil);
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtTokenUtil, userRepository, redisUtil);
         filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
         return filter;
     }
@@ -54,7 +55,7 @@ public class WebSecurityConfig {
 
     @Bean
     public JwtAuthorizationFilter jwtAuthorizationFilter() {
-        return new JwtAuthorizationFilter(jwtUtil, userDetailsService,redisUtil);
+        return new JwtAuthorizationFilter(jwtTokenUtil, userDetailsService,redisUtil,jwtRefreshTokenUtil);
     }
 
     private static final String[] PERMIT = {

@@ -22,19 +22,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.io.IOException;
 
-import static com.onpurple.enums.ExpireEnum.REFRESH_EXPIRE;
-
 @Slf4j(topic = "로그인 및 JWT 생성")
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-    private final JwtUtil jwtUtil;
+    private final JwtTokenUtil jwtTokenUtil;
     private final UserRepository userRepository;
     private final RedisUtil redisUtil;
 
 
     public JwtAuthenticationFilter(
-            JwtUtil jwtUtil, UserRepository userRepository,
+            JwtTokenUtil jwtTokenUtil, UserRepository userRepository,
             RedisUtil redisUtil) {
-        this.jwtUtil = jwtUtil;
+        this.jwtTokenUtil = jwtTokenUtil;
         this.userRepository = userRepository;
         this.redisUtil = redisUtil;
         // 로그인 처리를 여기서 처리한다.
@@ -72,9 +70,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
         // 토큰 발급
-        TokenDto tokenDto = jwtUtil.reissueToken(username);
+        TokenDto tokenDto = jwtTokenUtil.reissueToken(username);
         // header 로 토큰 send
-        jwtUtil.tokenSetHeaders(tokenDto, response); // AccessToken header, RefreshToken cookie
+        jwtTokenUtil.tokenSetHeaders(tokenDto, response); // AccessToken header, RefreshToken cookie
         // 응답
         sendJsonResponse(response, user);
     }
