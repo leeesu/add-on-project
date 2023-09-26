@@ -29,6 +29,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     private final JwtTokenUtil jwtTokenUtil;
     private final UserDetailsServiceImpl userDetailsService;
     private final RedisUtil redisUtil;
+    private final JwtRefreshTokenUtil jwtRefreshTokenUtil;
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
@@ -38,8 +39,8 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             if (!jwtTokenUtil.validateToken(accessToken)) {
                 log.warn("[FAIL] AccessToken 검증 실패했습니다.");
                 // 쿠키에서 토큰 추출후, 헤더로 토큰보내서 가져오기
-                String refreshToken = jwtTokenUtil.refreshSetHeader(req, res);
-                TokenDto tokenDto = jwtTokenUtil.handleRefreshToken(refreshToken, req);
+                String refreshToken = jwtRefreshTokenUtil.refreshSetHeader(req, res);
+                TokenDto tokenDto = jwtRefreshTokenUtil.handleRefreshToken(refreshToken, req);
                 accessToken = tokenDto.getAccessToken().substring(7);
                 jwtTokenUtil.tokenSetHeaders(tokenDto, res);
                 log.info("[SUCCESS] Access/Refresh 토큰 재발급에 성공했습니다.");
