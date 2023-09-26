@@ -6,7 +6,6 @@ import com.onpurple.repository.UserRepository;
 import com.onpurple.security.UserDetailsServiceImpl;
 import com.onpurple.security.jwt.JwtAuthenticationFilter;
 import com.onpurple.security.jwt.JwtAuthorizationFilter;
-import com.onpurple.security.jwt.JwtRefreshTokenUtil;
 import com.onpurple.security.jwt.JwtTokenUtil;
 import com.onpurple.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +30,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class WebSecurityConfig {
 
     private final JwtTokenUtil jwtTokenUtil;
-    private final JwtRefreshTokenUtil jwtRefreshTokenUtil;
     private final UserDetailsServiceImpl userDetailsService;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final UserRepository userRepository;
@@ -55,7 +53,7 @@ public class WebSecurityConfig {
 
     @Bean
     public JwtAuthorizationFilter jwtAuthorizationFilter() {
-        return new JwtAuthorizationFilter(jwtTokenUtil, userDetailsService,redisUtil,jwtRefreshTokenUtil);
+        return new JwtAuthorizationFilter(jwtTokenUtil, userDetailsService,redisUtil);
     }
 
     private static final String[] PERMIT = {
