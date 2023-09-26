@@ -6,11 +6,11 @@ import com.onpurple.dto.response.MessageResponseDto;
 import com.onpurple.dto.response.ResponseDto;
 import com.onpurple.dto.response.UserResponseDto;
 import com.onpurple.enums.ErrorCode;
+import com.onpurple.event.TokenReissueFailedEvent;
 import com.onpurple.exception.CustomException;
 import com.onpurple.model.Authority;
 import com.onpurple.model.User;
 import com.onpurple.repository.UserRepository;
-import com.onpurple.security.jwt.JwtRefreshTokenUtil;
 import com.onpurple.security.jwt.JwtTokenUtil;
 import com.onpurple.util.RedisUtil;
 import com.onpurple.util.s3.AwsS3UploadService;
@@ -18,6 +18,9 @@ import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.EventListener;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,13 +33,12 @@ import static com.onpurple.enums.SuccessCode.*;
 @RequiredArgsConstructor
 @Service
 public class UserService {
-
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RedisUtil redisUtil;
     private final AwsS3UploadService awsS3UploadService;
     private final JwtTokenUtil jwtTokenUtil;
-    private final JwtRefreshTokenUtil jwtRefreshTokenUtil;
+
     private static final String ADMIN_TOKEN = ("AAABnvxRVklrnYxKZ0aHgTBcXukeZygoC");
 
     //    아이디 체크. DB에 저장되어 있는 usernaeme을 찾아 유저가 존재한다면 에러메시지 전송)
@@ -103,7 +105,7 @@ public class UserService {
 
 
 //        현재 서비스에서 회원가입 이후 바로 서비스를 이용할 수 있도록 설정하였기에 회원가입이 진행될 때 토큰이 발행되도록 설정
-        TokenDto tokenDto = jwtTokenUtil.createAllToken(jwtTokenUtil.createAccessToken(user), jwtRefreshTokenUtil.createRefreshToken(user));
+        TokenDto tokenDto = jwtTokenUtil.createAllToken(jwtTokenUtil.createAccessToken(user), jwtTokenUtil.createRefreshToken(user));
         jwtTokenUtil.tokenSetHeaders(tokenDto, response);
 
         if (user.getRole().equals(Authority.ADMIN)) {
