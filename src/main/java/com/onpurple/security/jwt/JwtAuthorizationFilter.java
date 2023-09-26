@@ -20,32 +20,33 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-import static com.onpurple.security.jwt.JwtUtil.ACCESS_TOKEN;
+import static com.onpurple.security.jwt.JwtTokenUtil.ACCESS_TOKEN;
 
 @RequiredArgsConstructor
 @Slf4j(topic = "JWT 검증 및 인가")
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
-    private final JwtUtil jwtUtil;
+    private final JwtTokenUtil jwtTokenUtil;
     private final UserDetailsServiceImpl userDetailsService;
     private final RedisUtil redisUtil;
+    private final JwtRefreshTokenUtil jwtRefreshTokenUtil;
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
         // 토큰 검증 AccessToken
-        String accessToken = jwtUtil.resolveToken(req, ACCESS_TOKEN);
+        String accessToken = jwtTokenUtil.resolveToken(req, ACCESS_TOKEN);
         if (StringUtils.hasText(accessToken) && !(redisUtil.checkValidateData(accessToken))) {
-            if (!jwtUtil.validateToken(accessToken)) {
+            if (!jwtTokenUtil.validateToken(accessToken)) {
                 log.warn("[FAIL] AccessToken 검증 실패했습니다.");
                 // 쿠키에서 토큰 추출후, 헤더로 토큰보내서 가져오기
-                String refreshToken = jwtUtil.refreshSetHeader(req, res);
-                TokenDto tokenDto = jwtUtil.handleRefreshToken(refreshToken, req);
+                String refreshToken = jwtRefreshTokenUtil.refreshSetHeader(req, res);
+                TokenDto tokenDto = jwtRefreshTokenUtil.handleRefreshToken(refreshToken, req);
                 accessToken = tokenDto.getAccessToken().substring(7);
-                jwtUtil.tokenSetHeaders(tokenDto, res);
+                jwtTokenUtil.tokenSetHeaders(tokenDto, res);
                 log.info("[SUCCESS] Access/Refresh 토큰 재발급에 성공했습니다.");
             }
 
-            Claims info = jwtUtil.getUserInfoFromToken(accessToken);
+            Claims info = jwtTokenUtil.getUserInfoFromToken(accessToken);
 
             try {
                 setAuthentication(info.getSubject());
