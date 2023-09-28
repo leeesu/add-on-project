@@ -1,9 +1,7 @@
 package com.onpurple.controller;
 
 import com.onpurple.dto.request.ChatMessageRequestDto;
-import com.onpurple.dto.response.ChatMessageResponseDto;
-import com.onpurple.dto.response.ChatRoomDto;
-import com.onpurple.dto.response.ResponseDto;
+import com.onpurple.dto.response.*;
 import com.onpurple.security.UserDetailsImpl;
 import com.onpurple.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/chat")
 @RequiredArgsConstructor
 public class ChatRoomController {
     private final ChatRoomService chatRoomService;
@@ -31,15 +29,15 @@ public class ChatRoomController {
     }
 
     // 사용자 관련 채팅방 선택 조회
-    @GetMapping("room/{roomId}")
+    @GetMapping("/room/{roomId}")
     public ChatRoomDto findRoom(@PathVariable String roomId,
                                 @AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long userId) {
         return chatRoomService.findRoom(roomId, userDetails.getUser(), userId);
     }
 
     // 채팅방 삭제
-    @DeleteMapping("room/{id}")
-    public ResponseDto deleteRoom(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    @DeleteMapping("/room/{id}")
+    public ApiResponseDto<MessageResponseDto> deleteRoom(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return chatRoomService.deleteRoom(id, userDetails.getUser());
     }
 }

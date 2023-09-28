@@ -31,6 +31,11 @@ public class UnLikeService {
         this.validationUtil = validationUtil;
     }
 
+    /*
+    * 싫어요 기능
+    * @param targetId, user
+    * @return ApiResponseDto<MessageResponseDto>
+     */
     public ApiResponseDto<MessageResponseDto> UserUnLike(Long targetId,
                                                             User user) {
         // 회원 프로필이 존재하는지 유효성 체크
@@ -57,8 +62,12 @@ public class UnLikeService {
         }
     }
 
-    //    내가 싫어요 한 사람 리스트 조회.
-//    264~295의 내가 좋아요한  사람 리스트 조회와 동일한 로직으로 구현.
+    /*
+    * 내가 싫어요 한 사람 리스트 조회
+    * @param user
+    * @return ApiResponseDto<List<UnLikesResponseDto>>
+    * 좋아요한  사람 리스트 조회와 동일한 로직으로 구현.
+     */
     @Transactional(readOnly = true)
     public ApiResponseDto<List<UnLikesResponseDto>> getUnLike(User user) {
         List<UnLike> unLikesList = unLikeRepository.findAllByUser(user);

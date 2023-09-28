@@ -30,6 +30,11 @@ public class ReCommentService {
     private final ValidationUtil validationUtil;
     private final ReCommentRepository reCommentRepository;
 
+    /*
+    * 대댓글 작성
+    * @param commentId, reCommentRequestDto, user
+    * @return ApiResponseDto<ReCommentResponseDto>
+     */
     @Transactional
     public ApiResponseDto<ReCommentResponseDto> createReComment(Long commentId, ReCommentRequestDto requestDto, User user) {
 
@@ -54,6 +59,12 @@ public class ReCommentService {
                 .build();
     }
 
+    /*
+    * 대댓글 조회
+    * @param commentId
+    * @return ApiResponseDto<List<ReCommentResponseDto>>
+     */
+
     @Transactional(readOnly = true)
     public ApiResponseDto<List<ReCommentResponseDto>> getAllReCommentsByComment(Long commentId) {
 
@@ -75,7 +86,11 @@ public class ReCommentService {
 
     }
 
-
+    /*
+    * 대댓글 수정
+    * @param reCommentId, reCommentRequestDto, user
+    * @return ApiResponseDto<ReCommentResponseDto>
+     */
     @Transactional
     public ApiResponseDto<ReCommentResponseDto> updateReComment(Long reCommentId, ReCommentRequestDto requestDto, User user) {
 
@@ -91,6 +106,11 @@ public class ReCommentService {
         );
     }
 
+    /*
+    * 대댓글 삭제
+    * @param reCommentId, user
+    * @return ApiResponseDto<MessageResponseDto>
+     */
     @Transactional
     public ApiResponseDto<MessageResponseDto> deleteReComment(Long reCommentId, User user) {
 
