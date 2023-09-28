@@ -28,6 +28,11 @@ public class CommentService {
   private final CommentRepository commentRepository;
   private final ValidationUtil validationUtil;
 
+  /*
+    * 댓글 작성
+    * @param postId, commentRequestDto, user
+    * @return ApiResponseDto<CommentResponseDto>
+   */
   @Transactional
   public ApiResponseDto<CommentResponseDto> createComment(Long postId, CommentRequestDto commentRequestDto, User user) {
     // post 유효성 검사
@@ -47,7 +52,11 @@ public class CommentService {
             .comment(commentRequestDto.getComment())
             .build();
   }
-
+  /*
+  * 댓글 조회
+  * @param postId
+  * @return ApiResponseDto<List<CommentResponseDto>>
+   */
   @Transactional(readOnly = true)
   public ApiResponseDto<List<CommentResponseDto>> getAllCommentsByPost(Long postId) {
     Post post = validationUtil.validatePost(postId);
@@ -62,6 +71,12 @@ public class CommentService {
             SUCCESS_COMMENT_GET_ALL.getMessage(),
             commentResponseDtoList);
   }
+
+  /*
+  * 댓글 수정
+  * @param commentId, commentRequestDto, user
+  * @return ApiResponseDto<CommentResponseDto>
+   */
 
   @Transactional
   public ApiResponseDto<CommentResponseDto> updateComment(Long commentId, CommentRequestDto requestDto, User user) {
@@ -78,7 +93,11 @@ public class CommentService {
       return ApiResponseDto.success(SUCCESS_COMMENT_EDIT.getMessage(),CommentResponseDto.fromEntity(comment));
   }
 
-
+  /*
+  * 댓글 삭제
+  * @param commentId, user
+  * @return ApiResponseDto<MessageResponseDto>
+   */
   @Transactional
   public ApiResponseDto<MessageResponseDto> deleteComment(Long commentId, User user) {
     Comment comment = validationUtil.validateComment(commentId);

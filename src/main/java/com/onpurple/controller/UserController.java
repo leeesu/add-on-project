@@ -38,7 +38,7 @@ public class UserController {
         validationUtil.validateMultipartFile(multipartFiles);
         String imgPaths = s3Service.uploadOne(multipartFiles);
 
-        return userService.createUser(requestDto, userInfoRequestDto, imgPaths, response);
+        return userService.createUser(requestDto, userInfoRequestDto, imgPaths);
     }
 
     // login Filter단에서 이루어지게 구현

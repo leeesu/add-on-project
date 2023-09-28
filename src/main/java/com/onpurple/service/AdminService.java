@@ -31,9 +31,13 @@ public class AdminService {
 
     private final ValidationUtil validationUtil;
 
-//    관리자 권한으로 게시글 삭제.
-//    토큰을 통해 해당 토큰의 정보를 확인. 이때 해당 정보의 Role 설정이 Admin일 경우  게시글 삭제가 가능하도록 설정.
-//    반대로 해당 정보의 Role 설정이 User인 경우 게시글 삭제가 진행되지 않도록 에러메시지 전송.
+    /*
+    * 관리자 게시글 삭제
+    * @param user, postId
+    * @return ApiResponseDto<MessageResponseDto>
+    * 토큰을 통해 해당 토큰의 정보를 확인. 이때 해당 정보의 Role 설정이 Admin일 경우  게시글 삭제가 가능하도록 설정.
+    * 반대로 해당 정보의 Role 설정이 User인 경우 게시글 삭제가 진행되지 않도록 에러메시지 전송.
+     */
     @Transactional
     public ApiResponseDto<MessageResponseDto> deletePostByAdmin(User user, Long postId) {
 
@@ -51,8 +55,12 @@ public class AdminService {
         );
     }
 
-//    관리자 권한으로 댓글 삭제.
-//    관리자 권한으로 게시글 삭제와 동일한 로직으로 구현.
+    /*
+    * 관리자 댓글 삭제
+    * @param user, commentId
+    * @return ApiResponseDto<MessageResponseDto>
+    * 관리자 권한으로 게시글 삭제와 동일한 로직으로 구현.
+     */
     @Transactional
     public ApiResponseDto<MessageResponseDto> deleteCommentByAdmin(User user, Long commentId) {
 

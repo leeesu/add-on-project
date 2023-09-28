@@ -62,7 +62,7 @@ public class UserService {
     //    회원가입. SingupRequsetDto에 선언한 내용을 입력하여 회원가입
     @Transactional
     public ApiResponseDto<UserResponseDto> createUser(SignupRequestDto requestDto, UserInfoRequestDto userInfoRequestDto,
-                                                      String imgPaths, HttpServletResponse response) {
+                                                      String imgPaths) {
         if (!requestDto.getPassword().equals(requestDto.getPasswordConfirm())) {
             throw new CustomException(ErrorCode.PASSWORD_CONFIRM_NOT_MATCHED);
         }
@@ -105,8 +105,7 @@ public class UserService {
 
 
 //        현재 서비스에서 회원가입 이후 바로 서비스를 이용할 수 있도록 설정하였기에 회원가입이 진행될 때 토큰이 발행되도록 설정
-        TokenDto tokenDto = jwtTokenUtil.createAllToken(jwtTokenUtil.createAccessToken(user), jwtTokenUtil.createRefreshToken(user));
-        jwtTokenUtil.tokenSetHeaders(tokenDto, response);
+        jwtTokenUtil.reissueToken(user.getUsername());
 
         if (user.getRole().equals(Authority.ADMIN)) {
             return ApiResponseDto.success(SUCCESS_ADMIN_SIGNUP.getMessage());

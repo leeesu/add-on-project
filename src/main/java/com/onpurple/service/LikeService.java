@@ -25,7 +25,12 @@ public class LikeService {
     private final UserRepository userRepository;
     private final ValidationUtil validationUtil;
 
-    // 게시글 좋아요
+
+    /*
+    * 게시글 좋아요
+    * @param postId, user
+    * @return ApiResponseDto<LikeResponseDto>
+     */
     @Transactional
     public ApiResponseDto<LikeResponseDto> postLike(Long postId,
                                                     User user) {
@@ -54,7 +59,12 @@ public class LikeService {
         }
     }
 
-    // 댓글 좋아요
+    /*
+    * 댓글 좋아요
+    * @param commentId, user
+    * @return ApiResponseDto<LikeResponseDto>
+     */
+
     @Transactional
     public ApiResponseDto<LikeResponseDto> commentLike(Long commentId,
                                                        User user) {
@@ -83,7 +93,12 @@ public class LikeService {
         }
     }
 
-    //회원 좋아요
+
+    /*
+    * 회원 좋아요
+    * @param targetId, user
+    * @return ApiResponseDto<MessageResponseDto>
+     */
     @Transactional
     public ApiResponseDto<MessageResponseDto> userLike(Long targetId,
                                                        User user) {
@@ -111,6 +126,11 @@ public class LikeService {
     }
 
     // 매칭 JPQL QUERY방식
+    /*
+    * 매칭 조회
+    * @param userId, user
+    * @return ApiResponseDto<List<UserResponseDto>>
+     */
     @Transactional(readOnly = true)
     public ApiResponseDto<List<UserResponseDto>> likeCheck(Long userId, User user) {
         List<Integer> likeList = likeRepository.likeToLikeUserId(userId)

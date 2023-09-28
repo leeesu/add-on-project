@@ -192,6 +192,7 @@ public class JwtTokenUtil {
     }
     // 쿠키에서 RefreshToken 가져오기
     private String refreshCookieRequest(HttpServletRequest request){
+
         return getRefreshTokenFromRequest(request);
     }
 

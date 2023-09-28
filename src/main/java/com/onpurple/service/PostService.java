@@ -37,9 +37,11 @@ public class PostService {
     private final ImageUtil imageUtil;
     private final ValidationUtil validationUtil;
 
-
-
-    // 게시글 작성
+    /*
+    * 게시글 작성
+    * @param requestDto, user, imgPaths
+    * @return ApiResponseDto<PostResponseDto>
+     */
     @Transactional
     public ApiResponseDto<PostResponseDto> createPost(PostRequestDto requestDto,
                                                       User user, List<String> imgPaths) {
@@ -66,8 +68,11 @@ public class PostService {
                 .build();
     }
 
-
-    // 카테고리 전체 게시글 조회
+    /*
+    * 카테고리 전체 게시글 조회
+    * @param category, pageable
+    * @return ApiResponseDto<Slice<PostResponseDto>>
+     */
     @Transactional(readOnly = true)
     public ApiResponseDto<Slice<PostResponseDto>> getAllPostCategory(PostCategory category, Pageable pageable){
 
@@ -82,8 +87,11 @@ public class PostService {
 
     }
 
-
-    // 카테고리 검색
+    /*
+    * 카테고리 검색
+    * @param category, keyword, pageable
+    * @return ApiResponseDto<Slice<PostResponseDto>>
+     */
     @Transactional(readOnly = true)
     public ApiResponseDto<Slice<PostResponseDto>> getAllPostCategorySearch(
             PostCategory category, String keyword, Pageable pageable) {
@@ -101,8 +109,11 @@ public class PostService {
     }
 
 
-
-    // 게시글 단건 조회
+    /*
+    * 게시글 단건 조회
+    * @param postId
+    * @return ApiResponseDto<PostResponseDto>
+     */
     @Transactional// readOnly설정시 데이터가 Mapping되지 않는문제로 해제
     public ApiResponseDto<PostResponseDto> getPost(Long postId) {
         Post post = validationUtil.validatePost(postId);
@@ -122,7 +133,11 @@ public class PostService {
         );
     }
 
-    //게시글 업데이트
+    /*
+    * 게시글 업데이트
+    * @param postId, requestDto, user, imgPaths
+    * @return ApiResponseDto<PostResponseDto>
+     */
     @Transactional
     public ApiResponseDto<PostResponseDto> updatePost(Long postId,
                                                    PostRequestDto requestDto,
@@ -142,7 +157,11 @@ public class PostService {
                 PostResponseDto.fromEntity(post, newImgList)
         );
     }
-    //게시글 삭제
+    /*
+    * 게시글 삭제
+    * @param postId, user
+    * @return ApiResponseDto<MessageResponseDto>
+     */
     @Transactional
     public ApiResponseDto<MessageResponseDto> deletePost(Long postId, User user) {
 
@@ -154,7 +173,6 @@ public class PostService {
         imageUtil.deleteImageList(post, imgList);
         return ApiResponseDto.success(SUCCESS_POST_DELETE.getMessage());
     }
-
 
     public void validatePostUser(Post post, User user) {
         if (post.validateUser(user)) {

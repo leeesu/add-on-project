@@ -35,7 +35,11 @@ public class ReportService {
     private final UserRepository userRepository;
     private final AwsS3UploadService awsS3UploadService;
 
-    // 신고글 작성
+    /*
+    * 신고글 작성
+    * @param requestDto, user, imgPaths
+    * @return ApiResponseDto<ReportResponseDto>
+     */
     @Transactional
     public ApiResponseDto<ReportResponseDto> createReport(ReportRequestDto requestDto,
                                           User user,
@@ -71,7 +75,11 @@ public class ReportService {
         return report;
     }
 
-    // 신고글 단건 조회
+    /*
+    * 신고글 단건 조회
+    * @param reportId
+    * @return ApiResponseDto<ReportResponseDto>
+     */
     @Transactional// readOnly설정시 데이터가 Mapping되지 않는문제로 해제
     public ApiResponseDto<ReportResponseDto> getReport(Long reportId) {
         Report report = isPresentReport(reportId);
@@ -85,7 +93,10 @@ public class ReportService {
         );
     }
 
-    // 전체 신고글 조회
+    /*
+    * 신고글 전체 조회
+    * @return ApiResponseDto<List<ReportResponseDto>>
+     */
     @Transactional(readOnly = true)
     public ApiResponseDto<List<ReportResponseDto>> getAllReport() {
         List<Report> reportList = reportRepository.findAllByOrderByModifiedAtDesc();
@@ -101,7 +112,11 @@ public class ReportService {
                 reportResponseDto);
 
     }
-
+    /*
+    * 신고글 삭제
+    * @param reportId, user
+    * @return ApiResponseDto<MessageResponseDto>
+     */
     @Transactional
     public ApiResponseDto<MessageResponseDto> deleteReport(Long reportId, User user) {
 
