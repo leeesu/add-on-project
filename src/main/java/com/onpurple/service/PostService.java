@@ -123,7 +123,7 @@ public class PostService {
                 .collect(Collectors.toList());
 
         // 단건 조회 조회수 증가
-        post.updateViewCount();
+        viewCount(post);
         List<String> imgList = imageUtil.getListImage(post);
 
         return ApiResponseDto.success(
@@ -186,6 +186,10 @@ public class PostService {
             log.error("[FAIL] {} 카테고리가 존재하지 않습니다.", category);
             throw new CustomException(ErrorCode.POST_CATEGORY_NOT_FOUND);
         }
+    }
+
+    public void viewCount(Post post) {
+        post.updateViewCount();
     }
 
 
