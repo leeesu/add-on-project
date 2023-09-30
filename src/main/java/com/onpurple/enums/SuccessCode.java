@@ -1,6 +1,5 @@
 package com.onpurple.enums;
 
-import com.amazonaws.AmazonServiceException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -68,6 +67,7 @@ public enum SuccessCode {
     SUCCESS_REPORT_DELETE("신고글이 성공적으로 삭제되었습니다."),
     SUCCESS_POST_GET_ALL_CATEGORY_SEARCH("게시글 카테고리별 검색이 성공적으로 완료되었습니다."),
     SUCCESS_UN_LIKE_CANCEL("유저 싫어요 취소가 성공적으로 완료되었습니다."),
+    SUCCESS_UN_LIKE("유저 싫어요가 성공적으로 완료되었습니다"),
 
     //대댓글 관련 메세지
     SUCCESS_RECOMMENT_EDIT("대댓글 수정에 성공했습니다."),

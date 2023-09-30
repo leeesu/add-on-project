@@ -225,6 +225,7 @@ class PostServiceTest {
         // when
         ApiResponseDto<PostResponseDto> response = postService.getPost(post.getId());
         // then
+        System.out.println("현재 조회 수 : "+ post.getView());                        ;
         verify(validationUtil, times(1)).validatePost(any());
         assertThat(post.getView()).isNotEqualTo(40);
         assertEquals(response.getData().getTitle(), post.getTitle());

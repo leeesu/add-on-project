@@ -47,7 +47,7 @@ public class LikeService {
                     .post(post)
                     .build();
             likeRepository.save(postLike);
-            post.addLike();
+            addLikeCount(post);
             return ApiResponseDto.success(SUCCESS_POST_LIKE.getMessage(),
                     LikeResponseDto.fromPostLikesEntity(postLike)
             );
@@ -157,6 +157,9 @@ public class LikeService {
     public ApiResponseDto<List<LikesResponseDto>> getLike(User user) {
         //    토큰을 통해 user를 확인하고 확인된 유저 기준 좋아요를 누른 대상 모드를 찾아 리스트에 저장
         List<Likes> likesList = likeRepository.findAllByUser(user);
+        if(likesList.isEmpty()){
+            throw new CustomException(ErrorCode.LIKE_ME_USER_NOT_FOUND);
+        }
 
         List<LikesResponseDto> likesResponseDtoList = likesList
                 .stream()
@@ -179,6 +182,10 @@ public class LikeService {
         if (!comment.validateUser(user)) {
             throw new CustomException(ErrorCode.INVALID_SELF_LIKE);
         }
+    }
+
+    public void addLikeCount(Post post) {
+        post.addLike();
     }
 
 }

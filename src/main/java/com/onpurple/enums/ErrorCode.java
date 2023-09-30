@@ -67,7 +67,7 @@ public enum ErrorCode {
 
 
     UNSUPPORTED_ENCODING_ERROR("인코딩을 지원하지 않는 문자열입니다."),
-;
+    LIKE_ME_USER_NOT_FOUND("나를 좋아요한 회원이 없습니다.");
 
     private final String message;
 }

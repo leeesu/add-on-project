@@ -177,7 +177,7 @@ public class JwtTokenUtil {
                 REFRESH_EXPIRE.getTime());
 
         logger.info("Redis에 RefreshToken이 저장되었습니다.");
-        logger.info("{} : Redis에 저장된 토큰 확인", redisUtil.getData(REFRESH_TOKEN_KEY.getDesc())+user.getUsername());
+        logger.info("{} : Redis에 저장된 토큰 확인", redisUtil.getData(REFRESH_TOKEN_KEY.getDesc()+user.getUsername()));
 
         return refreshToken;
     }
