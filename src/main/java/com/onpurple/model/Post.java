@@ -57,6 +57,9 @@ public class Post extends Timestamped{
     @Column
     private String imageUrl;
 
+    @Version
+    private Long version;
+
 
     public void update(PostRequestDto requestDto) {
         this.title = requestDto.getTitle();
@@ -70,16 +73,16 @@ public class Post extends Timestamped{
         return !this.user.equals(user);
     }
     //좋아요
-    public void addLike(){
+    public void increasePostLike(){
 
         this.likes +=1;
     }
     //좋아요 취소
-    public void minusLike(){
+    public void cancelPostLike(){
         this.likes -=1;
     }
     //조회수 증가
-    public void updateViewCount(){
+    public void increasePostView(){
         this.view +=1;
     }
 
