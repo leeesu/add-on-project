@@ -34,7 +34,7 @@ private LikeService likeService; // Like Service 추가
     @DisplayName("10명이 동시에 좋아요 누르는 경우")
     void multi_post_like_two() throws InterruptedException {
         // User 객체 생성 및 저장
-        User author = TestUtil.createUser("작성자4", "작성자입니다4");
+        User author = TestUtil.createUser("작성자7", "작성자입니다7");
         author = userRepository.save(author);
 
         // given
@@ -51,7 +51,7 @@ private LikeService likeService; // Like Service 추가
             executorService.submit(() -> {
                         try {
                             // 각 스레드별로 새로운 user 생성 및 저장
-                            User user = TestUtil.createUser("user3"+ finalI, "user3입니다"+ finalI);
+                            User user = TestUtil.createUser("user6"+ finalI, "user6입니다"+ finalI);
                             user = userRepository.save(user);
                             likeService.postLike(savepost.getId(), user);
                         } finally {
@@ -63,6 +63,7 @@ private LikeService likeService; // Like Service 추가
         latch.await();
         Post resultPost = postRepository.findById(post.getId()).orElseThrow(() -> new IllegalArgumentException("Post not found"));
         assertEquals(threadCount, resultPost.getLikes());
+        System.out.println("좋아요 수 : " + resultPost.getLikes());
     }
 }
 

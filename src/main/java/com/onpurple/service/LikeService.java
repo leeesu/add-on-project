@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.onpurple.enums.SuccessCode.*;
@@ -23,6 +24,7 @@ public class LikeService {
 
     private final LikeRepository likeRepository;
     private final UserRepository userRepository;
+    private final PostRepository postRepository;
     private final ValidationUtil validationUtil;
 
 
@@ -32,32 +34,37 @@ public class LikeService {
     * @return ApiResponseDto<LikeResponseDto>
      */
     @Transactional
-    public ApiResponseDto<LikeResponseDto> postLike(Long postId,
-                                                    User user) {
-        // 게시글 유효성 체크
-        Post post = validationUtil.validatePost(postId);
-        // 본인에게 좋아요 할 수 없도록 예외처리
-        validatePostLikeUser(post, user);
-        //좋아요 한 적 있는지 체크
-        Likes liked = likeRepository.findByUserAndPostId(user, postId).orElse(null);
+    public ApiResponseDto<LikeResponseDto> postLike(Long postId, User user) {
+        try {
+            // 게시글 유효성 체크
+            Post post = postRepository.findByLockId(postId);
 
-        if (liked == null) {
-            Likes postLike = Likes.builder()
-                    .user(user)
-                    .post(post)
-                    .build();
-            likeRepository.save(postLike);
-            post.increasePostLike();
-            return ApiResponseDto.success(SUCCESS_POST_LIKE.getMessage(),
-                    LikeResponseDto.fromPostLikesEntity(postLike)
-            );
-        } else {
-            likeRepository.delete(liked);
-            post.cancelPostLike();
-            return ApiResponseDto.success(SUCCESS_POST_LIKE_CANCEL.getMessage());
+            // 본인에게 좋아요 할 수 없도록 예외처리
+            validatePostLikeUser(post, user);
 
+            //좋아요 한 적 있는지 체크
+            Likes liked = likeRepository.findByUserAndPostId(user, postId).orElse(null);
+
+            if (liked == null) {
+                Likes postLike = Likes.builder()
+                        .user(user)
+                        .post(post)
+                        .build();
+                likeRepository.save(postLike);
+                post.increasePostLike();
+                return ApiResponseDto.success(SUCCESS_POST_LIKE.getMessage(),
+                        LikeResponseDto.fromPostLikesEntity(postLike));
+            } else {
+                likeRepository.delete(liked);
+                post.cancelPostLike();
+                return ApiResponseDto.success(SUCCESS_POST_LIKE_CANCEL.getMessage());
+            }
+        } catch (CustomException ple) {
+            // 비관적 락 에러 발생 시 로직 처리
+            throw new CustomException(ErrorCode.POST_LOCKED_ERROR);
         }
     }
+
 
     /*
     * 댓글 좋아요

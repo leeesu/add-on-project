@@ -7,14 +7,16 @@ import com.onpurple.repository.post.PostCustomRepository;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface PostRepository extends JpaRepository<Post, Long>, PostCustomRepository {
-    // , PostCustomRepository
-    List<Post> findAllByCategoryOrderByCreatedAtDesc(PostCategory category);
 
-//    List<Post> findAllByCategoryOrderByCreatedAtDesc(String category);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select i from Post i where i.id = :id")
+    Post findByLockId(long id);
+
 
 }
