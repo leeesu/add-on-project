@@ -49,15 +49,11 @@ public class UnLikeService {
                     .target(target)
                     .build();
             unLikeRepository.save(userUnLike);
-            int addUnLike = unLikeRepository.countByTargetId(targetId);
-            log.info("지금 싫어요 수 : "+addUnLike);
-            target.addUnLike(addUnLike);
+            target.increaseUserUnLike();
             return ApiResponseDto.success(SuccessCode.SUCCESS_UN_LIKE.getMessage());
         } else {
             unLikeRepository.delete(unLiked);
-            int cancelUnLike = unLikeRepository.countByTargetId(targetId);
-            log.info("지금 싫어요 수 : "+cancelUnLike);
-            target.minusUnLike(cancelUnLike);
+            target.cancelUserUnLike();
             return ApiResponseDto.success(SUCCESS_UN_LIKE_CANCEL.getMessage());
         }
     }

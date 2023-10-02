@@ -189,7 +189,7 @@ public class PostService {
     }
 
     public void viewCount(Post post) {
-        post.updateViewCount();
+        post.increasePostView();
     }
 
 

@@ -47,13 +47,13 @@ public class LikeService {
                     .post(post)
                     .build();
             likeRepository.save(postLike);
-            addLikeCount(post);
+            post.increasePostLike();
             return ApiResponseDto.success(SUCCESS_POST_LIKE.getMessage(),
                     LikeResponseDto.fromPostLikesEntity(postLike)
             );
         } else {
             likeRepository.delete(liked);
-            post.minusLike();
+            post.cancelPostLike();
             return ApiResponseDto.success(SUCCESS_POST_LIKE_CANCEL.getMessage());
 
         }
@@ -82,13 +82,15 @@ public class LikeService {
                     .comment(comment)
                     .build();
             likeRepository.save(commentLike);
-            comment.addLike();
+            // 댓글 좋아요 수 증가
+            comment.increaseCommentLike();
             return ApiResponseDto.success(
                     SUCCESS_COMMENT_LIKE.getMessage(),
                     LikeResponseDto.fromCommentLikesEntity(commentLike));
         } else {
             likeRepository.delete(liked);
-            comment.minusLike();
+            // 댓글 좋아요 수 취소
+            comment.cancelCommentLike();
             return ApiResponseDto.success(SUCCESS_COMMENT_LIKE_CANCEL.getMessage());
         }
     }
@@ -114,13 +116,11 @@ public class LikeService {
                     .target(target)
                     .build();
             likeRepository.save(userLike);
-            int addLike = likeRepository.countByTargetId(targetId);
-            target.addLike(addLike);
+            target.increaseUserLike();
             return ApiResponseDto.success(SUCCESS_USER_LIKE.getMessage());
         } else {
             likeRepository.delete(liked);
-            int cancelLike = likeRepository.countByTargetId(targetId);
-            target.minusLike(cancelLike);
+            target.cancelUserLike();
             return ApiResponseDto.success(SUCCESS_USER_LIKE_CANCEL.getMessage());
         }
     }
@@ -182,10 +182,6 @@ public class LikeService {
         if (!comment.validateUser(user)) {
             throw new CustomException(ErrorCode.INVALID_SELF_LIKE);
         }
-    }
-
-    public void addLikeCount(Post post) {
-        post.addLike();
     }
 
 }
