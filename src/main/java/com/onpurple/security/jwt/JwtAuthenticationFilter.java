@@ -65,10 +65,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
         log.info("로그인 성공 및 JWT 생성");
         String username = ((UserDetailsImpl) authResult.getPrincipal()).getUsername();
-
-        User user = userRepository.findByUsername(username).orElseThrow(
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
-        );
+        User user = findUser(username);
         // 토큰 발급
         TokenDto tokenDto = jwtTokenUtil.reissueToken(username);
         // header 로 토큰 send
@@ -76,6 +73,12 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         // 응답
         sendJsonResponse(response, user);
     }
+    private User findUser(String username){
+        return userRepository.findByUsername(username).orElseThrow(
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+        );
+    }
+
     private void sendJsonResponse(HttpServletResponse response, User user) throws IOException {
         response.setContentType("application/json;charset=UTF-8");
 

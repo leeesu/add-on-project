@@ -36,7 +36,7 @@ public class UnLikeService {
     * @param targetId, user
     * @return ApiResponseDto<MessageResponseDto>
      */
-    public ApiResponseDto<MessageResponseDto> UserUnLike(Long targetId,
+    public ApiResponseDto<MessageResponseDto> userUnLike(Long targetId,
                                                             User user) {
         // 회원 프로필이 존재하는지 유효성 체크
         User target = validationUtil.validateProfile(targetId);
@@ -49,15 +49,11 @@ public class UnLikeService {
                     .target(target)
                     .build();
             unLikeRepository.save(userUnLike);
-            int addUnLike = unLikeRepository.countByTargetId(targetId);
-            log.info("지금 싫어요 수 : "+addUnLike);
-            target.addUnLike(addUnLike);
-            return ApiResponseDto.success("싫어요 성공");
+            target.increaseUserUnLike();
+            return ApiResponseDto.success(SuccessCode.SUCCESS_UN_LIKE.getMessage());
         } else {
             unLikeRepository.delete(unLiked);
-            int cancelUnLike = unLikeRepository.countByTargetId(targetId);
-            log.info("지금 싫어요 수 : "+cancelUnLike);
-            target.minusUnLike(cancelUnLike);
+            target.cancelUserUnLike();
             return ApiResponseDto.success(SUCCESS_UN_LIKE_CANCEL.getMessage());
         }
     }

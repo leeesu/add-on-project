@@ -47,13 +47,13 @@ public class LikeService {
                     .post(post)
                     .build();
             likeRepository.save(postLike);
-            post.addLike();
+            post.increasePostLike();
             return ApiResponseDto.success(SUCCESS_POST_LIKE.getMessage(),
                     LikeResponseDto.fromPostLikesEntity(postLike)
             );
         } else {
             likeRepository.delete(liked);
-            post.minusLike();
+            post.cancelPostLike();
             return ApiResponseDto.success(SUCCESS_POST_LIKE_CANCEL.getMessage());
 
         }
@@ -82,13 +82,15 @@ public class LikeService {
                     .comment(comment)
                     .build();
             likeRepository.save(commentLike);
-            comment.addLike();
+            // 댓글 좋아요 수 증가
+            comment.increaseCommentLike();
             return ApiResponseDto.success(
                     SUCCESS_COMMENT_LIKE.getMessage(),
                     LikeResponseDto.fromCommentLikesEntity(commentLike));
         } else {
             likeRepository.delete(liked);
-            comment.minusLike();
+            // 댓글 좋아요 수 취소
+            comment.cancelCommentLike();
             return ApiResponseDto.success(SUCCESS_COMMENT_LIKE_CANCEL.getMessage());
         }
     }
@@ -114,13 +116,11 @@ public class LikeService {
                     .target(target)
                     .build();
             likeRepository.save(userLike);
-            int addLike = likeRepository.countByTargetId(targetId);
-            target.addLike(addLike);
+            target.increaseUserLike();
             return ApiResponseDto.success(SUCCESS_USER_LIKE.getMessage());
         } else {
             likeRepository.delete(liked);
-            int cancelLike = likeRepository.countByTargetId(targetId);
-            target.minusLike(cancelLike);
+            target.cancelUserLike();
             return ApiResponseDto.success(SUCCESS_USER_LIKE_CANCEL.getMessage());
         }
     }
@@ -157,6 +157,9 @@ public class LikeService {
     public ApiResponseDto<List<LikesResponseDto>> getLike(User user) {
         //    토큰을 통해 user를 확인하고 확인된 유저 기준 좋아요를 누른 대상 모드를 찾아 리스트에 저장
         List<Likes> likesList = likeRepository.findAllByUser(user);
+        if(likesList.isEmpty()){
+            throw new CustomException(ErrorCode.LIKE_ME_USER_NOT_FOUND);
+        }
 
         List<LikesResponseDto> likesResponseDtoList = likesList
                 .stream()
