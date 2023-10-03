@@ -1,4 +1,4 @@
-package com.onpurple.exception.aop;
+package com.onpurple.config.aop;
 
 import java.util.HashMap;
 import java.util.List;
