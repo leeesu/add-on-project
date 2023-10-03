@@ -1,6 +1,9 @@
 package com.onpurple.config;
 
 import com.onpurple.dto.response.ChatMessageDto;
+import org.redisson.Redisson;
+import org.redisson.api.RedissonClient;
+import org.redisson.config.Config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -41,5 +44,14 @@ public class RedisConfig {
         redisTemplateMessage.setValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));      // Value Serializer
 
         return redisTemplateMessage;
+    }
+
+    @Bean
+    public RedissonClient redissonClient() {
+        Config config = new Config();
+        config.useSingleServer()
+                .setAddress("redis://localhost:6379"); // Redis 서버 주소 및 포트 설정
+
+        return Redisson.create(config);
     }
 }

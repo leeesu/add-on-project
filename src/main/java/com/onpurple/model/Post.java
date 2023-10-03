@@ -57,9 +57,6 @@ public class Post extends Timestamped{
     @Column
     private String imageUrl;
 
-    @Version
-    private Long version;
-
 
     public void update(PostRequestDto requestDto) {
         this.title = requestDto.getTitle();

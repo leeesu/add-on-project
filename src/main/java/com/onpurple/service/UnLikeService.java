@@ -1,5 +1,6 @@
 package com.onpurple.service;
 
+import com.onpurple.config.aop.DistributedLock;
 import com.onpurple.dto.response.ApiResponseDto;
 import com.onpurple.dto.response.MessageResponseDto;
 import com.onpurple.dto.response.ResponseDto;
@@ -36,6 +37,8 @@ public class UnLikeService {
     * @param targetId, user
     * @return ApiResponseDto<MessageResponseDto>
      */
+    @DistributedLock
+    @Transactional
     public ApiResponseDto<MessageResponseDto> userUnLike(Long targetId,
                                                             User user) {
         // 회원 프로필이 존재하는지 유효성 체크
