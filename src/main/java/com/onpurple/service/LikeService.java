@@ -1,6 +1,7 @@
 package com.onpurple.service;
 
 
+import com.onpurple.config.aop.DistributedLock;
 import com.onpurple.dto.response.*;
 import com.onpurple.exception.CustomException;
 import com.onpurple.enums.ErrorCode;
@@ -33,35 +34,32 @@ public class LikeService {
     * @param postId, user
     * @return ApiResponseDto<LikeResponseDto>
      */
+    @DistributedLock
     @Transactional
-    public ApiResponseDto<LikeResponseDto> postLike(Long postId, User user) {
-        try {
-            // 게시글 유효성 체크
-            Post post = postRepository.findByLockId(postId);
+    public ApiResponseDto<LikeResponseDto> postLike(Long postId,
+                                                    User user) {
+        // 게시글 유효성 체크 & 분산 Lock
+        Post post = validationUtil.validatePost(postId);
+        // 본인에게 좋아요 할 수 없도록 예외처리
+        validatePostLikeUser(post, user);
+        //좋아요 한 적 있는지 체크
+        Likes liked = likeRepository.findByUserAndPostId(user, postId).orElse(null);
 
-            // 본인에게 좋아요 할 수 없도록 예외처리
-            validatePostLikeUser(post, user);
+        if (liked == null) {
+            Likes postLike = Likes.builder()
+                    .user(user)
+                    .post(post)
+                    .build();
+            likeRepository.save(postLike);
+            post.increasePostLike();
+            return ApiResponseDto.success(SUCCESS_POST_LIKE.getMessage(),
+                    LikeResponseDto.fromPostLikesEntity(postLike)
+            );
+        } else {
+            likeRepository.delete(liked);
+            post.cancelPostLike();
+            return ApiResponseDto.success(SUCCESS_POST_LIKE_CANCEL.getMessage());
 
-            //좋아요 한 적 있는지 체크
-            Likes liked = likeRepository.findByUserAndPostId(user, postId).orElse(null);
-
-            if (liked == null) {
-                Likes postLike = Likes.builder()
-                        .user(user)
-                        .post(post)
-                        .build();
-                likeRepository.save(postLike);
-                post.increasePostLike();
-                return ApiResponseDto.success(SUCCESS_POST_LIKE.getMessage(),
-                        LikeResponseDto.fromPostLikesEntity(postLike));
-            } else {
-                likeRepository.delete(liked);
-                post.cancelPostLike();
-                return ApiResponseDto.success(SUCCESS_POST_LIKE_CANCEL.getMessage());
-            }
-        } catch (CustomException ple) {
-            // 비관적 락 에러 발생 시 로직 처리
-            throw new CustomException(ErrorCode.POST_LOCKED_ERROR);
         }
     }
 
@@ -72,6 +70,7 @@ public class LikeService {
     * @return ApiResponseDto<LikeResponseDto>
      */
 
+    @DistributedLock
     @Transactional
     public ApiResponseDto<LikeResponseDto> commentLike(Long commentId,
                                                        User user) {
@@ -108,6 +107,7 @@ public class LikeService {
     * @param targetId, user
     * @return ApiResponseDto<MessageResponseDto>
      */
+    @DistributedLock
     @Transactional
     public ApiResponseDto<MessageResponseDto> userLike(Long targetId,
                                                        User user) {
@@ -190,5 +190,7 @@ public class LikeService {
             throw new CustomException(ErrorCode.INVALID_SELF_LIKE);
         }
     }
+
+
 
 }
