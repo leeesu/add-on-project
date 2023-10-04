@@ -35,7 +35,7 @@ public class LockAspect {
 
     private String getLockName(ProceedingJoinPoint joinPoint) {
 
-        //메소드의 클래스명과 메소드명을 조합한 문자열로 락 이름 생성합니다.
+        //메소드의 클래스명과 메소드명을 조합한 문자열로 락 이름 생성
         String className = joinPoint.getTarget().getClass().getSimpleName();
         String methodName = joinPoint.getSignature().getName();
 
