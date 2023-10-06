@@ -1,5 +1,7 @@
 package com.onpurple.util;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -8,10 +10,11 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 @RequiredArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class RedisUtil {
 
 
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
 
     public void saveData(String key, String value, long time) {
         redisTemplate.opsForValue().set(key, value);
