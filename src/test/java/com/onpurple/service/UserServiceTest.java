@@ -3,26 +3,21 @@ package com.onpurple.service;
 import com.onpurple.dto.request.SignupRequestDto;
 import com.onpurple.dto.request.TokenDto;
 import com.onpurple.dto.request.UserInfoRequestDto;
-import com.onpurple.dto.response.ApiResponseDto;
 import com.onpurple.enums.ErrorCode;
 import com.onpurple.exception.CustomException;
 import com.onpurple.model.User;
 import com.onpurple.repository.UserRepository;
-import com.onpurple.security.jwt.JwtTokenUtil;
-import com.onpurple.util.ImageUtil;
+import com.onpurple.security.jwt.JwtTokenProvider;
 import com.onpurple.util.s3.AwsS3UploadService;
-import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -44,7 +39,7 @@ class UserServiceTest {
     AwsS3UploadService awsS3UploadService;
 
     @Mock
-    JwtTokenUtil jwtTokenUtil;
+    JwtTokenProvider jwtTokenProvider;
 
     @InjectMocks
     private UserService userService;
@@ -84,7 +79,7 @@ class UserServiceTest {
         when(awsS3UploadService.uploadOne(any())).thenReturn(imageUrl);
 
 
-        when(jwtTokenUtil.reissueToken(anyString())).thenReturn(tokenDto);
+        when(jwtTokenProvider.reissueToken(anyString())).thenReturn(tokenDto);
         //When
         userService.createUser(signupRequestDto, userInfoRequestDto, imageUrl);
 
@@ -134,7 +129,7 @@ class UserServiceTest {
         given(passwordEncoder.encode(anyString())).willReturn("123456789");
         // When
         when(awsS3UploadService.uploadOne(any())).thenReturn(imageUrl);
-        when(jwtTokenUtil.reissueToken(anyString())).thenReturn(tokenDto);
+        when(jwtTokenProvider.reissueToken(anyString())).thenReturn(tokenDto);
 
 
         Throwable exception = assertThrows(CustomException.class, () -> userService.createUser(signupRequestDto, userInfoRequestDto, imageUrl));

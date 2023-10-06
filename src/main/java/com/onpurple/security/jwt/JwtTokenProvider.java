@@ -35,7 +35,7 @@ import static com.onpurple.enums.RedisKeyEnum.REFRESH_TOKEN_KEY;
 
 @Component
 @RequiredArgsConstructor
-public class JwtTokenUtil {
+public class JwtTokenProvider {
     private static final String BEARER_PREFIX = "Bearer ";
     public static final String ACCESS_TOKEN = "AccessToken";
     public static final String REFRESH_TOKEN = "RefreshToken";
