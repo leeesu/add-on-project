@@ -11,7 +11,7 @@ import com.onpurple.model.Comment;
 import com.onpurple.model.Post;
 import com.onpurple.model.User;
 import com.onpurple.repository.CommentRepository;
-import com.onpurple.util.ValidationUtil;
+import com.onpurple.external.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

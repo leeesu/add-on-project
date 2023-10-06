@@ -1,4 +1,4 @@
-package com.onpurple.util;
+package com.onpurple.external;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

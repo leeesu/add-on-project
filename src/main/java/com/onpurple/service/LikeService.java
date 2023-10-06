@@ -7,7 +7,7 @@ import com.onpurple.exception.CustomException;
 import com.onpurple.enums.ErrorCode;
 import com.onpurple.model.*;
 import com.onpurple.repository.*;
-import com.onpurple.util.ValidationUtil;
+import com.onpurple.external.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

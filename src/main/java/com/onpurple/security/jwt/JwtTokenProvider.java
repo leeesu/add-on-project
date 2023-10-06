@@ -7,7 +7,7 @@ import com.onpurple.enums.ErrorCode;
 import com.onpurple.model.Authority;
 import com.onpurple.model.User;
 import com.onpurple.repository.UserRepository;
-import com.onpurple.util.RedisUtil;
+import com.onpurple.external.RedisUtil;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;

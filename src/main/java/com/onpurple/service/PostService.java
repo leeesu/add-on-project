@@ -4,24 +4,21 @@ package com.onpurple.service;
 import com.onpurple.dto.request.PostRequestDto;
 import com.onpurple.dto.response.*;
 import com.onpurple.category.PostCategory;
-import com.onpurple.enums.SuccessCode;
 import com.onpurple.exception.CustomException;
 import com.onpurple.enums.ErrorCode;
 import com.onpurple.model.Post;
 import com.onpurple.model.User;
 import com.onpurple.repository.CommentRepository;
 import com.onpurple.repository.PostRepository;
-import com.onpurple.util.ImageUtil;
-import com.onpurple.util.ValidationUtil;
+import com.onpurple.external.ImageUtil;
+import com.onpurple.external.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 

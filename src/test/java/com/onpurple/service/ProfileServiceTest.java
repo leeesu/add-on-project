@@ -1,15 +1,13 @@
 package com.onpurple.service;
 
 import com.onpurple.dto.request.ProfileUpdateRequestDto;
-import com.onpurple.dto.request.UserUpdateRequestDto;
 import com.onpurple.dto.response.ApiResponseDto;
 import com.onpurple.dto.response.MessageResponseDto;
 import com.onpurple.dto.response.ProfileResponseDto;
 import com.onpurple.enums.SuccessCode;
 import com.onpurple.model.User;
 import com.onpurple.repository.UserRepository;
-import com.onpurple.util.ValidationUtil;
-import org.apache.logging.log4j.message.Message;
+import com.onpurple.external.ValidationUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

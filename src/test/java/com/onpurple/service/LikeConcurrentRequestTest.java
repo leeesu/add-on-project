@@ -4,13 +4,12 @@ import com.onpurple.model.Post;
 import com.onpurple.model.User;
 import com.onpurple.repository.PostRepository;
 import com.onpurple.repository.UserRepository;
-import com.onpurple.util.TestUtil;
+import com.onpurple.external.TestUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

@@ -1,4 +1,4 @@
-package com.onpurple.util;
+package com.onpurple.external;
 
 import com.onpurple.exception.CustomException;
 import com.onpurple.enums.ErrorCode;

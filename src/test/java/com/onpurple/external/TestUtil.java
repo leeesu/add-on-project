@@ -1,4 +1,4 @@
-package com.onpurple.util;
+package com.onpurple.external;
 
 import com.onpurple.category.PostCategory;
 import com.onpurple.dto.request.PostRequestDto;

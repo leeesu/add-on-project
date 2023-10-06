@@ -9,7 +9,6 @@ import com.onpurple.enums.ErrorCode;
 import com.onpurple.model.User;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.security.UserDetailsImpl;
-import com.onpurple.util.RedisUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

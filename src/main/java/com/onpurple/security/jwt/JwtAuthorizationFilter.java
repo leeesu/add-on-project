@@ -2,7 +2,7 @@ package com.onpurple.security.jwt;
 
 import com.onpurple.dto.request.TokenDto;
 import com.onpurple.security.UserDetailsServiceImpl;
-import com.onpurple.util.RedisUtil;
+import com.onpurple.external.RedisUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

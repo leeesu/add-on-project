@@ -8,7 +8,7 @@ import com.onpurple.exception.CustomException;
 import com.onpurple.model.UnLike;
 import com.onpurple.model.User;
 import com.onpurple.repository.UnLikeRepository;
-import com.onpurple.util.ValidationUtil;
+import com.onpurple.external.ValidationUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

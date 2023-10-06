@@ -8,7 +8,7 @@ import com.onpurple.exception.CustomException;
 import com.onpurple.model.User;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.security.jwt.JwtTokenProvider;
-import com.onpurple.util.s3.AwsS3UploadService;
+import com.onpurple.external.s3.AwsS3UploadService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

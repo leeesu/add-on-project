@@ -7,7 +7,6 @@ import com.onpurple.security.UserDetailsServiceImpl;
 import com.onpurple.security.jwt.JwtAuthenticationFilter;
 import com.onpurple.security.jwt.JwtAuthorizationFilter;
 import com.onpurple.security.jwt.JwtTokenProvider;
-import com.onpurple.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;

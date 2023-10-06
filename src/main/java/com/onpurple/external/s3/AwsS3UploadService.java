@@ -1,4 +1,4 @@
-package com.onpurple.util.s3;
+package com.onpurple.external.s3;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
@@ -7,7 +7,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.onpurple.exception.CustomException;
 import com.onpurple.enums.ErrorCode;
-import com.onpurple.util.s3.dto.S3Component;
+import com.onpurple.external.s3.dto.S3Component;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
