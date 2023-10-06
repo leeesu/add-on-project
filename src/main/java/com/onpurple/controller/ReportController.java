@@ -6,7 +6,7 @@ import com.onpurple.dto.response.MessageResponseDto;
 import com.onpurple.dto.response.ReportResponseDto;
 import com.onpurple.security.UserDetailsImpl;
 import com.onpurple.service.ReportService;
-import com.onpurple.external.ValidationUtil;
+import com.onpurple.helper.EntityValidatorManager;
 import com.onpurple.external.s3.AwsS3UploadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,7 +20,7 @@ import java.util.List;
 public class ReportController {
     private final ReportService reportService;
     private final AwsS3UploadService s3Service;
-    private final ValidationUtil validationUtil;
+    private final EntityValidatorManager entityValidatorManager;
 
     // 신고글 작성
     @PostMapping( "/report")
@@ -28,7 +28,7 @@ public class ReportController {
                                                           @AuthenticationPrincipal UserDetailsImpl userDetails,
                                                           @RequestPart(value = "imageUrl",required = false) MultipartFile multipartFiles) {
 
-        validationUtil.validateMultipartFile(multipartFiles);
+        entityValidatorManager.validateMultipartFile(multipartFiles);
         String imgPaths = s3Service.uploadOne(multipartFiles);
         return reportService.createReport(requestDto,userDetails.getUser(), imgPaths);
     }

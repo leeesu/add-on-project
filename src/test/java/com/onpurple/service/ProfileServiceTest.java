@@ -7,7 +7,7 @@ import com.onpurple.dto.response.ProfileResponseDto;
 import com.onpurple.enums.SuccessCode;
 import com.onpurple.model.User;
 import com.onpurple.repository.UserRepository;
-import com.onpurple.external.ValidationUtil;
+import com.onpurple.helper.EntityValidatorManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +30,7 @@ class ProfileServiceTest {
     UserRepository userRepository;
 
     @Mock
-    ValidationUtil validationUtil;
+    EntityValidatorManager entityValidatorManager;
 
     @InjectMocks
     ProfileService profileService;
@@ -77,7 +77,7 @@ class ProfileServiceTest {
                 .gender("성골")
                 .area("신라")
                 .build();
-        given(validationUtil.validateProfile(any())).willReturn(user);
+        given(entityValidatorManager.validateProfile(any())).willReturn(user);
 
         ApiResponseDto<ProfileResponseDto> response = profileService.getProfile(user.getId());
         assertEquals(response.getData().getAge(), user.getAge());

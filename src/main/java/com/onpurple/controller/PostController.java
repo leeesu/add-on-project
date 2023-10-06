@@ -6,7 +6,7 @@ import com.onpurple.dto.response.ApiResponseDto;
 import com.onpurple.dto.response.PostResponseDto;
 import com.onpurple.security.UserDetailsImpl;
 import com.onpurple.service.PostService;
-import com.onpurple.external.ValidationUtil;
+import com.onpurple.helper.EntityValidatorManager;
 import com.onpurple.external.s3.AwsS3UploadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -24,7 +24,7 @@ public class PostController {
 
   private final PostService postService;
   private final AwsS3UploadService s3Service;
-  private final ValidationUtil validationUtil;
+  private final EntityValidatorManager entityValidatorManager;
 
 
   // 게시글 작성
@@ -33,7 +33,7 @@ public class PostController {
                                                     @AuthenticationPrincipal UserDetailsImpl userDetails,
                                                     @RequestPart(value = "imageUrl", required = false) List<MultipartFile> multipartFiles) {
 
-    validationUtil.validateMultipartFiles(multipartFiles);
+    entityValidatorManager.validateMultipartFiles(multipartFiles);
     List<String> imgPaths = s3Service.upload(multipartFiles);
     return postService.createPost(requestDto, userDetails.getUser(), imgPaths);
   }
@@ -53,7 +53,7 @@ public class PostController {
                                       @RequestPart("imageUrl") List<MultipartFile> multipartFiles,
                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-    validationUtil.validateMultipartFiles(multipartFiles);
+    entityValidatorManager.validateMultipartFiles(multipartFiles);
     List<String> imgPaths = s3Service.upload(multipartFiles);
     return postService.updatePost(postId, requestDto, userDetails.getUser(), imgPaths);
   }

@@ -11,7 +11,7 @@ import com.onpurple.model.Comment;
 import com.onpurple.model.Post;
 import com.onpurple.model.User;
 import com.onpurple.repository.CommentRepository;
-import com.onpurple.external.ValidationUtil;
+import com.onpurple.helper.EntityValidatorManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +26,7 @@ import static com.onpurple.enums.SuccessCode.*;
 public class CommentService {
 
   private final CommentRepository commentRepository;
-  private final ValidationUtil validationUtil;
+  private final EntityValidatorManager entityValidatorManager;
 
   /*
     * 댓글 작성
@@ -36,7 +36,7 @@ public class CommentService {
   @Transactional
   public ApiResponseDto<CommentResponseDto> createComment(Long postId, CommentRequestDto commentRequestDto, User user) {
     // post 유효성 검사
-    Post post = validationUtil.validatePost(postId);
+    Post post = entityValidatorManager.validatePost(postId);
     Comment comment = commentFromRequest(commentRequestDto, post, user);
     commentRepository.save(comment);
     return ApiResponseDto.success(SUCCESS_COMMENT_REGISTER.getMessage(),
@@ -59,7 +59,7 @@ public class CommentService {
    */
   @Transactional(readOnly = true)
   public ApiResponseDto<List<CommentResponseDto>> getAllCommentsByPost(Long postId) {
-    Post post = validationUtil.validatePost(postId);
+    Post post = entityValidatorManager.validatePost(postId);
 
     List<CommentResponseDto> commentResponseDtoList = commentRepository
             .findAllByPost(post)
@@ -82,9 +82,9 @@ public class CommentService {
   public ApiResponseDto<CommentResponseDto> updateComment(Long commentId, CommentRequestDto requestDto, User user) {
       // 이곳에서 validate 메서드에서 예외 발생 가능성이 있는 작업 수행
        // 게시글 유효성체크
-      validationUtil.validatePost(requestDto.getPostId());
+      entityValidatorManager.validatePost(requestDto.getPostId());
       // comment validate
-      Comment comment = validationUtil.validateComment(commentId);
+      Comment comment = entityValidatorManager.validateComment(commentId);
       // user validate
       validateUser(comment, user);
 
@@ -100,7 +100,7 @@ public class CommentService {
    */
   @Transactional
   public ApiResponseDto<MessageResponseDto> deleteComment(Long commentId, User user) {
-    Comment comment = validationUtil.validateComment(commentId);
+    Comment comment = entityValidatorManager.validateComment(commentId);
     validateUser(comment, user);
 
     commentRepository.delete(comment);

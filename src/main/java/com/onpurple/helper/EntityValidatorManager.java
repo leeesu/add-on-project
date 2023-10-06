@@ -1,4 +1,4 @@
-package com.onpurple.external;
+package com.onpurple.helper;
 
 import com.onpurple.exception.CustomException;
 import com.onpurple.enums.ErrorCode;
@@ -19,7 +19,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class ValidationUtil {
+public class EntityValidatorManager {
 
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;

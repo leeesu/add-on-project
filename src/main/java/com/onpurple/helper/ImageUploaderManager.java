@@ -1,4 +1,4 @@
-package com.onpurple.external;
+package com.onpurple.helper;
 
 import com.onpurple.model.Img;
 import com.onpurple.model.Post;
@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
-public class ImageUtil {
+public class ImageUploaderManager {
 
     private final ImgRepository imgRepository;
     private final AwsS3UploadService awsS3UploadService;

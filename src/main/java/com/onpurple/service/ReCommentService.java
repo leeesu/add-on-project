@@ -11,7 +11,7 @@ import com.onpurple.model.Comment;
 import com.onpurple.model.ReComment;
 import com.onpurple.model.User;
 import com.onpurple.repository.ReCommentRepository;
-import com.onpurple.external.ValidationUtil;
+import com.onpurple.helper.EntityValidatorManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +25,7 @@ import static com.onpurple.enums.SuccessCode.*;
 @RequiredArgsConstructor
 public class ReCommentService {
 
-    private final ValidationUtil validationUtil;
+    private final EntityValidatorManager entityValidatorManager;
     private final ReCommentRepository reCommentRepository;
 
     /*
@@ -36,7 +36,7 @@ public class ReCommentService {
     @Transactional
     public ApiResponseDto<ReCommentResponseDto> createReComment(Long commentId, ReCommentRequestDto requestDto, User user) {
 
-        Comment comment = validationUtil.validateComment(commentId);
+        Comment comment = entityValidatorManager.validateComment(commentId);
 
         ReComment reComment = recommentFromRequest(requestDto, user, comment);
 
@@ -67,7 +67,7 @@ public class ReCommentService {
     public ApiResponseDto<List<ReCommentResponseDto>> getAllReCommentsByComment(Long commentId) {
 
 
-        Comment comment = validationUtil.validateComment(commentId);
+        Comment comment = entityValidatorManager.validateComment(commentId);
 
         List<ReComment> reCommentList = reCommentRepository.findAllByComment(comment);
         List<ReCommentResponseDto> reCommentResponseDto = new ArrayList<>();
@@ -93,7 +93,7 @@ public class ReCommentService {
     public ApiResponseDto<ReCommentResponseDto> updateReComment(Long reCommentId, ReCommentRequestDto requestDto, User user) {
 
 
-        ReComment reComment = validationUtil.validateReComment(reCommentId);
+        ReComment reComment = entityValidatorManager.validateReComment(reCommentId);
 
         validateReCommentUser(reComment, user);
 
@@ -112,7 +112,7 @@ public class ReCommentService {
     @Transactional
     public ApiResponseDto<MessageResponseDto> deleteReComment(Long reCommentId, User user) {
 
-        ReComment reComment = validationUtil.validateReComment(reCommentId);
+        ReComment reComment = entityValidatorManager.validateReComment(reCommentId);
 
         validateReCommentUser(reComment, user);
 

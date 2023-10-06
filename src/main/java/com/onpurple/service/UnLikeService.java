@@ -8,7 +8,7 @@ import com.onpurple.enums.SuccessCode;
 import com.onpurple.model.UnLike;
 import com.onpurple.model.User;
 import com.onpurple.repository.UnLikeRepository;
-import com.onpurple.external.ValidationUtil;
+import com.onpurple.helper.EntityValidatorManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,13 +22,13 @@ import static com.onpurple.enums.SuccessCode.*;
 @Slf4j(topic = "싫어요 기능")
 public class UnLikeService {
     private final UnLikeRepository unLikeRepository;
-    private final ValidationUtil validationUtil;
+    private final EntityValidatorManager entityValidatorManager;
 
     public UnLikeService(UnLikeRepository unLikeRepository,
-                         ValidationUtil validationUtil) {
+                         EntityValidatorManager entityValidatorManager) {
 
         this.unLikeRepository = unLikeRepository;
-        this.validationUtil = validationUtil;
+        this.entityValidatorManager = entityValidatorManager;
     }
 
     /*
@@ -41,7 +41,7 @@ public class UnLikeService {
     public ApiResponseDto<MessageResponseDto> userUnLike(Long targetId,
                                                             User user) {
         // 회원 프로필이 존재하는지 유효성 체크
-        User target = validationUtil.validateProfile(targetId);
+        User target = entityValidatorManager.validateProfile(targetId);
         //좋아요 한 적 있는지 체크
         UnLike unLiked = unLikeRepository.findByUserAndTargetId(user, targetId).orElse(null);
 

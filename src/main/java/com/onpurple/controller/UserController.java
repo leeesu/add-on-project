@@ -9,7 +9,7 @@ import com.onpurple.dto.response.UserResponseDto;
 import com.onpurple.security.UserDetailsImpl;
 import com.onpurple.service.KakaoService;
 import com.onpurple.service.UserService;
-import com.onpurple.external.ValidationUtil;
+import com.onpurple.helper.EntityValidatorManager;
 import com.onpurple.external.s3.AwsS3UploadService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -29,13 +29,13 @@ public class UserController {
     private final AwsS3UploadService s3Service;
 
     private final KakaoService kakaoService;
-    private final ValidationUtil validationUtil;
+    private final EntityValidatorManager entityValidatorManager;
 
     @RequestMapping(value = "/user/signup", method = RequestMethod.POST)
     public ApiResponseDto<UserResponseDto> signup(@RequestPart(value = "info", required = false) @Valid SignupRequestDto requestDto,
                                                   @RequestPart(value = "userInfo", required = false) UserInfoRequestDto userInfoRequestDto,
                                                   @RequestPart(value = "imageUrl", required = false) MultipartFile multipartFiles, HttpServletResponse response) {
-        validationUtil.validateMultipartFile(multipartFiles);
+        entityValidatorManager.validateMultipartFile(multipartFiles);
         String imgPaths = s3Service.uploadOne(multipartFiles);
 
         return userService.createUser(requestDto, userInfoRequestDto, imgPaths);
@@ -64,7 +64,7 @@ public class UserController {
     public ApiResponseDto<MessageResponseDto> imageUpdate(@RequestPart("imageUrl") MultipartFile multipartFiles,
                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        validationUtil.validateMultipartFile(multipartFiles);
+        entityValidatorManager.validateMultipartFile(multipartFiles);
 
         String imgPaths = s3Service.uploadOne(multipartFiles);
         return userService.updateImage(userDetails.getUser(), imgPaths);

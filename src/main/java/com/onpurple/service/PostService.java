@@ -10,8 +10,8 @@ import com.onpurple.model.Post;
 import com.onpurple.model.User;
 import com.onpurple.repository.CommentRepository;
 import com.onpurple.repository.PostRepository;
-import com.onpurple.external.ImageUtil;
-import com.onpurple.external.ValidationUtil;
+import com.onpurple.helper.ImageUploaderManager;
+import com.onpurple.helper.EntityValidatorManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -31,8 +31,8 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
-    private final ImageUtil imageUtil;
-    private final ValidationUtil validationUtil;
+    private final ImageUploaderManager imageUploaderManager;
+    private final EntityValidatorManager entityValidatorManager;
 
     /*
     * 게시글 작성
@@ -48,7 +48,7 @@ public class PostService {
         postRepository.save(post);
 
         List<String> imgList;
-        imgList = imageUtil.addImage(imgPaths, post);
+        imgList = imageUploaderManager.addImage(imgPaths, post);
         post.saveImage(imgList.get(0));
 
         return ApiResponseDto.success(
@@ -113,7 +113,7 @@ public class PostService {
      */
     @Transactional// readOnly설정시 데이터가 Mapping되지 않는문제로 해제
     public ApiResponseDto<PostResponseDto> getPost(Long postId) {
-        Post post = validationUtil.validatePost(postId);
+        Post post = entityValidatorManager.validatePost(postId);
 
         List<CommentResponseDto> commentResponseDtoList = commentRepository.findAllByPost(post).stream()
                 .map(CommentResponseDto::fromEntity)
@@ -121,7 +121,7 @@ public class PostService {
 
         // 단건 조회 조회수 증가
         viewCount(post);
-        List<String> imgList = imageUtil.getListImage(post);
+        List<String> imgList = imageUploaderManager.getListImage(post);
 
         return ApiResponseDto.success(
                 SUCCESS_POST_GET_DETAIL.getMessage(),
@@ -141,11 +141,11 @@ public class PostService {
                                                    User user,
                                                    List<String> imgPaths) {
 
-        Post post = validationUtil.validatePost(postId);
+        Post post = entityValidatorManager.validatePost(postId);
         validatePostUser(post, user);
 
         //저장된 이미지 리스트 가져오기
-        List<String> newImgList = imageUtil.updateImage(imgPaths, post);
+        List<String> newImgList = imageUploaderManager.updateImage(imgPaths, post);
 
 
         post.update(requestDto);
@@ -162,12 +162,12 @@ public class PostService {
     @Transactional
     public ApiResponseDto<MessageResponseDto> deletePost(Long postId, User user) {
 
-        Post post = validationUtil.validatePost(postId);
+        Post post = entityValidatorManager.validatePost(postId);
         validatePostUser(post, user);
 
         postRepository.delete(post);
-        List<String> imgList = imageUtil.getListImage(post);
-        imageUtil.deleteImageList(post, imgList);
+        List<String> imgList = imageUploaderManager.getListImage(post);
+        imageUploaderManager.deleteImageList(post, imgList);
         return ApiResponseDto.success(SUCCESS_POST_DELETE.getMessage());
     }
 

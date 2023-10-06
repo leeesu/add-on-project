@@ -7,7 +7,7 @@ import com.onpurple.dto.response.MessageResponseDto;
 import com.onpurple.dto.response.ProfileResponseDto;
 import com.onpurple.model.User;
 import com.onpurple.repository.UserRepository;
-import com.onpurple.external.ValidationUtil;
+import com.onpurple.helper.EntityValidatorManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +24,7 @@ public class ProfileService {
 
 
     private final UserRepository userRepository;
-    private final ValidationUtil validationUtil;
+    private final EntityValidatorManager entityValidatorManager;
 
 
     /*
@@ -55,7 +55,7 @@ public class ProfileService {
      */
     @Transactional
     public ApiResponseDto<ProfileResponseDto> getProfile(Long userId) {
-        User user = validationUtil.validateProfile(userId);
+        User user = entityValidatorManager.validateProfile(userId);
 
         return ApiResponseDto.success(
                 SUCCESS_PROFILE_GET_DETAIL.getMessage(),

@@ -11,7 +11,7 @@ import com.onpurple.model.Likes;
 import com.onpurple.model.Post;
 import com.onpurple.model.User;
 import com.onpurple.repository.LikeRepository;
-import com.onpurple.external.ValidationUtil;
+import com.onpurple.helper.EntityValidatorManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ class LikeServiceTest {
     LikeRepository likeRepository;
 
     @Mock
-    ValidationUtil validationUtil;
+    EntityValidatorManager entityValidatorManager;
 
     @InjectMocks
     LikeService likeService;
@@ -60,7 +60,7 @@ class LikeServiceTest {
                     .build();
             User user = mock(User.class);
 
-            given(validationUtil.validatePost(any())).willReturn(post);
+            given(entityValidatorManager.validatePost(any())).willReturn(post);
             given(likeRepository.findByUserAndPostId(any(), any())).willReturn(Optional.empty());
 
             // when
@@ -80,7 +80,7 @@ class LikeServiceTest {
             User user = mock(User.class);
             Likes postLike = Likes.builder().user(user).post(post).build();
 
-            given(validationUtil.validatePost(any())).willReturn(post);
+            given(entityValidatorManager.validatePost(any())).willReturn(post);
             given(likeRepository.findByUserAndPostId(any(), any())).willReturn(Optional.of(postLike));
             when(post.validateUser(any())).thenReturn(true);
 
@@ -99,7 +99,7 @@ class LikeServiceTest {
             User user = mock(User.class);
             Likes postLike = Likes.builder().user(user).post(post).build();
 
-            lenient().when(validationUtil.validatePost(2L)).thenThrow(new CustomException(ErrorCode.POST_NOT_FOUND));
+            lenient().when(entityValidatorManager.validatePost(2L)).thenThrow(new CustomException(ErrorCode.POST_NOT_FOUND));
             // when&then
             Throwable exception = assertThrows(CustomException.class, () -> likeService.postLike(2L, user));
             // Then
@@ -117,7 +117,7 @@ class LikeServiceTest {
             User user = mock(User.class);
             Comment comment = mock(Comment.class);
 
-            given(validationUtil.validateComment(any())).willReturn(comment);
+            given(entityValidatorManager.validateComment(any())).willReturn(comment);
             given(likeRepository.findByUserAndCommentId(any(), any())).willReturn(Optional.empty());
             when(comment.validateUser(any())).thenReturn(true);
 
@@ -136,7 +136,7 @@ class LikeServiceTest {
             Comment comment = mock(Comment.class);
             Likes commentLike = Likes.builder().user(user).comment(comment).build();
 
-            given(validationUtil.validateComment(any())).willReturn(comment);
+            given(entityValidatorManager.validateComment(any())).willReturn(comment);
             given(likeRepository.findByUserAndCommentId(any(), any())).willReturn(Optional.of(commentLike));
             when(comment.validateUser(any())).thenReturn(true);
 
@@ -155,7 +155,7 @@ class LikeServiceTest {
             User user = mock(User.class);
             Likes postLike = Likes.builder().user(user).comment(comment).build();
 
-            lenient().when(validationUtil.validateComment(2L)).thenThrow(new CustomException(ErrorCode.COMMENT_NOT_FOUND));
+            lenient().when(entityValidatorManager.validateComment(2L)).thenThrow(new CustomException(ErrorCode.COMMENT_NOT_FOUND));
             // when&then
             Throwable exception = assertThrows(CustomException.class, () -> likeService.commentLike(2L, user));
             // Then
@@ -172,7 +172,7 @@ class LikeServiceTest {
             User user = mock(User.class);
             User targetUser = mock(User.class);
 
-            given(validationUtil.validateProfile(any())).willReturn(targetUser);
+            given(entityValidatorManager.validateProfile(any())).willReturn(targetUser);
             given(likeRepository.findByUserAndTargetId(any(), any())).willReturn(Optional.empty());
 
             // when
@@ -190,7 +190,7 @@ class LikeServiceTest {
             User targetUser = mock(User.class);
             Likes userLike = Likes.builder().user(user).target(targetUser).build();
 
-            given(validationUtil.validateProfile(any())).willReturn(user);
+            given(entityValidatorManager.validateProfile(any())).willReturn(user);
             given(likeRepository.findByUserAndTargetId(any(), any())).willReturn(Optional.of(userLike));
 
             // when
@@ -207,7 +207,7 @@ class LikeServiceTest {
 
             User user = mock(User.class);
 
-            lenient().when(validationUtil.validateProfile(2L)).thenThrow(new CustomException(ErrorCode.PROFILE_NOT_FOUND));
+            lenient().when(entityValidatorManager.validateProfile(2L)).thenThrow(new CustomException(ErrorCode.PROFILE_NOT_FOUND));
             // when&then
             Throwable exception = assertThrows(CustomException.class, () -> likeService.userLike(2L, user));
             // Then
@@ -231,7 +231,7 @@ class LikeServiceTest {
                     .imageUrl("이미지")
                     .build();
 
-            given(validationUtil.validatePost(any())).willReturn(post);
+            given(entityValidatorManager.validatePost(any())).willReturn(post);
 
             int threadCount = 100;
             ExecutorService executorService = Executors.newFixedThreadPool(100);
@@ -267,7 +267,7 @@ class LikeServiceTest {
                     .build();
 
 
-            given(validationUtil.validatePost(any())).willReturn(post);
+            given(entityValidatorManager.validatePost(any())).willReturn(post);
 
             int threadCount = 40;
             ExecutorService executorService = Executors.newFixedThreadPool(40);
