@@ -8,6 +8,7 @@ import com.onpurple.security.UserDetailsImpl;
 import com.onpurple.service.ReportService;
 import com.onpurple.helper.EntityValidatorManager;
 import com.onpurple.external.s3.AwsS3UploadService;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -26,9 +27,7 @@ public class ReportController {
     @PostMapping( "/report")
     public ApiResponseDto<ReportResponseDto> createReport(@RequestPart(value = "data",required = false) ReportRequestDto requestDto,
                                                           @AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                          @RequestPart(value = "imageUrl",required = false) MultipartFile multipartFiles) {
-
-        entityValidatorManager.validateMultipartFile(multipartFiles);
+                                                          @NotNull @RequestPart(value = "imageUrl",required = false) MultipartFile multipartFiles) {
         String imgPaths = s3Service.uploadOne(multipartFiles);
         return reportService.createReport(requestDto,userDetails.getUser(), imgPaths);
     }

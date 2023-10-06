@@ -8,6 +8,7 @@ import com.onpurple.security.UserDetailsImpl;
 import com.onpurple.service.PostService;
 import com.onpurple.helper.EntityValidatorManager;
 import com.onpurple.external.s3.AwsS3UploadService;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,9 +32,8 @@ public class PostController {
   @PostMapping
   public ApiResponseDto<PostResponseDto> createPost(@RequestPart(value = "data", required = false) PostRequestDto requestDto,
                                                     @AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                    @RequestPart(value = "imageUrl", required = false) List<MultipartFile> multipartFiles) {
+                                                    @NotNull @RequestPart(value = "imageUrl", required = false) List<MultipartFile> multipartFiles) {
 
-    entityValidatorManager.validateMultipartFiles(multipartFiles);
     List<String> imgPaths = s3Service.upload(multipartFiles);
     return postService.createPost(requestDto, userDetails.getUser(), imgPaths);
   }
@@ -53,7 +53,6 @@ public class PostController {
                                       @RequestPart("imageUrl") List<MultipartFile> multipartFiles,
                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-    entityValidatorManager.validateMultipartFiles(multipartFiles);
     List<String> imgPaths = s3Service.upload(multipartFiles);
     return postService.updatePost(postId, requestDto, userDetails.getUser(), imgPaths);
   }

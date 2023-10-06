@@ -34,7 +34,7 @@ public class ChatMessageController {
     }
 
     // 대화 내역 조회
-    @GetMapping("/api/room/{roomId}/message") // 2. "/api/room/{roomId}/message" 경로로 GET 요청을 보낼 때 처리하는 메소드
+    @GetMapping("/chat/room/{roomId}/message") // 2. "/api/room/{roomId}/message" 경로로 GET 요청을 보낼 때 처리하는 메소드
     public ResponseEntity<List<ChatMessageDto>> loadMessage(@PathVariable String roomId) { // 특정 채팅방의 메시지 목록을 가져옴
         return ResponseEntity.ok(chatMessageService.loadMessage(roomId)); // 해당 채팅방의 모든 메시지를 반환
     }
