@@ -24,15 +24,15 @@ import java.io.IOException;
 
 @Slf4j(topic = "로그인 및 JWT 생성")
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-    private final JwtTokenUtil jwtTokenUtil;
+    private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
     private final RedisUtil redisUtil;
 
 
     public JwtAuthenticationFilter(
-            JwtTokenUtil jwtTokenUtil, UserRepository userRepository,
+            JwtTokenProvider jwtTokenProvider, UserRepository userRepository,
             RedisUtil redisUtil) {
-        this.jwtTokenUtil = jwtTokenUtil;
+        this.jwtTokenProvider = jwtTokenProvider;
         this.userRepository = userRepository;
         this.redisUtil = redisUtil;
         // 로그인 처리를 여기서 처리한다.
@@ -67,9 +67,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         String username = ((UserDetailsImpl) authResult.getPrincipal()).getUsername();
         User user = findUser(username);
         // 토큰 발급
-        TokenDto tokenDto = jwtTokenUtil.reissueToken(username);
+        TokenDto tokenDto = jwtTokenProvider.reissueToken(username);
         // header 로 토큰 send
-        jwtTokenUtil.tokenSetHeaders(tokenDto, response); // AccessToken header, RefreshToken cookie
+        jwtTokenProvider.tokenSetHeaders(tokenDto, response); // AccessToken header, RefreshToken cookie
         // 응답
         sendJsonResponse(response, user);
     }

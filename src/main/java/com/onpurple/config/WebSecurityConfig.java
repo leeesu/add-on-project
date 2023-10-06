@@ -6,7 +6,7 @@ import com.onpurple.repository.UserRepository;
 import com.onpurple.security.UserDetailsServiceImpl;
 import com.onpurple.security.jwt.JwtAuthenticationFilter;
 import com.onpurple.security.jwt.JwtAuthorizationFilter;
-import com.onpurple.security.jwt.JwtTokenUtil;
+import com.onpurple.security.jwt.JwtTokenProvider;
 import com.onpurple.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -29,7 +29,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class WebSecurityConfig {
 
-    private final JwtTokenUtil jwtTokenUtil;
+    private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsServiceImpl userDetailsService;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final UserRepository userRepository;
@@ -45,7 +45,7 @@ public class WebSecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtTokenUtil, userRepository, redisUtil);
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtTokenProvider, userRepository, redisUtil);
         filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
         return filter;
     }
@@ -53,7 +53,7 @@ public class WebSecurityConfig {
 
     @Bean
     public JwtAuthorizationFilter jwtAuthorizationFilter() {
-        return new JwtAuthorizationFilter(jwtTokenUtil, userDetailsService,redisUtil);
+        return new JwtAuthorizationFilter(jwtTokenProvider, userDetailsService,redisUtil);
     }
 
     private static final String[] PERMIT = {

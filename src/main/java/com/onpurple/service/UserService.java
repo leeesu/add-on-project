@@ -6,21 +6,16 @@ import com.onpurple.dto.response.MessageResponseDto;
 import com.onpurple.dto.response.ResponseDto;
 import com.onpurple.dto.response.UserResponseDto;
 import com.onpurple.enums.ErrorCode;
-import com.onpurple.event.TokenReissueFailedEvent;
 import com.onpurple.exception.CustomException;
 import com.onpurple.model.Authority;
 import com.onpurple.model.User;
 import com.onpurple.repository.UserRepository;
-import com.onpurple.security.jwt.JwtTokenUtil;
+import com.onpurple.security.jwt.JwtTokenProvider;
 import com.onpurple.util.RedisUtil;
 import com.onpurple.util.s3.AwsS3UploadService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.EventListener;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +32,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final RedisUtil redisUtil;
     private final AwsS3UploadService awsS3UploadService;
-    private final JwtTokenUtil jwtTokenUtil;
+    private final JwtTokenProvider jwtTokenProvider;
 
     private static final String ADMIN_TOKEN = ("AAABnvxRVklrnYxKZ0aHgTBcXukeZygoC");
 
@@ -105,7 +100,7 @@ public class UserService {
 
 
 //        현재 서비스에서 회원가입 이후 바로 서비스를 이용할 수 있도록 설정하였기에 회원가입이 진행될 때 토큰이 발행되도록 설정
-        jwtTokenUtil.reissueToken(user.getUsername());
+        jwtTokenProvider.reissueToken(user.getUsername());
 
         if (user.getRole().equals(Authority.ADMIN)) {
             return ApiResponseDto.success(SUCCESS_ADMIN_SIGNUP.getMessage());
@@ -187,10 +182,10 @@ public class UserService {
 
     @Transactional
     public void logoutBlackListToken(HttpServletRequest request) {
-        String accessToken = jwtTokenUtil.resolveToken(request, JwtTokenUtil.ACCESS_TOKEN);
-        Claims info = jwtTokenUtil.getUserInfoFromToken(accessToken);
+        String accessToken = jwtTokenProvider.resolveToken(request, JwtTokenProvider.ACCESS_TOKEN);
+        Claims info = jwtTokenProvider.getUserInfoFromToken(accessToken);
         // 엑세스 토큰 남은시간
-        long remainMilliSeconds = jwtTokenUtil.getExpiration(accessToken);
+        long remainMilliSeconds = jwtTokenProvider.getExpiration(accessToken);
         // 액세스 토큰 만료시점 까지 저장
         redisUtil.saveData(accessToken, accessToken, remainMilliSeconds);
         // refreshToken 삭제
