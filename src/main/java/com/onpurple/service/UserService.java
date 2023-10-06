@@ -30,7 +30,6 @@ import static com.onpurple.enums.SuccessCode.*;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final RedisUtil redisUtil;
     private final AwsS3UploadService awsS3UploadService;
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -187,9 +186,9 @@ public class UserService {
         // 엑세스 토큰 남은시간
         long remainMilliSeconds = jwtTokenProvider.getExpiration(accessToken);
         // 액세스 토큰 만료시점 까지 저장
-        redisUtil.saveData(accessToken, accessToken, remainMilliSeconds);
+        RedisUtil.saveData(accessToken, accessToken, remainMilliSeconds);
         // refreshToken 삭제
-        redisUtil.deleteData(REFRESH_TOKEN_KEY.getDesc()+info.getSubject());
+        RedisUtil.deleteData(REFRESH_TOKEN_KEY.getDesc()+info.getSubject());
     }
 
 }

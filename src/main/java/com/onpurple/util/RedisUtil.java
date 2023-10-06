@@ -14,22 +14,22 @@ import java.util.concurrent.TimeUnit;
 public class RedisUtil {
 
 
-    private final RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+    private static final RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
 
-    public void saveData(String key, String value, long time) {
+    public static void saveData(String key, String value, long time) {
         redisTemplate.opsForValue().set(key, value);
         redisTemplate.expire(key, time, TimeUnit.MILLISECONDS);
     }
 
-    public String getData(String key) {
+    public static String getData(String key) {
         return (String) redisTemplate.opsForValue().get(key);
     }
 
-    public boolean checkValidateData(String key) {
+    public static boolean checkValidateData(String key) {
         return redisTemplate.hasKey(key);
     }
 
-    public void deleteData(String key) {
+    public static void deleteData(String key) {
         redisTemplate.delete(key);
     }
 }

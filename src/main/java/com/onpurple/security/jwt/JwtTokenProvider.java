@@ -49,7 +49,6 @@ public class JwtTokenProvider {
     private Key key;
     private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
     private final UserRepository userRepository;
-    private final RedisUtil redisUtil;
     private final ApplicationEventPublisher eventPublisher;
 
     // secretKey Base64 Decode
@@ -173,11 +172,11 @@ public class JwtTokenProvider {
     public String createRefreshToken(User user) {
         String refreshToken = createToken(user, REFRESH_EXPIRE.getTime(), REFRESH_TOKEN);
 
-        redisUtil.saveData(REFRESH_TOKEN_KEY.getDesc()+user.getUsername(), refreshToken,
+        RedisUtil.saveData(REFRESH_TOKEN_KEY.getDesc()+user.getUsername(), refreshToken,
                 REFRESH_EXPIRE.getTime());
 
         logger.info("Redis에 RefreshToken이 저장되었습니다.");
-        logger.info("{} : Redis에 저장된 토큰 확인", redisUtil.getData(REFRESH_TOKEN_KEY.getDesc()+user.getUsername()));
+        logger.info("{} : Redis에 저장된 토큰 확인", RedisUtil.getData(REFRESH_TOKEN_KEY.getDesc()+user.getUsername()));
 
         return refreshToken;
     }
@@ -218,7 +217,7 @@ public class JwtTokenProvider {
 
         //DB에 저장한 토큰 비교
         Claims info = getUserInfoFromToken(token);
-        String redisRefreshToken = redisUtil.getData(REFRESH_TOKEN_KEY.getDesc()+info.getSubject());
+        String redisRefreshToken = RedisUtil.getData(REFRESH_TOKEN_KEY.getDesc()+info.getSubject());
         return refreshRedisValidate(redisRefreshToken, token);
 
     }

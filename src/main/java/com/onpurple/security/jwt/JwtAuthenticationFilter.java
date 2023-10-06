@@ -26,15 +26,12 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
-    private final RedisUtil redisUtil;
 
 
     public JwtAuthenticationFilter(
-            JwtTokenProvider jwtTokenProvider, UserRepository userRepository,
-            RedisUtil redisUtil) {
+            JwtTokenProvider jwtTokenProvider, UserRepository userRepository) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.userRepository = userRepository;
-        this.redisUtil = redisUtil;
         // 로그인 처리를 여기서 처리한다.
         setFilterProcessesUrl("/user/login");
     }
