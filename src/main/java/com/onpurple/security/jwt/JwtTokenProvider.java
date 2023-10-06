@@ -181,17 +181,8 @@ public class JwtTokenProvider {
 
         return refreshToken;
     }
-
-    // httpOnly, Secure설정이 되어있는 쿠키 -> 자바스크립트에서 접근 불가
-    // RefreshToken을 가져와서 헤더로 보낸다.
-    public String refreshSetHeader(HttpServletRequest request, HttpServletResponse response) {
-
-        response.setHeader(REFRESH_TOKEN, refreshCookieRequest(request));
-        String refreshToken = resolveToken(request, REFRESH_TOKEN);
-        return refreshToken;
-    }
     // 쿠키에서 RefreshToken 가져오기
-    private String refreshCookieRequest(HttpServletRequest request){
+    public String refreshCookieRequest(HttpServletRequest request){
 
         return getRefreshTokenFromRequest(request);
     }
@@ -249,7 +240,7 @@ public class JwtTokenProvider {
     }
 
     // HttpServletRequest 에서 Cookie Value : JWT 가져오기
-    public String getRefreshTokenFromRequest(HttpServletRequest req) {
+    private String getRefreshTokenFromRequest(HttpServletRequest req) {
         Cookie[] cookies = req.getCookies();
         if(cookies != null) {
             for (Cookie cookie : cookies) {

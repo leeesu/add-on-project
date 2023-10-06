@@ -38,7 +38,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             if (!jwtTokenProvider.validateToken(accessToken)) {
                 log.warn("[FAIL] AccessToken 검증 실패했습니다.");
                 // 쿠키에서 토큰 추출후, 헤더로 토큰보내서 가져오기
-                String refreshToken = jwtTokenProvider.refreshSetHeader(req, res);
+                String refreshToken = jwtTokenProvider.refreshCookieRequest(req);
                 TokenDto tokenDto = jwtTokenProvider.handleRefreshToken(refreshToken, req);
                 accessToken = tokenDto.getAccessToken().substring(7);
                 jwtTokenProvider.tokenSetHeaders(tokenDto, res);
