@@ -11,11 +11,9 @@ import com.onpurple.repository.PostRepository;
 import com.onpurple.repository.ReCommentRepository;
 import com.onpurple.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -27,50 +25,31 @@ public class EntityValidatorManager {
     private final ReCommentRepository reCommentRepository;
 
     // 게시글 정보가 없을 경우 에러 메시지 전송.
-    @Transactional
+    @Transactional(readOnly = true)
     public Post validatePost(Long postId) {
-        Post post = postRepository.findById(postId).orElseThrow(
-                ()-> new CustomException(ErrorCode.POST_NOT_FOUND)
-        );
-        return post;
+        return validateOrThrow(postRepository, postId, ErrorCode.POST_NOT_FOUND);
     }
+
     // 댓글 정보가 없을 경우 에러 메시지 전송.
     @Transactional(readOnly = true)
     public Comment validateComment (Long commentId) {
-        Comment comment = commentRepository.findById(commentId).orElseThrow(
-                ()-> new CustomException(ErrorCode.COMMENT_NOT_FOUND)
-        );
-        return comment;
+        return validateOrThrow(commentRepository, commentId, ErrorCode.COMMENT_NOT_FOUND);
     }
     // 회원 정보가 없을 경우 에러 메시지 전송.
-    @Transactional
+    @Transactional(readOnly = true)
     public User validateProfile(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new CustomException(ErrorCode.PROFILE_NOT_FOUND)
-        );
-        return user;
+        return validateOrThrow(userRepository, userId,ErrorCode.PROFILE_NOT_FOUND);
     }
     // 대댓글 정보가 없을 경우 에러 메시지 전송.
-    @Transactional
+    @Transactional(readOnly = true)
     public ReComment validateReComment(Long reCommentId) {
-        ReComment reComment = reCommentRepository.findById(reCommentId).orElseThrow(
-                ()-> new CustomException(ErrorCode.NOT_FOUND_RECOMMENT)
-        );
-        return reComment;
+        return validateOrThrow(reCommentRepository, reCommentId, ErrorCode.NOT_FOUND_RECOMMENT);
     }
-    // 이미지 데이터가 없을 경우 에러 메시지 전송.
-    @Transactional
-    public void validateMultipartFile(MultipartFile multipartFiles) {
-        if (multipartFiles == null) {
-            throw new NullPointerException("사진을 업로드해주세요");
-        }
-    }
-    // 이미지 데이터(리스트)가 없을 경우 에러 메시지 전송.
-    @Transactional
-    public void validateMultipartFiles(List<MultipartFile> multipartFiles) {
 
-        if (multipartFiles == null) {
-            throw new NullPointerException("사진을 업로드해주세요");
-        }
+    private <T> T validateOrThrow(JpaRepository<T, Long> repository,
+                                  Long id,
+                                  ErrorCode errorCode){
+        return repository.findById(id).orElseThrow(() -> new CustomException(errorCode));
     }
+
 }
