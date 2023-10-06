@@ -9,8 +9,8 @@ import com.onpurple.enums.ErrorCode;
 import com.onpurple.model.*;
 import com.onpurple.repository.CommentRepository;
 import com.onpurple.repository.PostRepository;
-import com.onpurple.util.ImageUtil;
-import com.onpurple.util.ValidationUtil;
+import com.onpurple.helper.ImageUploaderManager;
+import com.onpurple.helper.EntityValidatorManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,9 +27,9 @@ public class AdminService {
 
     private final CommentRepository commentRepository;
 
-    private final ImageUtil imageUtil;
+    private final ImageUploaderManager imageUploaderManager;
 
-    private final ValidationUtil validationUtil;
+    private final EntityValidatorManager entityValidatorManager;
 
     /*
     * 관리자 게시글 삭제
@@ -42,13 +42,13 @@ public class AdminService {
     public ApiResponseDto<MessageResponseDto> deletePostByAdmin(User user, Long postId) {
 
 
-        Post post = validationUtil.validatePost(postId);
+        Post post = entityValidatorManager.validatePost(postId);
 
         validationAdmin(user);
         postRepository.delete(post);
-        List<String> imgList = imageUtil.getListImage(post);
+        List<String> imgList = imageUploaderManager.getListImage(post);
 
-        imageUtil.deleteImageList(post,imgList);
+        imageUploaderManager.deleteImageList(post,imgList);
 
         return ApiResponseDto.success(
                 SuccessCode.SUCCESS_ADMIN_COMMENT_DELETE.getMessage()
@@ -64,7 +64,7 @@ public class AdminService {
     @Transactional
     public ApiResponseDto<MessageResponseDto> deleteCommentByAdmin(User user, Long commentId) {
 
-        Comment comment = validationUtil.validateComment(commentId);
+        Comment comment = entityValidatorManager.validateComment(commentId);
 
         validationAdmin(user);
         commentRepository.delete(comment);

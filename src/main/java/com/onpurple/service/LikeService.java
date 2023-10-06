@@ -7,14 +7,12 @@ import com.onpurple.exception.CustomException;
 import com.onpurple.enums.ErrorCode;
 import com.onpurple.model.*;
 import com.onpurple.repository.*;
-import com.onpurple.util.ValidationUtil;
+import com.onpurple.helper.EntityValidatorManager;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.onpurple.enums.SuccessCode.*;
@@ -25,8 +23,7 @@ public class LikeService {
 
     private final LikeRepository likeRepository;
     private final UserRepository userRepository;
-    private final PostRepository postRepository;
-    private final ValidationUtil validationUtil;
+    private final EntityValidatorManager entityValidatorManager;
 
 
     /*
@@ -39,7 +36,7 @@ public class LikeService {
     public ApiResponseDto<LikeResponseDto> postLike(Long postId,
                                                     User user) {
         // 게시글 유효성 체크 & 분산 Lock
-        Post post = validationUtil.validatePost(postId);
+        Post post = entityValidatorManager.validatePost(postId);
         // 본인에게 좋아요 할 수 없도록 예외처리
         validatePostLikeUser(post, user);
         //좋아요 한 적 있는지 체크
@@ -75,7 +72,7 @@ public class LikeService {
     public ApiResponseDto<LikeResponseDto> commentLike(Long commentId,
                                                        User user) {
         // 댓글 유효성 체크
-        Comment comment = validationUtil.validateComment(commentId);
+        Comment comment = entityValidatorManager.validateComment(commentId);
         // 본인 댓글에 좋아요 할 수 없도록 예외처리
         validateCommentLikeUser(comment, user);
 
@@ -112,7 +109,7 @@ public class LikeService {
     public ApiResponseDto<MessageResponseDto> userLike(Long targetId,
                                                        User user) {
 
-        User target = validationUtil.validateProfile(targetId);
+        User target = entityValidatorManager.validateProfile(targetId);
 
         //좋아요 한 적 있는지 체크
         Likes liked = likeRepository.findByUserAndTargetId(user, targetId).orElse(null);

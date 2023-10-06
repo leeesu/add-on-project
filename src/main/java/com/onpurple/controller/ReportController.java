@@ -4,11 +4,11 @@ import com.onpurple.dto.request.ReportRequestDto;
 import com.onpurple.dto.response.ApiResponseDto;
 import com.onpurple.dto.response.MessageResponseDto;
 import com.onpurple.dto.response.ReportResponseDto;
-import com.onpurple.dto.response.ResponseDto;
 import com.onpurple.security.UserDetailsImpl;
 import com.onpurple.service.ReportService;
-import com.onpurple.util.ValidationUtil;
-import com.onpurple.util.s3.AwsS3UploadService;
+import com.onpurple.helper.EntityValidatorManager;
+import com.onpurple.external.s3.AwsS3UploadService;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -21,15 +21,13 @@ import java.util.List;
 public class ReportController {
     private final ReportService reportService;
     private final AwsS3UploadService s3Service;
-    private final ValidationUtil validationUtil;
+    private final EntityValidatorManager entityValidatorManager;
 
     // 신고글 작성
     @PostMapping( "/report")
     public ApiResponseDto<ReportResponseDto> createReport(@RequestPart(value = "data",required = false) ReportRequestDto requestDto,
                                                           @AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                          @RequestPart(value = "imageUrl",required = false) MultipartFile multipartFiles) {
-
-        validationUtil.validateMultipartFile(multipartFiles);
+                                                          @NotNull @RequestPart(value = "imageUrl",required = false) MultipartFile multipartFiles) {
         String imgPaths = s3Service.uploadOne(multipartFiles);
         return reportService.createReport(requestDto,userDetails.getUser(), imgPaths);
     }

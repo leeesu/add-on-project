@@ -8,7 +8,7 @@ import com.onpurple.exception.CustomException;
 import com.onpurple.model.UnLike;
 import com.onpurple.model.User;
 import com.onpurple.repository.UnLikeRepository;
-import com.onpurple.util.ValidationUtil;
+import com.onpurple.helper.EntityValidatorManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +28,7 @@ import static org.mockito.Mockito.mock;
 class UnLikeServiceTest {
 
     @Mock
-    ValidationUtil validationUtil;
+    EntityValidatorManager entityValidatorManager;
 
     @Mock
     UnLikeRepository unLikeRepository;
@@ -42,7 +42,7 @@ class UnLikeServiceTest {
         User user = mock(User.class);
         User targetUser = mock(User.class);
 
-        given(validationUtil.validateProfile(any())).willReturn(targetUser);
+        given(entityValidatorManager.validateProfile(any())).willReturn(targetUser);
         given(unLikeRepository.findByUserAndTargetId(any(), any())).willReturn(Optional.empty());
 
         // when
@@ -60,7 +60,7 @@ class UnLikeServiceTest {
         User targetUser = mock(User.class);
         UnLike userUnLike = UnLike.builder().user(user).target(targetUser).build();
 
-        given(validationUtil.validateProfile(any())).willReturn(targetUser);
+        given(entityValidatorManager.validateProfile(any())).willReturn(targetUser);
         given(unLikeRepository.findByUserAndTargetId(any(), any())).willReturn(Optional.of(userUnLike));
 
         // when
@@ -77,7 +77,7 @@ class UnLikeServiceTest {
 
         User targetUser = mock(User.class);
 
-        lenient().when(validationUtil.validateProfile(2L)).thenThrow(new CustomException(ErrorCode.PROFILE_NOT_FOUND));
+        lenient().when(entityValidatorManager.validateProfile(2L)).thenThrow(new CustomException(ErrorCode.PROFILE_NOT_FOUND));
         // when&then
         Throwable exception = assertThrows(CustomException.class, () -> unLikeService.userUnLike(2L,targetUser));
         // Then

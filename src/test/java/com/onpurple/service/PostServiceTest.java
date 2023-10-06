@@ -1,25 +1,21 @@
 package com.onpurple.service;
 
-import com.google.common.base.Optional;
 import com.onpurple.category.PostCategory;
 import com.onpurple.dto.request.PostRequestDto;
 import com.onpurple.dto.response.ApiResponseDto;
-import com.onpurple.dto.response.CommentResponseDto;
 import com.onpurple.dto.response.MessageResponseDto;
 import com.onpurple.dto.response.PostResponseDto;
 import com.onpurple.enums.SuccessCode;
-import com.onpurple.model.Comment;
 import com.onpurple.model.Post;
 import com.onpurple.model.User;
 import com.onpurple.repository.CommentRepository;
 import com.onpurple.repository.PostRepository;
-import com.onpurple.util.ImageUtil;
-import com.onpurple.util.TestUtil;
-import com.onpurple.util.ValidationUtil;
+import com.onpurple.helper.ImageUploaderManager;
+import com.onpurple.external.TestUtil;
+import com.onpurple.helper.EntityValidatorManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.Nested;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,20 +23,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
-import static java.util.Optional.of;
-import static java.util.Optional.ofNullable;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.OPTIONAL;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -54,12 +44,12 @@ class PostServiceTest {
     PostRepository postRepository;
 
     @Mock
-    ImageUtil imageUtil;
+    ImageUploaderManager imageUploaderManager;
 
     @Mock
     CommentRepository commentRepository;
     @Mock
-    ValidationUtil validationUtil;
+    EntityValidatorManager entityValidatorManager;
 
     @InjectMocks
     PostService postService;
@@ -87,7 +77,7 @@ class PostServiceTest {
 
         List<String> imgPaths = List.of("img1", "img2");
 
-        given(imageUtil.addImage(any(), any())).willReturn(imgPaths);
+        given(imageUploaderManager.addImage(any(), any())).willReturn(imgPaths);
 
 
         given(postRepository.save(any())).willReturn(post);
@@ -144,11 +134,11 @@ class PostServiceTest {
     @DisplayName("게시글 단일 조회")
     void test_get_post() {
         // given
-        when(validationUtil.validatePost(any())).thenReturn(post);
+        when(entityValidatorManager.validatePost(any())).thenReturn(post);
         // when
         ApiResponseDto<PostResponseDto> response = postService.getPost(post.getId());
         // then
-        verify(validationUtil, times(1)).validatePost(any());
+        verify(entityValidatorManager, times(1)).validatePost(any());
         assertEquals(response.getData().getTitle(), post.getTitle());
         assertEquals(response.getData().getContent(), post.getContent());
     }
@@ -169,16 +159,16 @@ class PostServiceTest {
                 .build();
         List<String> imgPaths = List.of("img1", "img2");
         //
-        when(validationUtil.validatePost(any())).thenReturn(post);
-        when(imageUtil.updateImage(imgPaths, post)).thenReturn(imgPaths);
+        when(entityValidatorManager.validatePost(any())).thenReturn(post);
+        when(imageUploaderManager.updateImage(imgPaths, post)).thenReturn(imgPaths);
 
         ApiResponseDto<PostResponseDto> response = postService.updatePost(post.getId(), updateDto, user, imgPaths);
 
         // then
-        verify(validationUtil).validatePost(post.getId());
-        verify(imageUtil).updateImage(imgPaths, post);
+        verify(entityValidatorManager).validatePost(post.getId());
+        verify(imageUploaderManager).updateImage(imgPaths, post);
         assertNotNull(response);
-        verify(validationUtil, times(1)).validatePost(any());
+        verify(entityValidatorManager, times(1)).validatePost(any());
         assertEquals(response.getData().getTitle(), updatePost.getTitle());
         assertEquals(response.getData().getContent(), updatePost.getContent());
     }
@@ -187,11 +177,11 @@ class PostServiceTest {
     @DisplayName("게시글 삭제")
     void test_delete_post() {
         // given
-        when(validationUtil.validatePost(any())).thenReturn(post);
+        when(entityValidatorManager.validatePost(any())).thenReturn(post);
         // when
         ApiResponseDto<MessageResponseDto> response = postService.deletePost(post.getId(), user);
         // then
-        verify(validationUtil, times(1)).validatePost(any());
+        verify(entityValidatorManager, times(1)).validatePost(any());
         assertEquals(SuccessCode.SUCCESS_POST_DELETE.getMessage(), response.getMessage());
     }
 
@@ -209,7 +199,7 @@ class PostServiceTest {
     void test_get_post_view() throws InterruptedException{
         User user = mock(User.class);
         // given
-        when(validationUtil.validatePost(any())).thenReturn(post);
+        when(entityValidatorManager.validatePost(any())).thenReturn(post);
         int threadCount = 40;
         ExecutorService executorService = Executors.newFixedThreadPool(40);
         CountDownLatch latch = new CountDownLatch(40);
@@ -226,7 +216,7 @@ class PostServiceTest {
         ApiResponseDto<PostResponseDto> response = postService.getPost(post.getId());
         // then
         System.out.println("현재 조회 수 : "+ post.getView());                        ;
-        verify(validationUtil, times(1)).validatePost(any());
+        verify(entityValidatorManager, times(1)).validatePost(any());
         assertThat(post.getView()).isNotEqualTo(40);
         assertEquals(response.getData().getTitle(), post.getTitle());
         assertEquals(response.getData().getContent(), post.getContent());

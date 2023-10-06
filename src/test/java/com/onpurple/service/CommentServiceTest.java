@@ -9,7 +9,7 @@ import com.onpurple.model.Comment;
 import com.onpurple.model.Post;
 import com.onpurple.model.User;
 import com.onpurple.repository.CommentRepository;
-import com.onpurple.util.ValidationUtil;
+import com.onpurple.helper.EntityValidatorManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -31,7 +30,7 @@ import static org.mockito.Mockito.when;
 class CommentServiceTest {
 
     @Mock
-    ValidationUtil validationUtil;
+    EntityValidatorManager entityValidatorManager;
 
     @Mock
     CommentRepository commentRepository;
@@ -58,7 +57,7 @@ class CommentServiceTest {
     void create_comment() {
 
         // given
-        given(validationUtil.validatePost(any())).willReturn(post);
+        given(entityValidatorManager.validatePost(any())).willReturn(post);
         given(commentRepository.save(any())).willReturn(defaultComment);
         // when
         ApiResponseDto<CommentResponseDto> saveComment = commentService.createComment(post.getId(),requestDto, user);
@@ -70,7 +69,7 @@ class CommentServiceTest {
     @DisplayName("댓글 전체 조회하기")
     void get_all_comment_by_post() {
         // given
-        given(validationUtil.validatePost(any())).willReturn(post);
+        given(entityValidatorManager.validatePost(any())).willReturn(post);
 
         // when
         List<Comment> mockCommentList = new ArrayList<>();
@@ -99,7 +98,7 @@ class CommentServiceTest {
                 .comment("댓글내용 수정")
                 .build();
         // given
-        given(validationUtil.validateComment(any())).willReturn(defaultComment);
+        given(entityValidatorManager.validateComment(any())).willReturn(defaultComment);
         // when
         ApiResponseDto<CommentResponseDto> updateComment = commentService.updateComment(defaultComment.getId(), updateRequestDto, user);
         // then
@@ -111,7 +110,7 @@ class CommentServiceTest {
     @DisplayName("댓글 삭제")
     void delete_comment() {
         // given
-        given(validationUtil.validateComment(any())).willReturn(defaultComment);
+        given(entityValidatorManager.validateComment(any())).willReturn(defaultComment);
         // when
         ApiResponseDto<MessageResponseDto> deleteComment = commentService.deleteComment(defaultComment.getId(), user);
         // then

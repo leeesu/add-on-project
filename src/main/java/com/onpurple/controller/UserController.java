@@ -9,11 +9,12 @@ import com.onpurple.dto.response.UserResponseDto;
 import com.onpurple.security.UserDetailsImpl;
 import com.onpurple.service.KakaoService;
 import com.onpurple.service.UserService;
-import com.onpurple.util.ValidationUtil;
-import com.onpurple.util.s3.AwsS3UploadService;
+import com.onpurple.helper.EntityValidatorManager;
+import com.onpurple.external.s3.AwsS3UploadService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -29,13 +30,12 @@ public class UserController {
     private final AwsS3UploadService s3Service;
 
     private final KakaoService kakaoService;
-    private final ValidationUtil validationUtil;
+    private final EntityValidatorManager entityValidatorManager;
 
     @RequestMapping(value = "/user/signup", method = RequestMethod.POST)
     public ApiResponseDto<UserResponseDto> signup(@RequestPart(value = "info", required = false) @Valid SignupRequestDto requestDto,
                                                   @RequestPart(value = "userInfo", required = false) UserInfoRequestDto userInfoRequestDto,
-                                                  @RequestPart(value = "imageUrl", required = false) MultipartFile multipartFiles, HttpServletResponse response) {
-        validationUtil.validateMultipartFile(multipartFiles);
+                                                  @NotNull @RequestPart(value = "imageUrl", required = false) MultipartFile multipartFiles) {
         String imgPaths = s3Service.uploadOne(multipartFiles);
 
         return userService.createUser(requestDto, userInfoRequestDto, imgPaths);
@@ -61,10 +61,8 @@ public class UserController {
     }
 
     @RequestMapping(value = "/mypage/image", method = RequestMethod.PUT)
-    public ApiResponseDto<MessageResponseDto> imageUpdate(@RequestPart("imageUrl") MultipartFile multipartFiles,
+    public ApiResponseDto<MessageResponseDto> imageUpdate(@NotNull@RequestPart("imageUrl") MultipartFile multipartFiles,
                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
-
-        validationUtil.validateMultipartFile(multipartFiles);
 
         String imgPaths = s3Service.uploadOne(multipartFiles);
         return userService.updateImage(userDetails.getUser(), imgPaths);

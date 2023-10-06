@@ -1,9 +1,9 @@
-package com.onpurple.util;
+package com.onpurple.helper;
 
 import com.onpurple.model.Img;
 import com.onpurple.model.Post;
 import com.onpurple.repository.ImgRepository;
-import com.onpurple.util.s3.AwsS3UploadService;
+import com.onpurple.external.s3.AwsS3UploadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
-public class ImageUtil {
+public class ImageUploaderManager {
 
     private final ImgRepository imgRepository;
     private final AwsS3UploadService awsS3UploadService;
