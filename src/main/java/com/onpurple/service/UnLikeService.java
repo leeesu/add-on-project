@@ -31,10 +31,12 @@ public class UnLikeService {
         this.entityValidatorManager = entityValidatorManager;
     }
 
-    /*
-    * 싫어요 기능
-    * @param targetId, user
-    * @return ApiResponseDto<MessageResponseDto>
+    /**
+     * 싫어요 기능
+     * @DistributedLock 분산 Lock
+     * @param targetId
+     * @param user
+     * @return ApiResponseDto<MessageResponseDto>
      */
     @DistributedLock
     @Transactional
@@ -59,12 +61,11 @@ public class UnLikeService {
             return ApiResponseDto.success(SUCCESS_UN_LIKE_CANCEL.getMessage());
         }
     }
-
-    /*
-    * 내가 싫어요 한 사람 리스트 조회
-    * @param user
-    * @return ApiResponseDto<List<UnLikesResponseDto>>
-    * 좋아요한  사람 리스트 조회와 동일한 로직으로 구현.
+    /**
+     * 내가 싫어요 한 사람 리스트 조회
+     * @param user
+     * @return ApiResponseDto<List<UnLikesResponseDto>>
+     * 좋아요한 사람 리스트 조회와 동일한 로직
      */
     @Transactional(readOnly = true)
     public ApiResponseDto<List<UnLikesResponseDto>> getUnLike(User user) {

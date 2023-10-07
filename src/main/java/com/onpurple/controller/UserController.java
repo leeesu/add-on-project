@@ -43,13 +43,13 @@ public class UserController {
 
     // login Filter단에서 이루어지게 구현
     @PostMapping("/user/idCheck/{username}")
-    public ApiResponseDto<?> checkUser(@PathVariable String username) {
+    public ApiResponseDto<MessageResponseDto> checkUser(@PathVariable String username) {
 
         return userService.checkUser(username);
     }
 
     @PostMapping("/user/nicknameCheck/{nickname}")
-    public ResponseDto<?> checkNickname(@PathVariable String nickname) {
+    public ApiResponseDto<MessageResponseDto> checkNickname(@PathVariable String nickname) {
 
         return userService.checkNickname(nickname);
     }

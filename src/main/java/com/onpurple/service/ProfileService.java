@@ -26,13 +26,11 @@ public class ProfileService {
     private final UserRepository userRepository;
     private final EntityValidatorManager entityValidatorManager;
 
-
-    /*
-    * 전체 프로필 조회
-    * @return ApiResponseDto<List<ProfileResponseDto>>
-    * 전체 프로필 조회(메인페이지). user DB에 저장된 모든 내용을 찾은 후 리스트에 저장,이후 저장한 내용을 반환.
+    /**
+     * 전체 프로필 조회
+     * @return ApiResponseDto<List<ProfileResponseDto>>
+     * 전체 프로필 조회(메인페이지). user DB에 저장된 모든 내용을 찾은 후 리스트에 저장,이후 저장한 내용을 반환
      */
-
     @Transactional(readOnly = true)
     public ApiResponseDto<List<ProfileResponseDto>> getAllProfiles() {
         List<ProfileResponseDto> profileResponseDto = userRepository.findAll().stream()
@@ -47,11 +45,11 @@ public class ProfileService {
                 profileResponseDto);
     }
 
-    /*
-    * 상세 프로필 조회
-    * @param userId
-    * @return ApiResponseDto<ProfileResponseDto>
-    * 상세 프로필 조회(디테일페이지). userId를 찾아 해당 id가 있을 경우 해당 내용을 조회.
+    /**
+     * 상세 프로필 조회
+     * @param userId
+     * @return ApiResponseDto<ProfileResponseDto>
+     * 상세 프로필 조회(디테일페이지). userId를 찾아 해당 id가 있을 경우 해당 내용을 조회.
      */
     @Transactional
     public ApiResponseDto<ProfileResponseDto> getProfile(Long userId) {
@@ -63,11 +61,12 @@ public class ProfileService {
         );
     }
 
-    /*
-    * 프로필 수정
-    * @param requestDto, user
-    * @return ApiResponseDto<MessageResponseDto>
-    * 프로필 수정. DB에 저장된 유저의 정보들 중 프로필에 해당되는 내용을 수정.
+    /**
+     * 프로필 수정
+     * @param requestDto
+     * @param user
+     * @return ApiResponseDto<MessageResponseDto>
+     * 프로필 수정. DB에 저장된 유저의 정보들 중 프로필에 해당되는 내용을 수정.
      */
     @Transactional
     public ApiResponseDto<MessageResponseDto> updateProfile(ProfileUpdateRequestDto requestDto, User user) {

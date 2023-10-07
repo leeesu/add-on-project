@@ -28,10 +28,13 @@ public class CommentService {
   private final CommentRepository commentRepository;
   private final EntityValidatorManager entityValidatorManager;
 
-  /*
-    * 댓글 작성
-    * @param postId, commentRequestDto, user
-    * @return ApiResponseDto<CommentResponseDto>
+
+  /**
+   * 댓글 작성
+   * @param postId
+   * @param commentRequestDto
+   * @param user
+   * @return ApiResponseDto<CommentResponseDto>
    */
   @Transactional
   public ApiResponseDto<CommentResponseDto> createComment(Long postId, CommentRequestDto commentRequestDto, User user) {
@@ -52,10 +55,11 @@ public class CommentService {
             .comment(commentRequestDto.getComment())
             .build();
   }
-  /*
-  * 댓글 조회
-  * @param postId
-  * @return ApiResponseDto<List<CommentResponseDto>>
+
+  /**
+   * 댓글 조회
+   * @param postId
+   * @return ApiResponseDto<List<CommentResponseDto>>
    */
   @Transactional(readOnly = true)
   public ApiResponseDto<List<CommentResponseDto>> getAllCommentsByPost(Long postId) {
@@ -72,10 +76,12 @@ public class CommentService {
             commentResponseDtoList);
   }
 
-  /*
-  * 댓글 수정
-  * @param commentId, commentRequestDto, user
-  * @return ApiResponseDto<CommentResponseDto>
+  /**
+   * 댓글 수정
+   * @param commentId
+   * @param requestDto
+   * @param user
+   * @return ApiResponseDto<CommentResponseDto>
    */
 
   @Transactional
@@ -93,10 +99,11 @@ public class CommentService {
       return ApiResponseDto.success(SUCCESS_COMMENT_EDIT.getMessage(),CommentResponseDto.fromEntity(comment));
   }
 
-  /*
-  * 댓글 삭제
-  * @param commentId, user
-  * @return ApiResponseDto<MessageResponseDto>
+  /**
+   * 댓글 삭제
+   * @param commentId
+   * @param user
+   * @return ApiResponseDto<MessageResponseDto>
    */
   @Transactional
   public ApiResponseDto<MessageResponseDto> deleteComment(Long commentId, User user) {
@@ -107,6 +114,11 @@ public class CommentService {
     return ApiResponseDto.success(SUCCESS_COMMENT_DELETE.getMessage());
   }
 
+  /**
+   * 댓글 작성자와 로그인한 사용자가 일치하는지 확인
+   * @param comment
+   * @param user
+   */
 
   public void validateUser(Comment comment, User user) {
     if (comment.validateUser(user)) {

@@ -34,10 +34,12 @@ public class PostService {
     private final ImageUploaderManager imageUploaderManager;
     private final EntityValidatorManager entityValidatorManager;
 
-    /*
-    * 게시글 작성
-    * @param requestDto, user, imgPaths
-    * @return ApiResponseDto<PostResponseDto>
+    /**
+     * 게시글 작성
+     * @param requestDto
+     * @param user
+     * @param imgPaths
+     * @return ApiResponseDto<PostResponseDto>
      */
     @Transactional
     public ApiResponseDto<PostResponseDto> createPost(PostRequestDto requestDto,
@@ -47,8 +49,7 @@ public class PostService {
         Post post = postFromRequest(requestDto, user);
         postRepository.save(post);
 
-        List<String> imgList;
-        imgList = imageUploaderManager.addImage(imgPaths, post);
+        List<String> imgList = imageUploaderManager.addImage(imgPaths, post);
         post.saveImage(imgList.get(0));
 
         return ApiResponseDto.success(
@@ -65,10 +66,12 @@ public class PostService {
                 .build();
     }
 
-    /*
-    * 카테고리 전체 게시글 조회
-    * @param category, pageable
-    * @return ApiResponseDto<Slice<PostResponseDto>>
+
+    /**
+     * 카테고리 전체 게시글 조회 (무한스크롤)
+     * @param category
+     * @param pageable
+     * @return ApiResponseDto<Slice<PostResponseDto>>
      */
     @Transactional(readOnly = true)
     public ApiResponseDto<Slice<PostResponseDto>> getAllPostCategory(PostCategory category, Pageable pageable){
@@ -84,10 +87,12 @@ public class PostService {
 
     }
 
-    /*
-    * 카테고리 검색
-    * @param category, keyword, pageable
-    * @return ApiResponseDto<Slice<PostResponseDto>>
+    /**
+     * 카테고리 검색 (무한스크롤)
+     * @param category
+     * @param keyword
+     * @param pageable
+     * @return ApiResponseDto<Slice<PostResponseDto>>
      */
     @Transactional(readOnly = true)
     public ApiResponseDto<Slice<PostResponseDto>> getAllPostCategorySearch(
@@ -105,11 +110,10 @@ public class PostService {
 
     }
 
-
-    /*
-    * 게시글 단건 조회
-    * @param postId
-    * @return ApiResponseDto<PostResponseDto>
+    /**
+     * 게시글 단건 조회
+     * @param postId
+     * @return ApiResponseDto<PostResponseDto>
      */
     @Transactional// readOnly설정시 데이터가 Mapping되지 않는문제로 해제
     public ApiResponseDto<PostResponseDto> getPost(Long postId) {
@@ -130,14 +134,18 @@ public class PostService {
         );
     }
 
-    /*
-    * 게시글 업데이트
-    * @param postId, requestDto, user, imgPaths
-    * @return ApiResponseDto<PostResponseDto>
+
+    /**
+     * 게시글 업데이트
+     * @param postId
+     * @param postRequestDto
+     * @param user
+     * @param imgPaths
+     * @return ApiResponseDto<PostResponseDto>
      */
     @Transactional
     public ApiResponseDto<PostResponseDto> updatePost(Long postId,
-                                                   PostRequestDto requestDto,
+                                                   PostRequestDto postRequestDto,
                                                    User user,
                                                    List<String> imgPaths) {
 
@@ -148,16 +156,18 @@ public class PostService {
         List<String> newImgList = imageUploaderManager.updateImage(imgPaths, post);
 
 
-        post.update(requestDto);
+        post.update(postRequestDto);
         return ApiResponseDto.success(
                 SUCCESS_POST_EDIT.getMessage(),
                 PostResponseDto.fromEntity(post, newImgList)
         );
     }
-    /*
-    * 게시글 삭제
-    * @param postId, user
-    * @return ApiResponseDto<MessageResponseDto>
+
+    /**
+     * 게시글 삭제
+     * @param postId
+     * @param user
+     * @return ApiResponseDto<MessageResponseDto>
      */
     @Transactional
     public ApiResponseDto<MessageResponseDto> deletePost(Long postId, User user) {
@@ -171,12 +181,21 @@ public class PostService {
         return ApiResponseDto.success(SUCCESS_POST_DELETE.getMessage());
     }
 
+    /**
+     * 게시글 작성자와 로그인한 사용자가 일치하는지 확인
+     * @param post
+     * @param user
+     */
     public void validatePostUser(Post post, User user) {
         if (post.validateUser(user)) {
             throw new CustomException(ErrorCode.INVALID_USER_MATCH);
         }
     }
 
+    /**
+     * 카테고리 검증
+     * @param category
+     */
     public void validateCategory(PostCategory category) {
 
         if (!PostCategory.isValidCategory(category)) {
@@ -185,6 +204,10 @@ public class PostService {
         }
     }
 
+    /**
+     * 조회수 증가
+     * @param post
+     */
     public void viewCount(Post post) {
         post.increasePostView();
     }

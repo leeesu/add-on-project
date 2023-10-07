@@ -22,10 +22,12 @@ public class ChatMessageService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
 
-    /*
-    * 대화 저장
-    * @param messageDto
-    * @return void
+
+    /**
+     * 대화 저장
+     * ChatMessageDto 를 ChatMessage 로 변환
+     * @param messageDto
+     * @return void
      */
     public void saveMessage(ChatMessageDto messageDto) {
         // DB 저장
@@ -42,10 +44,10 @@ public class ChatMessageService {
         redisTemplateMessage.expire(messageDto.getRoomId(), 1, TimeUnit.MINUTES);
     }
 
-    /*
-    * 대화 조회 - Redis & DB
-    * @param roomId
-    * @return List<ChatMessageDto>
+    /**
+     * 대화 조회 - Redis & DB
+     * @param roomId
+     * @return List<ChatMessageDto>
      */
     public List<ChatMessageDto> loadMessage(String roomId) {
         List<ChatMessageDto> messageList = new ArrayList<>();

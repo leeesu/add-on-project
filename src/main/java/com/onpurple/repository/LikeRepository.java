@@ -5,6 +5,7 @@ package com.onpurple.repository;
 
 import com.onpurple.model.Likes;
 import com.onpurple.model.User;
+import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -28,5 +29,5 @@ public interface LikeRepository extends JpaRepository<Likes, Long> {
     int countByTargetId(Long targetId);
 
     @Query(value ="select l.user.id from Likes l where l.user.id in(select l.target.id from Likes l where l.user.id =:userId)")
-    List<Integer> likeToLikeUserId(Long userId);
+    List<Integer> likeToLikeUserId(@Param("userId") Long userId);
 }

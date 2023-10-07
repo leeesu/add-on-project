@@ -51,10 +51,11 @@ public class ChatRoomService {
         topics = new HashMap<>();
     }
 
-    /*
-    * 채팅방 생성
-    * @param chatMessageRequestDto, user
-    * @return ChatMessageResponseDto
+    /**
+     * 채팅방 생성
+     * @param chatMessageRequestDto
+     * @param user
+     * @return ChatMessageResponseDto
      */
     public ChatMessageResponseDto createRoom(ChatMessageRequestDto chatMessageRequestDto, User user) {
 
@@ -74,10 +75,11 @@ public class ChatRoomService {
         }
     }
 
-    /*
-    * 7. 사용자 관련 채팅방 전체 조회
-    * @param user
-    * @return List<ChatMessageResponseDto>
+
+    /**
+     * 사용자 관련 채팅방 전체 조회
+     * @param user
+     * @return List<ChatMessageResponseDto>
      */
     public List<ChatMessageResponseDto> findAllRoomByUser(User user) {
         List<ChatRoom> chatRooms = chatRoomRepository.findByUserOrReceiver(user, user.getNickname());      // sender & receiver 모두 해당 쪽지방 조회 가능 (1:1 대화)
@@ -125,10 +127,12 @@ public class ChatRoomService {
         return chatMessageResponseDtos;
     }
 
-    /*
-    * 사용자 관련 채팅방 선택 조회
-    * @param roomId, user, userId
-    * @return ChatRoomDto
+    /**
+     * 사용자 관련 채팅방 선택 조회
+     * @param roomId
+     * @param user
+     * @param userId
+     * @return ChatRoomDto
      */
     public ChatRoomDto findRoom(String roomId, User user, Long userId) {
         ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId);
@@ -154,10 +158,11 @@ public class ChatRoomService {
         return chatRoomDto;
     }
 
-    /*
-    * 10. 채팅방 삭제
-    * @param id, user
-    * @return ApiResponseDto<MessageResponseDto>
+    /**
+     * 채팅방 삭제
+     * @param id
+     * @param user
+     * @return ApiResponseDto<MessageResponseDto>
      */
     public ApiResponseDto<MessageResponseDto> deleteRoom(Long id, User user) {
         ChatRoom chatRoom = chatRoomRepository.findByIdAndUserOrIdAndReceiver(id, user, id, user.getNickname());

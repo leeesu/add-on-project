@@ -68,7 +68,8 @@ public enum ErrorCode {
 
     UNSUPPORTED_ENCODING_ERROR("인코딩을 지원하지 않는 문자열입니다."),
     LIKE_ME_USER_NOT_FOUND("나를 좋아요한 회원이 없습니다."),
-    POST_LOCKED_ERROR("현재 해당 리소스는 다른 트랜잭션에 의해 사용 중입니다. 나중에 다시 시도해 주세요");
+    POST_LOCKED_ERROR("현재 해당 리소스는 다른 트랜잭션에 의해 사용 중입니다. 나중에 다시 시도해 주세요"),
+    DUPLICATED_NICKNAME("중복된 닉네임 입니다");
 
     private final String message;
 }
