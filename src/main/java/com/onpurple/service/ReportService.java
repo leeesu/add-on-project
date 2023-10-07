@@ -33,10 +33,13 @@ public class ReportService {
     private final UserRepository userRepository;
     private final AwsS3UploadService awsS3UploadService;
 
-    /*
-    * 신고글 작성
-    * @param requestDto, user, imgPaths
-    * @return ApiResponseDto<ReportResponseDto>
+
+    /**
+     * 신고글 작성
+     * @param requestDto
+     * @param user
+     * @param imgPaths
+     * @return ApiResponseDto<ReportResponseDto>
      */
     @Transactional
     public ApiResponseDto<ReportResponseDto> createReport(ReportRequestDto requestDto,
@@ -73,10 +76,10 @@ public class ReportService {
         return report;
     }
 
-    /*
-    * 신고글 단건 조회
-    * @param reportId
-    * @return ApiResponseDto<ReportResponseDto>
+    /**
+     * 신고글 단건 조회
+     * @param reportId
+     * @return ApiResponseDto<ReportResponseDto>
      */
     @Transactional// readOnly설정시 데이터가 Mapping되지 않는문제로 해제
     public ApiResponseDto<ReportResponseDto> getReport(Long reportId) {
@@ -91,9 +94,9 @@ public class ReportService {
         );
     }
 
-    /*
-    * 신고글 전체 조회
-    * @return ApiResponseDto<List<ReportResponseDto>>
+    /**
+     * 신고글 전체 조회
+     * @return ApiResponseDto<List<ReportResponseDto>>
      */
     @Transactional(readOnly = true)
     public ApiResponseDto<List<ReportResponseDto>> getAllReport() {
@@ -110,10 +113,12 @@ public class ReportService {
                 reportResponseDto);
 
     }
-    /*
-    * 신고글 삭제
-    * @param reportId, user
-    * @return ApiResponseDto<MessageResponseDto>
+
+    /**
+     * 신고글 삭제
+     * @param reportId
+     * @param user
+     * @return ApiResponseDto<MessageResponseDto>
      */
     @Transactional
     public ApiResponseDto<MessageResponseDto> deleteReport(Long reportId, User user) {
@@ -136,12 +141,21 @@ public class ReportService {
     }
 
 
+    /**
+     * 신고글 작성자와 로그인한 사용자가 일치하는지 확인
+     * @param reportId
+     * @return Report
+     */
     @Transactional(readOnly = true)
     public Report isPresentReport(Long reportId) {
         Optional<Report> optionalReport = reportRepository.findById(reportId);
         return optionalReport.orElse(null);
     }
 
+    /**
+     * 카테고리 검증
+     * @param category
+     */
     public void validateReportCategory(ReportCategory category) {
 
         if (!ReportCategory.isValidCategory(category)) {

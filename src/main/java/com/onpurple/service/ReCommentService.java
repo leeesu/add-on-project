@@ -28,10 +28,12 @@ public class ReCommentService {
     private final EntityValidatorManager entityValidatorManager;
     private final ReCommentRepository reCommentRepository;
 
-    /*
-    * 대댓글 작성
-    * @param commentId, reCommentRequestDto, user
-    * @return ApiResponseDto<ReCommentResponseDto>
+    /**
+     * 대댓글 작성
+     * @param commentId
+     * @param requestDto
+     * @param user
+     * @return ApiResponseDto<ReCommentResponseDto>
      */
     @Transactional
     public ApiResponseDto<ReCommentResponseDto> createReComment(Long commentId, ReCommentRequestDto requestDto, User user) {
@@ -47,7 +49,6 @@ public class ReCommentService {
         );
 
     }
-
     private ReComment recommentFromRequest(ReCommentRequestDto reCommentRequestDto,
                                            User user, Comment comment) {
         return ReComment.builder()
@@ -57,12 +58,11 @@ public class ReCommentService {
                 .build();
     }
 
-    /*
-    * 대댓글 조회
-    * @param commentId
-    * @return ApiResponseDto<List<ReCommentResponseDto>>
+    /**
+     * 대댓글 조회
+     * @param commentId
+     * @return ApiResponseDto<List<ReCommentResponseDto>>
      */
-
     @Transactional(readOnly = true)
     public ApiResponseDto<List<ReCommentResponseDto>> getAllReCommentsByComment(Long commentId) {
 
@@ -84,10 +84,12 @@ public class ReCommentService {
 
     }
 
-    /*
-    * 대댓글 수정
-    * @param reCommentId, reCommentRequestDto, user
-    * @return ApiResponseDto<ReCommentResponseDto>
+    /**
+     * 대댓글 수정
+     * @param reCommentId
+     * @param requestDto
+     * @param user
+     * @return ApiResponseDto<ReCommentResponseDto>
      */
     @Transactional
     public ApiResponseDto<ReCommentResponseDto> updateReComment(Long reCommentId, ReCommentRequestDto requestDto, User user) {
@@ -104,10 +106,11 @@ public class ReCommentService {
         );
     }
 
-    /*
-    * 대댓글 삭제
-    * @param reCommentId, user
-    * @return ApiResponseDto<MessageResponseDto>
+    /**
+     * 대댓글 삭제
+     * @param reCommentId
+     * @param user
+     * @return ApiResponseDto<MessageResponseDto>
      */
     @Transactional
     public ApiResponseDto<MessageResponseDto> deleteReComment(Long reCommentId, User user) {
@@ -120,6 +123,11 @@ public class ReCommentService {
         return ApiResponseDto.success("delete success");
     }
 
+    /**
+     * 대댓글 작성자와 로그인한 사용자가 일치하는지 확인
+     * @param reComment
+     * @param user
+     */
     public void validateReCommentUser(ReComment reComment, User user) {
         if (reComment.validateUser(user)) {
             throw new CustomException(ErrorCode.INVALID_USER_MATCH);

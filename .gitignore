@@ -47,6 +47,8 @@ out/
 application-awsS3.yml
 ## Mysql ##
 application-dev.yml
+## echo ##
+application-echo.yml
 
 ### setting ###
 src/main/resources/application.properties

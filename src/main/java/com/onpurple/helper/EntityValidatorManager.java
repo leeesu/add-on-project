@@ -15,6 +15,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Component
 @RequiredArgsConstructor
 public class EntityValidatorManager {
@@ -40,6 +42,9 @@ public class EntityValidatorManager {
     public User validateProfile(Long userId) {
         return validateOrThrow(userRepository, userId,ErrorCode.PROFILE_NOT_FOUND);
     }
+
+
+
     // 대댓글 정보가 없을 경우 에러 메시지 전송.
     @Transactional(readOnly = true)
     public ReComment validateReComment(Long reCommentId) {

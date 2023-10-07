@@ -25,13 +25,13 @@ public class MypageService {
     private final LikeRepository likeRepository;
 
 
-
-    /*
-    * 마이페이지 조회
-    * @param user, userId
-    * @return ApiResponseDto<MypageResponseDto>
-    * 마이페이지 조회. 토큰을 확인하고 정보를 불러올 때 나를 좋아요 한 사람과 서로 좋아요 한 사람의 리스트를 불러온다.
-    * 이때 기준이 되는 id를 내 userId로 설정.
+    /**
+     * 마이페이지 조회
+     * @param user
+     * @param userId
+     * @return ApiResponseDto<MypageResponseDto>
+     * 마이페이지 조회. 토큰을 확인하고 정보를 불러올 때 나를 좋아요 한 사람과 서로 좋아요 한 사람의 리스트를 불러온다.
+     * 이때 기준이 되는 id를 내 userId로 설정.
      */
     @Transactional
     public ApiResponseDto<MypageResponseDto> getMyPage(User user, Long userId) {
@@ -51,8 +51,13 @@ public class MypageService {
 
     }
 
-    // 서로 좋아요 리스트
-    public List<OtherLikeResponseDto> getOtherAndMeLikeList(Long userId) {
+
+    /**
+     * 서로 좋아요 리스트
+     * @param userId
+     * @return List<OtherLikeResponseDto>
+     */
+    private List<OtherLikeResponseDto> getOtherAndMeLikeList(Long userId) {
         List<Integer> likeList = likeRepository.likeToLikeUserId(userId)
                 .stream()
                 .distinct()
@@ -67,7 +72,12 @@ public class MypageService {
         }
         return otherLikeResponseDtoList;
     }
-    // 나를 좋아요한 리스트
+
+    /**
+     * 나를 좋아요 한 사람 리스트
+     * @param userId
+     * @return List<LikedResponseDto>
+     */
     public List<LikedResponseDto> getLikeMeList(Long userId) {
         List<Likes> likeMeList = likeRepository.findByTargetId(userId);
         List<LikedResponseDto> likedResponseDtoList = new ArrayList<>();

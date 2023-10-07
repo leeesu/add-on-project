@@ -25,11 +25,12 @@ public class LikeService {
     private final UserRepository userRepository;
     private final EntityValidatorManager entityValidatorManager;
 
-
-    /*
-    * 게시글 좋아요
-    * @param postId, user
-    * @return ApiResponseDto<LikeResponseDto>
+    /**
+     *  게시글 좋아요
+     * @DistributedLock 분산 Lock
+     * @param postId
+     * @param user
+     * @return ApiResponseDto<LikeResponseDto>
      */
     @DistributedLock
     @Transactional
@@ -61,12 +62,13 @@ public class LikeService {
     }
 
 
-    /*
-    * 댓글 좋아요
-    * @param commentId, user
-    * @return ApiResponseDto<LikeResponseDto>
+    /**
+     * 댓글 좋아요
+     * @DistributedLock 분산 Lock
+     * @param commentId
+     * @param user
+     * @return ApiResponseDto<LikeResponseDto>
      */
-
     @DistributedLock
     @Transactional
     public ApiResponseDto<LikeResponseDto> commentLike(Long commentId,
@@ -98,11 +100,12 @@ public class LikeService {
         }
     }
 
-
-    /*
-    * 회원 좋아요
-    * @param targetId, user
-    * @return ApiResponseDto<MessageResponseDto>
+    /**
+     * 회원 좋아요
+     * @DistributedLock 분산 Lock
+     * @param targetId
+     * @param user
+     * @return
      */
     @DistributedLock
     @Transactional
@@ -129,11 +132,11 @@ public class LikeService {
         }
     }
 
-    // 매칭 JPQL QUERY방식
-    /*
-    * 매칭 조회
-    * @param userId, user
-    * @return ApiResponseDto<List<UserResponseDto>>
+    /**
+     * 매칭 조회
+     * @param userId
+     * @param user
+     * @return ApiResponseDto<List<UserResponseDto>>
      */
     @Transactional(readOnly = true)
     public ApiResponseDto<List<UserResponseDto>> likeCheck(Long userId, User user) {
@@ -156,7 +159,15 @@ public class LikeService {
 
 
     //    내가 좋아요 한 사람 리스트 조회.
-    //    프론트에서 나를 좋아요 한 사람을 찾아 프로필을 불러올 때 조건을 걸기 위해서 생성된 메소드.
+    //
+
+    /**
+     * 내가 좋아요 한 사람 리스트 조회
+     * @param user
+     * @return ApiResponseDto<List<LikesResponseDto>>
+     */
+
+    //프론트에서 나를 좋아요 한 사람을 찾아 프로필을 불러올 때 조건을 걸기 위해서 생성된 메소드.
     @Transactional(readOnly = true)
     public ApiResponseDto<List<LikesResponseDto>> getLike(User user) {
         //    토큰을 통해 user를 확인하고 확인된 유저 기준 좋아요를 누른 대상 모드를 찾아 리스트에 저장
@@ -173,21 +184,27 @@ public class LikeService {
         return ApiResponseDto.success(SUCCESS_LIKE_USER_FOUND.getMessage(),likesResponseDtoList);
     }
 
-
-
+    /**
+     * 본인 게시글에 좋아요 할 수 없도록 예외처리
+     * @param post
+     * @param user
+     */
     public void validatePostLikeUser(Post post, User user) {
         if (!post.validateUser(user)) {
             throw new CustomException(ErrorCode.INVALID_SELF_LIKE);
         }
     }
 
+    /**
+     * 본인 댓글에 좋아요 할 수 없도록 예외처리
+     * @param comment
+     * @param user
+     */
     public void validateCommentLikeUser(Comment comment, User user) {
 
         if (!comment.validateUser(user)) {
             throw new CustomException(ErrorCode.INVALID_SELF_LIKE);
         }
     }
-
-
 
 }

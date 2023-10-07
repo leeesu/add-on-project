@@ -37,13 +37,13 @@ public class KakaoService {
     private final JwtTokenProvider jwtTokenProvider;
 
     public KakaoUserRequestDto kakaoLogin(String code, HttpServletResponse response) throws JsonProcessingException {
-        // 1. "인가 코드"로 전체 response 요청
+        /** 1. "인가 코드"로 전체 response 요청 */
         String accessToken = getAccessToken(code);
 
-        // 2. response에 access token으로 카카오 api 호출
+        /** 2. response에 access token으로 카카오 api 호출 */
         KakaoUserRequestDto kakaoUserInfo = getkakaoUserInfo(accessToken);
 
-        // 3. 필요시에 회원가입
+        /** 3. 필요시에 회원가입 */
         User kakaoUser = registerKakaoUserIfNeeded(kakaoUserInfo);
 
         UserDetails userDetails = new UserDetailsImpl(kakaoUser);

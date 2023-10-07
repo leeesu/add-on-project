@@ -6,6 +6,7 @@ import com.onpurple.dto.response.MessageResponseDto;
 import com.onpurple.dto.response.ResponseDto;
 import com.onpurple.dto.response.UserResponseDto;
 import com.onpurple.enums.ErrorCode;
+import com.onpurple.enums.SuccessCode;
 import com.onpurple.exception.CustomException;
 import com.onpurple.model.Authority;
 import com.onpurple.model.User;
@@ -35,7 +36,12 @@ public class UserService {
 
     private static final String ADMIN_TOKEN = ("AAABnvxRVklrnYxKZ0aHgTBcXukeZygoC");
 
-    //    아이디 체크. DB에 저장되어 있는 usernaeme을 찾아 유저가 존재한다면 에러메시지 전송)
+    /**
+     * 아이디 체크
+     * @param username
+     * @return ApiResponseDto<MessageResponseDto>
+     * 아이디 체크. DB에 저장되어 있는 usernaeme을 찾아 유저가 존재한다면 에러메시지 전송
+     */
     @Transactional
     public ApiResponseDto<MessageResponseDto> checkUser(String username) {
         Optional<User> user = userRepository.findByUsername(username);
@@ -44,16 +50,27 @@ public class UserService {
         return ApiResponseDto.success("사용 가능한 ID입니다.");
     }
 
-    //    닉네임 체크. DB에 저장되어 있는 usernaeme을 찾아 유저가 존재한다면 에러메시지 전송)
+    /**
+     * 닉네임 체크
+     * @param nickname
+     * @return ApiResponseDto<MessageResponseDto>
+     * DB에 저장되어 있는 usernaeme을 찾아 유저가 존재한다면 에러메시지 전송
+     */
     @Transactional
-    public ResponseDto<?> checkNickname(String nickname) {
+    public ApiResponseDto<MessageResponseDto> checkNickname(String nickname) {
         Optional<User> user = userRepository.findByNickname(nickname);
         if (null != isPresentNickname(nickname))
-            return ResponseDto.fail("DUPLICATED_NICKANAME", "중복된 닉네임 입니다.");
-        return ResponseDto.success("사용 가능한 닉네임 입니다.");
+            throw new CustomException(ErrorCode.DUPLICATED_NICKNAME);
+        return ApiResponseDto.success(SuccessCode.SUCCESS_NICKNAME_CHANGE.getMessage());
     }
 
-    //    회원가입. SingupRequsetDto에 선언한 내용을 입력하여 회원가입
+    /**
+     * 회원가입
+     * @param requestDto
+     * @param userInfoRequestDto
+     * @param imgPaths
+     * @return ApiResponseDto<UserResponseDto>
+     */
     @Transactional
     public ApiResponseDto<UserResponseDto> createUser(SignupRequestDto requestDto, UserInfoRequestDto userInfoRequestDto,
                                                       String imgPaths) {
@@ -70,8 +87,6 @@ public class UserService {
             }
             role = Authority.ADMIN;
         }
-        //        이미지 등록 이미지를 추가하여 user의 img에 추가
-        postBlankCheck(imgPaths);
 
         User user = User.builder()
                 .username(requestDto.getUsername())
@@ -95,9 +110,6 @@ public class UserService {
         userRepository.save(user);
 
 
-
-
-
 //        현재 서비스에서 회원가입 이후 바로 서비스를 이용할 수 있도록 설정하였기에 회원가입이 진행될 때 토큰이 발행되도록 설정
         jwtTokenProvider.reissueToken(user.getUsername());
 
@@ -111,11 +123,11 @@ public class UserService {
 
     }
 
-    private void postBlankCheck(String imgPaths) {
-        if (imgPaths == null || imgPaths.isEmpty()) { //.isEmpty()도 되는지 확인해보기
-            throw new NullPointerException("이미지를 등록해주세요(Blank Check)");
-        }
-    }
+    /**
+     * 내 정보 조회
+     * @param user
+     * @return ApiResponseDto<UserResponseDto>
+     */
 
     @Transactional
     public ApiResponseDto<UserResponseDto> getUser(User user) {
@@ -126,10 +138,14 @@ public class UserService {
         );
     }
 
-    //    비밀번호 수정.
+    /**
+     * 비밀번호 수정
+     * @param requestDto
+     * @param user
+     * @return ApiResponseDto<MessageResponseDto>
+     */
     @Transactional
-    public ApiResponseDto<MessageResponseDto> updatePassword(UserUpdateRequestDto requestDto,
-                                         User user) {
+    public ApiResponseDto<MessageResponseDto> updatePassword(UserUpdateRequestDto requestDto, User user) {
 
         if (!requestDto.getPassword().equals(requestDto.getPasswordConfirm())) {
             throw new CustomException(ErrorCode.PASSWORD_CONFIRM_NOT_MATCHED);
@@ -144,7 +160,12 @@ public class UserService {
                 SUCCESS_PASSWORD_CHANGE.getMessage());
     }
 
-    //    이미지 수정
+    /**
+     * 이미지 수정
+     * @param user
+     * @param imgPaths
+     * @return ApiResponseDto<MessageResponseDto>
+     */
     @Transactional
     public ApiResponseDto<MessageResponseDto> updateImage(User user, String imgPaths) {
 
@@ -165,20 +186,10 @@ public class UserService {
         logoutBlackListToken(request);
         return ApiResponseDto.success("로그아웃이 완료되었습니다.");
     }
-
-
-    @Transactional(readOnly = true)
-    public User isPresentUser(String username) {
-        Optional<User> optionalUser = userRepository.findByUsername(username);
-        return optionalUser.orElse(null);
-    }
-
-    @Transactional(readOnly = true)
-    public User isPresentNickname(String nickname) {
-        Optional<User> optionalUser = userRepository.findByNickname(nickname);
-        return optionalUser.orElse(null);
-    }
-
+    /**
+     * 로그아웃시 AccessToken BlackList저장
+     * @param request
+     */
     @Transactional
     public void logoutBlackListToken(HttpServletRequest request) {
         String accessToken = jwtTokenProvider.resolveToken(request, JwtTokenProvider.ACCESS_TOKEN);
@@ -189,6 +200,28 @@ public class UserService {
         RedisUtil.saveData(accessToken, accessToken, remainMilliSeconds);
         // refreshToken 삭제
         RedisUtil.deleteData(REFRESH_TOKEN_KEY.getDesc()+info.getSubject());
+    }
+
+    /**
+     * 회원명 중복확인
+     * @param username
+     * @return
+     */
+    @Transactional(readOnly = true)
+    private User isPresentUser(String username) {
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        return optionalUser.orElse(null);
+    }
+
+    /**
+     * 닉네임 중복확인
+     * @param nickname
+     * @return
+     */
+    @Transactional(readOnly = true)
+    private User isPresentNickname(String nickname) {
+        Optional<User> optionalUser = userRepository.findByNickname(nickname);
+        return optionalUser.orElse(null);
     }
 
 }
