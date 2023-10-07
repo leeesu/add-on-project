@@ -9,6 +9,7 @@ import com.onpurple.model.UnLike;
 import com.onpurple.model.User;
 import com.onpurple.repository.UnLikeRepository;
 import com.onpurple.helper.EntityValidatorManager;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,16 +21,10 @@ import static com.onpurple.enums.SuccessCode.*;
 
 @Service
 @Slf4j(topic = "싫어요 기능")
+@RequiredArgsConstructor
 public class UnLikeService {
     private final UnLikeRepository unLikeRepository;
     private final EntityValidatorManager entityValidatorManager;
-
-    public UnLikeService(UnLikeRepository unLikeRepository,
-                         EntityValidatorManager entityValidatorManager) {
-
-        this.unLikeRepository = unLikeRepository;
-        this.entityValidatorManager = entityValidatorManager;
-    }
 
     /**
      * 싫어요 기능

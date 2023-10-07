@@ -38,6 +38,7 @@ public class SignupRequestDto {
 
     private String gender;
 
+    @Builder.Default
     private boolean admin = false;
 
     private String adminToken;
