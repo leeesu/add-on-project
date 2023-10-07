@@ -27,18 +27,15 @@ public class EntityValidatorManager {
     private final ReCommentRepository reCommentRepository;
 
     // 게시글 정보가 없을 경우 에러 메시지 전송.
-    @Transactional(readOnly = true)
     public Post validatePost(Long postId) {
         return validateOrThrow(postRepository, postId, ErrorCode.POST_NOT_FOUND);
     }
 
     // 댓글 정보가 없을 경우 에러 메시지 전송.
-    @Transactional(readOnly = true)
     public Comment validateComment (Long commentId) {
         return validateOrThrow(commentRepository, commentId, ErrorCode.COMMENT_NOT_FOUND);
     }
     // 회원 정보가 없을 경우 에러 메시지 전송.
-    @Transactional(readOnly = true)
     public User validateProfile(Long userId) {
         return validateOrThrow(userRepository, userId,ErrorCode.PROFILE_NOT_FOUND);
     }
@@ -46,7 +43,6 @@ public class EntityValidatorManager {
 
 
     // 대댓글 정보가 없을 경우 에러 메시지 전송.
-    @Transactional(readOnly = true)
     public ReComment validateReComment(Long reCommentId) {
         return validateOrThrow(reCommentRepository, reCommentId, ErrorCode.NOT_FOUND_RECOMMENT);
     }

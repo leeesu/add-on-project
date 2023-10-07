@@ -3,7 +3,6 @@ package com.onpurple.service;
 import com.onpurple.dto.request.*;
 import com.onpurple.dto.response.ApiResponseDto;
 import com.onpurple.dto.response.MessageResponseDto;
-import com.onpurple.dto.response.ResponseDto;
 import com.onpurple.dto.response.UserResponseDto;
 import com.onpurple.enums.ErrorCode;
 import com.onpurple.enums.SuccessCode;
@@ -12,7 +11,7 @@ import com.onpurple.model.Authority;
 import com.onpurple.model.User;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.security.jwt.JwtTokenProvider;
-import com.onpurple.util.RedisUtil;
+import com.onpurple.helper.RedisManager;
 import com.onpurple.external.s3.AwsS3UploadService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,6 +32,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final AwsS3UploadService awsS3UploadService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final RedisManager redisManager;
 
     private static final String ADMIN_TOKEN = ("AAABnvxRVklrnYxKZ0aHgTBcXukeZygoC");
 
@@ -197,9 +197,9 @@ public class UserService {
         // 엑세스 토큰 남은시간
         long remainMilliSeconds = jwtTokenProvider.getExpiration(accessToken);
         // 액세스 토큰 만료시점 까지 저장
-        RedisUtil.saveData(accessToken, accessToken, remainMilliSeconds);
+        redisManager.saveData(accessToken, accessToken, remainMilliSeconds);
         // refreshToken 삭제
-        RedisUtil.deleteData(REFRESH_TOKEN_KEY.getDesc()+info.getSubject());
+        redisManager.deleteData(REFRESH_TOKEN_KEY.getDesc()+info.getSubject());
     }
 
     /**
@@ -207,8 +207,7 @@ public class UserService {
      * @param username
      * @return
      */
-    @Transactional(readOnly = true)
-    private User isPresentUser(String username) {
+    public User isPresentUser(String username) {
         Optional<User> optionalUser = userRepository.findByUsername(username);
         return optionalUser.orElse(null);
     }
@@ -218,8 +217,7 @@ public class UserService {
      * @param nickname
      * @return
      */
-    @Transactional(readOnly = true)
-    private User isPresentNickname(String nickname) {
+    public User isPresentNickname(String nickname) {
         Optional<User> optionalUser = userRepository.findByNickname(nickname);
         return optionalUser.orElse(null);
     }
