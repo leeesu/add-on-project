@@ -10,8 +10,11 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum RedisKeyEnum {
 
-    REFRESH_TOKEN_KEY("refreshToken:"),
+    REFRESH_TOKEN_KEY("RefreshToken:"),
 
+
+    // Cache Key
+    USER_KEY("User:"),
 
     ;
 

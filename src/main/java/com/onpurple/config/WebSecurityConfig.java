@@ -3,6 +3,7 @@ package com.onpurple.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onpurple.exception.CustomAuthenticationEntryPoint;
 import com.onpurple.helper.RedisManager;
+import com.onpurple.redis.repository.UserCacheRepository;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.security.UserDetailsServiceImpl;
 import com.onpurple.security.jwt.JwtAuthenticationFilter;
@@ -35,6 +36,7 @@ public class WebSecurityConfig {
     private final UserRepository userRepository;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final RedisManager redisManager;
+    private final UserCacheRepository userCacheRepository;
 
 
     @Bean
@@ -44,7 +46,7 @@ public class WebSecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtTokenProvider, userRepository);
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtTokenProvider, userRepository, userCacheRepository);
         filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
         return filter;
     }

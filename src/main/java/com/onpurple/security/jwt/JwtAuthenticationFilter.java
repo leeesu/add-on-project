@@ -6,7 +6,9 @@ import com.onpurple.dto.request.TokenDto;
 import com.onpurple.dto.response.LoginResponseDto;
 import com.onpurple.exception.CustomException;
 import com.onpurple.enums.ErrorCode;
+import com.onpurple.exception.ErrorResponse;
 import com.onpurple.model.User;
+import com.onpurple.redis.repository.UserCacheRepository;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.security.UserDetailsImpl;
 import jakarta.servlet.FilterChain;
@@ -21,16 +23,20 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.io.IOException;
 
+import static com.onpurple.enums.ErrorCode.ACCESS_DENIED;
+
 @Slf4j(topic = "로그인 및 JWT 생성")
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
+    private final UserCacheRepository userCacheRepository;
 
 
     public JwtAuthenticationFilter(
-            JwtTokenProvider jwtTokenProvider, UserRepository userRepository) {
+            JwtTokenProvider jwtTokenProvider, UserRepository userRepository, UserCacheRepository userCacheRepository) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.userRepository = userRepository;
+        this.userCacheRepository = userCacheRepository;
         // 로그인 처리를 여기서 처리한다.
         setFilterProcessesUrl("/user/login");
     }
@@ -61,13 +67,21 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
         log.info("로그인 성공 및 JWT 생성");
         String username = ((UserDetailsImpl) authResult.getPrincipal()).getUsername();
-        User user = findUser(username);
+        User user = findCacheOrDbUser(username);
         // 토큰 발급
         TokenDto tokenDto = jwtTokenProvider.reissueToken(username);
         // header 로 토큰 send
         jwtTokenProvider.tokenSetHeaders(tokenDto, response); // AccessToken header, RefreshToken cookie
         // 응답
         sendJsonResponse(response, user);
+    }
+    private User findCacheOrDbUser(String username) {
+        User user = userCacheRepository.getUser(username).orElseGet(() -> {
+            User foundUser = findUser(username);
+            userCacheRepository.saveUser(foundUser);
+            return foundUser;
+        });
+        return user;
     }
     private User findUser(String username){
         return userRepository.findByUsername(username).orElseThrow(
@@ -88,6 +102,12 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
         log.info("로그인 실패");
         response.setStatus(401);
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().println(
+                new ObjectMapper().writeValueAsString(
+                        new ErrorResponse(ErrorCode.LOGIN_FAIL_ERROR, ACCESS_DENIED.getMessage())
+                )
+        );
     }
 
 }
