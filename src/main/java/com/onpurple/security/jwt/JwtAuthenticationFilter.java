@@ -11,6 +11,7 @@ import com.onpurple.model.User;
 import com.onpurple.redis.repository.UserCacheRepository;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.security.UserDetailsImpl;
+import com.onpurple.util.ResponseUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +25,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import java.io.IOException;
 
 import static com.onpurple.enums.ErrorCode.ACCESS_DENIED;
+import static com.onpurple.enums.ErrorCode.LOGIN_FAIL_ERROR;
 
 @Slf4j(topic = "로그인 및 JWT 생성")
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -90,24 +92,16 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     }
 
     private void sendJsonResponse(HttpServletResponse response, User user) throws IOException {
-        response.setContentType("application/json;charset=UTF-8");
-
         LoginResponseDto responseData = LoginResponseDto.fromEntity(user);
-        String responseJson = new ObjectMapper().writeValueAsString(responseData);
-
-        response.getWriter().println(responseJson);
+        ResponseUtil.sendJsonResponse(response, HttpServletResponse.SC_OK, responseData);
     }
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
         log.info("로그인 실패");
-        response.setStatus(401);
-        response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().println(
-                new ObjectMapper().writeValueAsString(
-                        new ErrorResponse(ErrorCode.LOGIN_FAIL_ERROR, ACCESS_DENIED.getMessage())
-                )
-        );
+
+        ErrorResponse errorResponse = new ErrorResponse(LOGIN_FAIL_ERROR, LOGIN_FAIL_ERROR.getMessage());
+        ResponseUtil.sendJsonResponse(response, HttpServletResponse.SC_UNAUTHORIZED, errorResponse);
     }
 
 }
