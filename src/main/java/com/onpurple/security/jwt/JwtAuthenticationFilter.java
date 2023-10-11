@@ -8,7 +8,7 @@ import com.onpurple.exception.CustomException;
 import com.onpurple.enums.ErrorCode;
 import com.onpurple.exception.ErrorResponse;
 import com.onpurple.model.User;
-import com.onpurple.redis.repository.UserCacheRepository;
+import com.onpurple.redis.cacheRepository.UserCacheRepository;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.security.UserDetailsImpl;
 import com.onpurple.util.ResponseUtil;
@@ -24,7 +24,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.io.IOException;
 
-import static com.onpurple.enums.ErrorCode.ACCESS_DENIED;
 import static com.onpurple.enums.ErrorCode.LOGIN_FAIL_ERROR;
 
 @Slf4j(topic = "로그인 및 JWT 생성")

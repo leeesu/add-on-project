@@ -7,7 +7,7 @@ import com.onpurple.enums.ErrorCode;
 import com.onpurple.model.Authority;
 import com.onpurple.model.User;
 import com.onpurple.repository.UserRepository;
-import com.onpurple.helper.RedisManager;
+import com.onpurple.redis.repository.RefreshTokenRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -50,7 +50,7 @@ public class JwtTokenProvider {
     private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
-    private final RedisManager redisManager;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     // secretKey Base64 Decode
     @PostConstruct
@@ -173,11 +173,11 @@ public class JwtTokenProvider {
     public String createRefreshToken(User user) {
         String refreshToken = createToken(user, REFRESH_EXPIRE.getTime(), REFRESH_TOKEN);
 
-        redisManager.saveData(REFRESH_TOKEN_KEY.getDesc()+user.getUsername(), refreshToken,
+        refreshTokenRepository.saveToken(REFRESH_TOKEN_KEY.getDesc()+user.getUsername(), refreshToken,
                 REFRESH_EXPIRE.getTime());
 
         logger.info("Redis에 RefreshToken이 저장되었습니다.");
-        logger.info("{} : Redis에 저장된 토큰 확인", redisManager.getData(REFRESH_TOKEN_KEY.getDesc()+user.getUsername()));
+        logger.info("{} : Redis에 저장된 토큰 확인", refreshTokenRepository.getToken(REFRESH_TOKEN_KEY.getDesc()+user.getUsername()));
 
         return refreshToken;
     }
@@ -218,7 +218,7 @@ public class JwtTokenProvider {
 
         //DB에 저장한 토큰 비교
         Claims info = getUserInfoFromToken(token);
-        String redisRefreshToken = redisManager.getData(REFRESH_TOKEN_KEY.getDesc()+info.getSubject());
+        String redisRefreshToken = refreshTokenRepository.getToken(REFRESH_TOKEN_KEY.getDesc()+info.getSubject());
         return refreshRedisValidate(redisRefreshToken, token);
 
     }

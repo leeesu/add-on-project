@@ -11,7 +11,7 @@ import com.onpurple.model.Authority;
 import com.onpurple.model.User;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.security.jwt.JwtTokenProvider;
-import com.onpurple.helper.RedisManager;
+import com.onpurple.redis.repository.RefreshTokenRepository;
 import com.onpurple.external.s3.AwsS3UploadService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,7 +32,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final AwsS3UploadService awsS3UploadService;
     private final JwtTokenProvider jwtTokenProvider;
-    private final RedisManager redisManager;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     private static final String ADMIN_TOKEN = ("AAABnvxRVklrnYxKZ0aHgTBcXukeZygoC");
 
@@ -197,9 +197,9 @@ public class UserService {
         // 엑세스 토큰 남은시간
         long remainMilliSeconds = jwtTokenProvider.getExpiration(accessToken);
         // 액세스 토큰 만료시점 까지 저장
-        redisManager.saveData(accessToken, accessToken, remainMilliSeconds);
+        refreshTokenRepository.saveToken(accessToken, accessToken, remainMilliSeconds);
         // refreshToken 삭제
-        redisManager.deleteData(REFRESH_TOKEN_KEY.getDesc()+info.getSubject());
+        refreshTokenRepository.deleteToken(REFRESH_TOKEN_KEY.getDesc()+info.getSubject());
     }
 
     /**

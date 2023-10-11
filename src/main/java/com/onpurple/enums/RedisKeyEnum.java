@@ -14,10 +14,11 @@ public enum RedisKeyEnum {
 
 
     // Cache Key
-    USER_KEY("User:"),
-
+    LOGIN_USER_KEY("User:"),
+    USER_LIST_KEY("UserList:"),
     ;
 
     private final String desc;
 
 }
+

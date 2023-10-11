@@ -1,9 +1,8 @@
 package com.onpurple.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onpurple.exception.CustomAuthenticationEntryPoint;
-import com.onpurple.helper.RedisManager;
-import com.onpurple.redis.repository.UserCacheRepository;
+import com.onpurple.redis.repository.RefreshTokenRepository;
+import com.onpurple.redis.cacheRepository.UserCacheRepository;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.security.UserDetailsServiceImpl;
 import com.onpurple.security.jwt.JwtAuthenticationFilter;
@@ -35,7 +34,7 @@ public class WebSecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final UserRepository userRepository;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-    private final RedisManager redisManager;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final UserCacheRepository userCacheRepository;
 
 
@@ -54,7 +53,7 @@ public class WebSecurityConfig {
 
     @Bean
     public JwtAuthorizationFilter jwtAuthorizationFilter() {
-        return new JwtAuthorizationFilter(jwtTokenProvider, userDetailsService, redisManager);
+        return new JwtAuthorizationFilter(jwtTokenProvider, userDetailsService, refreshTokenRepository);
     }
 
     private static final String[] PERMIT = {
