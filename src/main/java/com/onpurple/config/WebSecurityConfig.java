@@ -88,6 +88,7 @@ public class WebSecurityConfig {
 
         http.authorizeRequests()
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                .requestMatchers("/main/**").permitAll()
                 .requestMatchers("/user/**").permitAll()
                 .requestMatchers("/post/**").permitAll()
                 .requestMatchers("/comment/**").permitAll()
