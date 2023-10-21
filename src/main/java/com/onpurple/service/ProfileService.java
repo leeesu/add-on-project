@@ -9,11 +9,16 @@ import com.onpurple.model.User;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.helper.EntityValidatorManager;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import static com.onpurple.enums.SuccessCode.*;
@@ -33,16 +38,26 @@ public class ProfileService {
      */
     @Transactional(readOnly = true)
     public ApiResponseDto<List<ProfileResponseDto>> getAllProfiles() {
-        List<ProfileResponseDto> profileResponseDto = userRepository.findAll().stream()
+        int pageSize = 10; // 페이지당 표시할 사용자 수 설정
+
+        long totalUsers = userRepository.count(); // 전체 사용자 수
+        int totalPages = (int) Math.ceil((double) totalUsers / pageSize); // 전체 페이지 수 계산
+
+        Random random = new Random(); // 랜덤 객체 생성
+        int randomPageNumber = random.nextInt(totalPages); // 무작위 페이지 번호 생성
+
+        Pageable pageable = PageRequest.of(randomPageNumber, pageSize); // 무작위로 선택한 페이지 번호와 페이지 크기로 PageRequest 객체 생성
+        Page<User> usersPage = userRepository.findAll(pageable); // 해당 pageable로 모든 사용자를 조회하여 Page<User> 객체에 저장
+
+        List<ProfileResponseDto> profileResponseDtos = usersPage.stream()
                 .map(ProfileResponseDto::allFromEntity)
                 .collect(Collectors.toList());
 
-        //  랜덤 추출 코드. 리스트를 불러올 때 기존의 경우 수정일자 순으로 정렬하였지만 무작위로 리스트를 불러올 때 사용
-        Collections.shuffle(profileResponseDto);
+        Collections.shuffle(profileResponseDtos);  // 사용자 목록을 무작위 순서로 섞기
 
         return ApiResponseDto.success(
                 SUCCESS_PROFILE_GET_ALL.getMessage(),
-                profileResponseDto);
+                profileResponseDtos);
     }
 
     /**
