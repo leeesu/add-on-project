@@ -16,6 +16,7 @@ import com.onpurple.external.s3.AwsS3UploadService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -167,6 +168,7 @@ public class UserService {
      * @return ApiResponseDto<MessageResponseDto>
      */
     @Transactional
+    @CachePut(value = "user", key = "#user.id")
     public ApiResponseDto<MessageResponseDto> updateImage(User user, String imgPaths) {
 
 //        이미지를 확인하고 user의 기존 이미지를 삭제. 이후 새로 넣은 이미지로 업데이트 되도록 설정.

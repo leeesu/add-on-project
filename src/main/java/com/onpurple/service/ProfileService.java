@@ -9,6 +9,8 @@ import com.onpurple.model.User;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.helper.EntityValidatorManager;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -66,6 +68,7 @@ public class ProfileService {
      * @return ApiResponseDto<ProfileResponseDto>
      * 상세 프로필 조회(디테일페이지). userId를 찾아 해당 id가 있을 경우 해당 내용을 조회.
      */
+    @Cacheable(value = "user", key = "#userId")
     @Transactional
     public ApiResponseDto<ProfileResponseDto> getProfile(Long userId) {
         User user = entityValidatorManager.validateProfile(userId);
@@ -84,6 +87,7 @@ public class ProfileService {
      * 프로필 수정. DB에 저장된 유저의 정보들 중 프로필에 해당되는 내용을 수정.
      */
     @Transactional
+    @CachePut(value = "user", key = "#user.id")
     public ApiResponseDto<MessageResponseDto> updateProfile(ProfileUpdateRequestDto requestDto, User user) {
 
         user.update(requestDto);
