@@ -130,8 +130,6 @@ public class JwtTokenProvider {
     // AccessToken HTTP header로, RefreshToken은 Cookie로 전달
     public void tokenSetHeaders(TokenDto tokenDto, HttpServletResponse response) {
         response.setHeader(ACCESS_TOKEN, tokenDto.getAccessToken());
-        // 토큰 지워주기 -> 어차피 Redis에 새로운 토큰이 발급 되기 떄문에 굳이 헤더로 필요없는 토큰이 가는걸 막는 코드
-        response.setHeader(REFRESH_TOKEN, null);
         addJwtToCookie(tokenDto.getRefreshToken(), response);
     }
 
