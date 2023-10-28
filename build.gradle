@@ -59,7 +59,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
 	implementation 'org.springframework.boot:spring-boot-starter-cache'
 	// redisson
-	implementation 'org.redisson:redisson-spring-boot-starter:3.23.5'
+	implementation 'org.redisson:redisson-spring-boot-starter:3.18.0'
 	//embedded-redis
 	implementation group: 'it.ozimov', name: 'embedded-redis', version: '0.7.2'
 	// QueryDSL 적용을 위한 의존성 (SpringBoot3.0 부터는 jakarta 사용해야함)

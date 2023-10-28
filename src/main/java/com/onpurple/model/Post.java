@@ -13,6 +13,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(name = "Post", indexes = {
+        @Index(name = "idx_category", columnList = "category"),
+        @Index(name = "idx_title_category", columnList = "title,category")
+})
 public class Post extends Timestamped{
 
     @Id
