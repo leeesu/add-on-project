@@ -95,9 +95,6 @@ public class User extends Timestamped {
     @Column
     private String area;
 
-    @Column
-    private int reportCount;
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
