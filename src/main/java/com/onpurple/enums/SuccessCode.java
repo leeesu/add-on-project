@@ -74,8 +74,10 @@ public enum SuccessCode {
     SUCCESS_RECOMMENT_DELETE("대댓글 삭제에 성공했습니다."),
     SUCCESS_RECOMMENT_REGISTER("대댓글 등록에 성공했습니다."),
     SUCCESS_RECOMMENT_GET_ALL("대댓글 전체 조회에 성공했습니다."),
-    SUCCESS_NICKNAME_CHANGE("사용 가능한 닉네임 입니다.")
+    SUCCESS_NICKNAME_CHANGE("사용 가능한 닉네임 입니다."),
+    SUCCESS_LOGOUT("로그아웃에 성공했습니다."),
     ;
+
 
     private final String message;
 }
