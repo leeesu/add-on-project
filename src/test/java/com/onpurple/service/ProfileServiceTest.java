@@ -14,6 +14,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,21 +53,29 @@ class ProfileServiceTest {
 
     @Test
     public void testGetAllProfiles() {
-        when(userRepository.findAll()).thenReturn(users);
+        int pageSize = 10;
+        long totalUsers = users.size();
+        int totalPages = (int) Math.ceil((double) totalUsers / pageSize);
+
+        when(userRepository.count()).thenReturn((long) users.size()); // userRepository.count()에 대한 모킹
+
+        for (int i = 0; i < totalPages; ++i) {
+            Page<User> userPage = new PageImpl<>(users.subList(i * pageSize, Math.min((i + 1) * pageSize, users.size())));
+            when(userRepository.findAll(PageRequest.of(i, pageSize))).thenReturn(userPage); // userRepository.findAll(Pageable pageable)에 대한 모킹
+        }
 
         ApiResponseDto<List<ProfileResponseDto>> response = profileService.getAllProfiles();
 
-        verify(userRepository).findAll();
-
         assertNotNull(response);
-
 
         assertEquals(SUCCESS_PROFILE_GET_ALL.getMessage(), response.getMessage());
 
         assertFalse(response.getData().isEmpty());
 
-        assertEquals(users.size(), response.getData().size());
+        // 무작위 페이지에서 가져온 사용자 수와 같아야 함
+        assertTrue(response.getData().size() <= pageSize);
     }
+
 
     @Test
     void getProfile() {
