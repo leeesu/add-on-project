@@ -1,6 +1,7 @@
 package com.onpurple.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.onpurple.util.ResponseUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,13 +17,8 @@ import static com.onpurple.enums.ErrorCode.ACCESS_DENIED;
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
-                         AuthenticationException authException) throws IOException, ServletException {
-        response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().println(
-                new ObjectMapper().writeValueAsString(
-                        new ErrorResponse(ACCESS_DENIED, ACCESS_DENIED.getMessage())
-                )
-        );
-
+                         AuthenticationException authException) throws IOException {
+        ErrorResponse errorResponse = new ErrorResponse(ACCESS_DENIED, ACCESS_DENIED.getMessage());
+        ResponseUtil.sendJsonResponse(response, HttpServletResponse.SC_FORBIDDEN, errorResponse);
     }
 }

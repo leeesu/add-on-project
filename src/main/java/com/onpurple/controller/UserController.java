@@ -76,9 +76,9 @@ public class UserController {
     }
 
     @RequestMapping(value = "/user/logout", method = RequestMethod.POST)
-    public ApiResponseDto<MessageResponseDto> logout(HttpServletRequest request) {
+    public ApiResponseDto<MessageResponseDto> logout(HttpServletRequest request, HttpServletResponse response) {
 
-        return userService.logout(request);
+        return userService.logout(request,response);
     }
 
     @RequestMapping(value = "/user/kakaoLogin", method = RequestMethod.GET)

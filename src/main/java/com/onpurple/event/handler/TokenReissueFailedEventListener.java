@@ -16,6 +16,6 @@ public class TokenReissueFailedEventListener {
     @EventListener
     public void handleTokenReissueFailedEvent(TokenReissueFailedEvent event) {
         log.info("TokenReissueFailedEvent 발생, 로그아웃 처리");
-        userService.logout(event.getRequest());
+        userService.logout(event.getRequest(), event.getResponse());
     }
 }

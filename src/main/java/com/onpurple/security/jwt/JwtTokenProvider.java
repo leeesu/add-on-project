@@ -7,7 +7,7 @@ import com.onpurple.enums.ErrorCode;
 import com.onpurple.model.Authority;
 import com.onpurple.model.User;
 import com.onpurple.repository.UserRepository;
-import com.onpurple.helper.RedisManager;
+import com.onpurple.redis.repository.RefreshTokenRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -50,7 +51,7 @@ public class JwtTokenProvider {
     private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
-    private final RedisManager redisManager;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     // secretKey Base64 Decode
     @PostConstruct
@@ -130,8 +131,6 @@ public class JwtTokenProvider {
     // AccessToken HTTP header로, RefreshToken은 Cookie로 전달
     public void tokenSetHeaders(TokenDto tokenDto, HttpServletResponse response) {
         response.setHeader(ACCESS_TOKEN, tokenDto.getAccessToken());
-        // 토큰 지워주기 -> 어차피 Redis에 새로운 토큰이 발급 되기 떄문에 굳이 헤더로 필요없는 토큰이 가는걸 막는 코드
-        response.setHeader(REFRESH_TOKEN, null);
         addJwtToCookie(tokenDto.getRefreshToken(), response);
     }
 
@@ -173,11 +172,11 @@ public class JwtTokenProvider {
     public String createRefreshToken(User user) {
         String refreshToken = createToken(user, REFRESH_EXPIRE.getTime(), REFRESH_TOKEN);
 
-        redisManager.saveData(REFRESH_TOKEN_KEY.getDesc()+user.getUsername(), refreshToken,
+        refreshTokenRepository.saveToken(REFRESH_TOKEN_KEY.getDesc()+user.getUsername(), refreshToken,
                 REFRESH_EXPIRE.getTime());
 
         logger.info("Redis에 RefreshToken이 저장되었습니다.");
-        logger.info("{} : Redis에 저장된 토큰 확인", redisManager.getData(REFRESH_TOKEN_KEY.getDesc()+user.getUsername()));
+        logger.info("{} : Redis에 저장된 토큰 확인", refreshTokenRepository.getToken(REFRESH_TOKEN_KEY.getDesc()+user.getUsername()));
 
         return refreshToken;
     }
@@ -189,7 +188,7 @@ public class JwtTokenProvider {
 
 
     // 리프레시 토큰 검증을 통한 AccessToken 재발급
-    public TokenDto handleRefreshToken(String refreshToken, HttpServletRequest request) {
+    public TokenDto handleRefreshToken(String refreshToken, HttpServletRequest request, HttpServletResponse response) {
 
         try {
             // RefreshToken의 만료를 검증하고, redis에 저장된 토큰과 비교검증한다.
@@ -204,7 +203,7 @@ public class JwtTokenProvider {
             logger.error("회원 토큰 재발급에 실패했습니다.", e.getMessage());
 
             // 재발급 실패시 로그아웃을 위한 이벤트 발행
-            eventPublisher.publishEvent(new TokenReissueFailedEvent(request));
+            eventPublisher.publishEvent(new TokenReissueFailedEvent(request, response));
 
             throw new CustomException(ErrorCode.REQUEST_FAILED_ERROR);
         }
@@ -218,7 +217,7 @@ public class JwtTokenProvider {
 
         //DB에 저장한 토큰 비교
         Claims info = getUserInfoFromToken(token);
-        String redisRefreshToken = redisManager.getData(REFRESH_TOKEN_KEY.getDesc()+info.getSubject());
+        String redisRefreshToken = refreshTokenRepository.getToken(REFRESH_TOKEN_KEY.getDesc()+info.getSubject());
         return refreshRedisValidate(redisRefreshToken, token);
 
     }
@@ -267,5 +266,33 @@ public class JwtTokenProvider {
             logger.error("Refresh 토큰이 존재하지 않습니다.");
             throw new CustomException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);
         }
+    }
+    /**
+     * 로그아웃시 AccessToken BlackList저장
+     * @param request
+     */
+    @Transactional
+    public void logoutBlackListToken(HttpServletRequest request) {
+        String accessToken = resolveToken(request, JwtTokenProvider.ACCESS_TOKEN);
+        Claims info = getUserInfoFromToken(accessToken);
+        // 엑세스 토큰 남은시간
+        long remainMilliSeconds = getExpiration(accessToken);
+        // 액세스 토큰 만료시점 까지 저장
+        refreshTokenRepository.saveToken(accessToken, accessToken, remainMilliSeconds);
+        // refreshToken 삭제
+        refreshTokenRepository.deleteToken(REFRESH_TOKEN_KEY.getDesc()+info.getSubject());
+    }
+
+    /**
+     * @param res
+     */
+
+    public void deleteJwtFromCookie(HttpServletResponse res) {
+        Cookie cookie = new Cookie(REFRESH_TOKEN, null); // 쿠키의 값을 null로 설정
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setMaxAge(0); // 쿠키의 만료 날짜를 과거로 설정
+        res.addCookie(cookie);
     }
 }

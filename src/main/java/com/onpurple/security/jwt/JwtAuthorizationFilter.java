@@ -2,7 +2,7 @@ package com.onpurple.security.jwt;
 
 import com.onpurple.dto.request.TokenDto;
 import com.onpurple.security.UserDetailsServiceImpl;
-import com.onpurple.helper.RedisManager;
+import com.onpurple.redis.repository.RefreshTokenRepository;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -28,18 +28,18 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsServiceImpl userDetailsService;
-    private final RedisManager redisManager;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
         // 토큰 검증 AccessToken
         String accessToken = jwtTokenProvider.resolveToken(req, ACCESS_TOKEN);
-        if (StringUtils.hasText(accessToken) && !(redisManager.checkValidateData(accessToken))) {
+        if (StringUtils.hasText(accessToken) && !(refreshTokenRepository.isTokenBlacklisted(accessToken))) {
             if (!jwtTokenProvider.validateToken(accessToken)) {
                 log.warn("[FAIL] AccessToken 검증 실패했습니다.");
                 // 쿠키에서 토큰 추출후, 헤더로 토큰보내서 가져오기
                 String refreshToken = jwtTokenProvider.refreshCookieRequest(req);
-                TokenDto tokenDto = jwtTokenProvider.handleRefreshToken(refreshToken, req);
+                TokenDto tokenDto = jwtTokenProvider.handleRefreshToken(refreshToken, req, res);
                 accessToken = tokenDto.getAccessToken().substring(7);
                 jwtTokenProvider.tokenSetHeaders(tokenDto, res);
                 log.info("[SUCCESS] Access/Refresh 토큰 재발급에 성공했습니다.");

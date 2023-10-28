@@ -6,9 +6,12 @@ import com.onpurple.dto.request.TokenDto;
 import com.onpurple.dto.response.LoginResponseDto;
 import com.onpurple.exception.CustomException;
 import com.onpurple.enums.ErrorCode;
+import com.onpurple.exception.ErrorResponse;
 import com.onpurple.model.User;
+import com.onpurple.redis.cacheRepository.UserCacheRepository;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.security.UserDetailsImpl;
+import com.onpurple.util.ResponseUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,16 +24,20 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.io.IOException;
 
+import static com.onpurple.enums.ErrorCode.LOGIN_FAIL_ERROR;
+
 @Slf4j(topic = "로그인 및 JWT 생성")
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
+    private final UserCacheRepository userCacheRepository;
 
 
     public JwtAuthenticationFilter(
-            JwtTokenProvider jwtTokenProvider, UserRepository userRepository) {
+            JwtTokenProvider jwtTokenProvider, UserRepository userRepository, UserCacheRepository userCacheRepository) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.userRepository = userRepository;
+        this.userCacheRepository = userCacheRepository;
         // 로그인 처리를 여기서 처리한다.
         setFilterProcessesUrl("/user/login");
     }
@@ -69,6 +76,14 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         // 응답
         sendJsonResponse(response, user);
     }
+    private User findCacheOrDbUser(String username) {
+        User user = userCacheRepository.getUser(username).orElseGet(() -> {
+            User foundUser = findUser(username);
+            userCacheRepository.saveUser(foundUser);
+            return foundUser;
+        });
+        return user;
+    }
     private User findUser(String username){
         return userRepository.findByUsername(username).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
@@ -76,18 +91,16 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     }
 
     private void sendJsonResponse(HttpServletResponse response, User user) throws IOException {
-        response.setContentType("application/json;charset=UTF-8");
-
         LoginResponseDto responseData = LoginResponseDto.fromEntity(user);
-        String responseJson = new ObjectMapper().writeValueAsString(responseData);
-
-        response.getWriter().println(responseJson);
+        ResponseUtil.sendJsonResponse(response, HttpServletResponse.SC_OK, responseData);
     }
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
         log.info("로그인 실패");
-        response.setStatus(401);
+
+        ErrorResponse errorResponse = new ErrorResponse(LOGIN_FAIL_ERROR, LOGIN_FAIL_ERROR.getMessage());
+        ResponseUtil.sendJsonResponse(response, HttpServletResponse.SC_UNAUTHORIZED, errorResponse);
     }
 
 }

@@ -11,11 +11,13 @@ import com.onpurple.model.Authority;
 import com.onpurple.model.User;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.security.jwt.JwtTokenProvider;
-import com.onpurple.helper.RedisManager;
+import com.onpurple.redis.repository.RefreshTokenRepository;
 import com.onpurple.external.s3.AwsS3UploadService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +34,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final AwsS3UploadService awsS3UploadService;
     private final JwtTokenProvider jwtTokenProvider;
-    private final RedisManager redisManager;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     private static final String ADMIN_TOKEN = ("AAABnvxRVklrnYxKZ0aHgTBcXukeZygoC");
 
@@ -167,6 +169,7 @@ public class UserService {
      * @return ApiResponseDto<MessageResponseDto>
      */
     @Transactional
+    @CachePut(value = "user", key = "#user.id")
     public ApiResponseDto<MessageResponseDto> updateImage(User user, String imgPaths) {
 
 //        이미지를 확인하고 user의 기존 이미지를 삭제. 이후 새로 넣은 이미지로 업데이트 되도록 설정.
@@ -181,26 +184,22 @@ public class UserService {
     }
 
     //  로그아웃. 토큰을 확인하여 일치할 경우 로그인 된 유저의 이미지와 토큰을 삭제.
-    public ApiResponseDto<MessageResponseDto> logout(HttpServletRequest request) {
-        // 리프레시 토큰 삭제, AccessToken 만료시간까지 저장
-        logoutBlackListToken(request);
-        return ApiResponseDto.success("로그아웃이 완료되었습니다.");
-    }
+
     /**
-     * 로그아웃시 AccessToken BlackList저장
+     * 로그아웃
      * @param request
+     * @param response
+     * @return ApiResponseDto<MessageResponseDto>
      */
-    @Transactional
-    public void logoutBlackListToken(HttpServletRequest request) {
-        String accessToken = jwtTokenProvider.resolveToken(request, JwtTokenProvider.ACCESS_TOKEN);
-        Claims info = jwtTokenProvider.getUserInfoFromToken(accessToken);
-        // 엑세스 토큰 남은시간
-        long remainMilliSeconds = jwtTokenProvider.getExpiration(accessToken);
-        // 액세스 토큰 만료시점 까지 저장
-        redisManager.saveData(accessToken, accessToken, remainMilliSeconds);
-        // refreshToken 삭제
-        redisManager.deleteData(REFRESH_TOKEN_KEY.getDesc()+info.getSubject());
+    public ApiResponseDto<MessageResponseDto> logout(HttpServletRequest request, HttpServletResponse response) {
+        // 리프레시 토큰 삭제, AccessToken 만료시간까지 저장
+        jwtTokenProvider.logoutBlackListToken(request);
+        // 쿠키에서 JWT 삭제
+        jwtTokenProvider.deleteJwtFromCookie(response);
+
+        return ApiResponseDto.success(SuccessCode.SUCCESS_LOGOUT.getMessage());
     }
+
 
     /**
      * 회원명 중복확인
