@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -187,7 +188,7 @@ public class JwtTokenProvider {
 
 
     // 리프레시 토큰 검증을 통한 AccessToken 재발급
-    public TokenDto handleRefreshToken(String refreshToken, HttpServletRequest request) {
+    public TokenDto handleRefreshToken(String refreshToken, HttpServletRequest request, HttpServletResponse response) {
 
         try {
             // RefreshToken의 만료를 검증하고, redis에 저장된 토큰과 비교검증한다.
@@ -202,7 +203,7 @@ public class JwtTokenProvider {
             logger.error("회원 토큰 재발급에 실패했습니다.", e.getMessage());
 
             // 재발급 실패시 로그아웃을 위한 이벤트 발행
-            eventPublisher.publishEvent(new TokenReissueFailedEvent(request));
+            eventPublisher.publishEvent(new TokenReissueFailedEvent(request, response));
 
             throw new CustomException(ErrorCode.REQUEST_FAILED_ERROR);
         }
@@ -265,5 +266,33 @@ public class JwtTokenProvider {
             logger.error("Refresh 토큰이 존재하지 않습니다.");
             throw new CustomException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);
         }
+    }
+    /**
+     * 로그아웃시 AccessToken BlackList저장
+     * @param request
+     */
+    @Transactional
+    public void logoutBlackListToken(HttpServletRequest request) {
+        String accessToken = resolveToken(request, JwtTokenProvider.ACCESS_TOKEN);
+        Claims info = getUserInfoFromToken(accessToken);
+        // 엑세스 토큰 남은시간
+        long remainMilliSeconds = getExpiration(accessToken);
+        // 액세스 토큰 만료시점 까지 저장
+        refreshTokenRepository.saveToken(accessToken, accessToken, remainMilliSeconds);
+        // refreshToken 삭제
+        refreshTokenRepository.deleteToken(REFRESH_TOKEN_KEY.getDesc()+info.getSubject());
+    }
+
+    /**
+     * @param res
+     */
+
+    public void deleteJwtFromCookie(HttpServletResponse res) {
+        Cookie cookie = new Cookie(REFRESH_TOKEN, null); // 쿠키의 값을 null로 설정
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setMaxAge(0); // 쿠키의 만료 날짜를 과거로 설정
+        res.addCookie(cookie);
     }
 }

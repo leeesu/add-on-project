@@ -68,7 +68,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
         log.info("로그인 성공 및 JWT 생성");
         String username = ((UserDetailsImpl) authResult.getPrincipal()).getUsername();
-        User user = findCacheOrDbUser(username);
+        User user = findUser(username);
         // 토큰 발급
         TokenDto tokenDto = jwtTokenProvider.reissueToken(username);
         // header 로 토큰 send
