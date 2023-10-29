@@ -12,8 +12,7 @@ import com.onpurple.model.User;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.security.jwt.JwtTokenProvider;
 import com.onpurple.redis.repository.RefreshTokenRepository;
-import com.onpurple.external.s3.AwsS3UploadService;
-import io.jsonwebtoken.Claims;
+import com.onpurple.external.AwsS3UploadService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
@@ -25,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-import static com.onpurple.enums.RedisKeyEnum.*;
 import static com.onpurple.enums.SuccessCode.*;
 
 @RequiredArgsConstructor

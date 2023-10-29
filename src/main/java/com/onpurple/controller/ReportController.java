@@ -7,7 +7,7 @@ import com.onpurple.dto.response.ReportResponseDto;
 import com.onpurple.security.UserDetailsImpl;
 import com.onpurple.service.ReportService;
 import com.onpurple.helper.EntityValidatorManager;
-import com.onpurple.external.s3.AwsS3UploadService;
+import com.onpurple.external.AwsS3UploadService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
