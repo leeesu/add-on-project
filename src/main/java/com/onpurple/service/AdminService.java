@@ -11,6 +11,7 @@ import com.onpurple.repository.CommentRepository;
 import com.onpurple.repository.PostRepository;
 import com.onpurple.helper.ImageUploaderManager;
 import com.onpurple.helper.EntityValidatorManager;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -82,7 +83,7 @@ public class AdminService {
      * @param user 'ADMIN' 역할인지 검증할 User 객체
      */
     @Transactional
-    public void validationAdmin(User user) {
+    public void validationAdmin(@NotNull User user) {
         if (!user.getRole().equals(Authority.ADMIN)) {
             log.error("{} 회원은 관리자가 아닙니다.", user);
             throw new CustomException(ErrorCode.NOT_ADMIN_ERROR);

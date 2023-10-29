@@ -23,24 +23,24 @@ public class LikeController {
 
     // 게시글 좋아요
     @PostMapping( "/post/like/{postId}")
-    public ApiResponseDto<LikeResponseDto> createPostLike(@PathVariable Long postId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ApiResponseDto<LikeResponseDto> createPostLike(@PathVariable final Long postId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return likeService.postLike(postId, userDetails.getUser());
     }
     // 댓글 좋아요
     @PostMapping( "/comment/like/{commentId}")
-    public ApiResponseDto<LikeResponseDto> createCommentLike(@PathVariable Long commentId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ApiResponseDto<LikeResponseDto> createCommentLike(@PathVariable final Long commentId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return likeService.commentLike(commentId, userDetails.getUser());
     }
 
     // 회원 좋아요
     @PostMapping( "/user/like/{targetId}")
-    public ApiResponseDto<MessageResponseDto> createUserLike(@PathVariable Long targetId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ApiResponseDto<MessageResponseDto> createUserLike(@PathVariable final Long targetId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return likeService.userLike(targetId, userDetails.getUser());
     }
 
 
     @PostMapping( "/user/match/{userId}")
-    public ApiResponseDto<List<UserResponseDto>> createCheckUser(@PathVariable Long userId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ApiResponseDto<List<UserResponseDto>> createCheckUser(@PathVariable final Long userId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return likeService.likeCheck(userId, userDetails.getUser());
     }
     @GetMapping("/user/like")

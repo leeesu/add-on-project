@@ -2,7 +2,6 @@ package com.onpurple.controller;
 
 
 import com.onpurple.dto.response.ApiResponseDto;
-import com.onpurple.dto.response.ResponseDto;
 import com.onpurple.security.UserDetailsImpl;
 import com.onpurple.service.AdminService;
 import lombok.RequiredArgsConstructor;
@@ -18,14 +17,14 @@ public class AdminController {
     private final AdminService adminService;
 
     @DeleteMapping( "/admin/post/{postId}")
-    public ApiResponseDto<?> deletePost(@PathVariable Long postId,
+    public ApiResponseDto<?> deletePost(@PathVariable final Long postId,
                                         @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         return adminService.deletePostByAdmin(userDetails.getUser(), postId);
     }
 
     @DeleteMapping( "/admin/comment/{commentId}")
-    public ApiResponseDto<?> deleteComment(@PathVariable Long commentId,
+    public ApiResponseDto<?> deleteComment(@PathVariable final Long commentId,
                                         @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         return adminService.deleteCommentByAdmin(userDetails.getUser(), commentId);

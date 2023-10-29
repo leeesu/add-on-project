@@ -24,7 +24,7 @@ public class UnLikeController {
 
     // 회원 싫어요
     @PostMapping( "/user/unlike/{targetId}")
-    public ApiResponseDto<MessageResponseDto> createUserUnLike(@PathVariable Long targetId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ApiResponseDto<MessageResponseDto> createUserUnLike(@PathVariable final Long targetId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return unLikeService.userUnLike(targetId, userDetails.getUser());
     }
 

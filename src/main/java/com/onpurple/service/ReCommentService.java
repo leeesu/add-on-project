@@ -12,6 +12,7 @@ import com.onpurple.model.ReComment;
 import com.onpurple.model.User;
 import com.onpurple.repository.ReCommentRepository;
 import com.onpurple.helper.EntityValidatorManager;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -128,7 +129,7 @@ public class ReCommentService {
      * @param reComment
      * @param user
      */
-    public void validateReCommentUser(ReComment reComment, User user) {
+    public void validateReCommentUser(@NotNull ReComment reComment, User user) {
         if (reComment.validateUser(user)) {
             throw new CustomException(ErrorCode.INVALID_USER_MATCH);
         }

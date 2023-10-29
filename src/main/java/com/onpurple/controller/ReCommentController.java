@@ -23,28 +23,29 @@ public class ReCommentController {
     // 대댓글 작성
     @PostMapping( "/reComment/{commentId}")
     public ApiResponseDto<ReCommentResponseDto> createReComment(@PathVariable Long commentId,
-                                                                @RequestPart(value = "data") ReCommentRequestDto requestDto,
+                                                                @RequestPart(value = "data") final ReCommentRequestDto reCommentRequestDto,
                                                                 @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return reCommentService.createReComment(commentId, requestDto, userDetails.getUser());
+        return reCommentService.createReComment(commentId, reCommentRequestDto, userDetails.getUser());
     }
 
     // 대댓글 조회하기
     @GetMapping("/reComment/{commentId}")
-    public ApiResponseDto<List<ReCommentResponseDto>> getAllReComment(@PathVariable Long commentId) {
+    public ApiResponseDto<List<ReCommentResponseDto>> getAllReComment(@PathVariable final Long commentId) {
             return reCommentService.getAllReCommentsByComment(commentId);
         }
 
 
     // 대댓글 수정
     @PutMapping( "/reComment/{reCommentId}")
-    public ApiResponseDto<ReCommentResponseDto> updateReComment(@PathVariable Long reCommentId, ReCommentRequestDto requestDto,
+    public ApiResponseDto<ReCommentResponseDto> updateReComment(@PathVariable final Long reCommentId,
+                                                                @RequestPart(value = "data") final ReCommentRequestDto reCommentRequestDto,
                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return reCommentService.updateReComment(reCommentId, requestDto, userDetails.getUser());
+        return reCommentService.updateReComment(reCommentId, reCommentRequestDto, userDetails.getUser());
     }
 
     //대댓글삭제
     @DeleteMapping( "/reComment/{reCommentId}")
-    public ApiResponseDto<MessageResponseDto> deleteReComment(@PathVariable Long reCommentId,
+    public ApiResponseDto<MessageResponseDto> deleteReComment(@PathVariable final Long reCommentId,
                                                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return reCommentService.deleteReComment(reCommentId, userDetails.getUser());
     }

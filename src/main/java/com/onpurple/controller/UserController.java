@@ -33,9 +33,9 @@ public class UserController {
     private final EntityValidatorManager entityValidatorManager;
 
     @RequestMapping(value = "/user/signup", method = RequestMethod.POST)
-    public ApiResponseDto<UserResponseDto> signup(@RequestPart(value = "info", required = false) @Valid SignupRequestDto requestDto,
-                                                  @RequestPart(value = "userInfo", required = false) UserInfoRequestDto userInfoRequestDto,
-                                                  @NotNull @RequestPart(value = "imageUrl", required = false) MultipartFile multipartFiles) {
+    public ApiResponseDto<UserResponseDto> signup(@RequestPart(value = "info", required = false) @Valid final SignupRequestDto requestDto,
+                                                  @RequestPart(value = "userInfo", required = false) final UserInfoRequestDto userInfoRequestDto,
+                                                  @NotNull @RequestPart(value = "imageUrl", required = false) final MultipartFile multipartFiles) {
         String imgPaths = s3Service.uploadOne(multipartFiles);
 
         return userService.createUser(requestDto, userInfoRequestDto, imgPaths);
@@ -43,25 +43,25 @@ public class UserController {
 
     // login Filter단에서 이루어지게 구현
     @PostMapping("/user/idCheck/{username}")
-    public ApiResponseDto<MessageResponseDto> checkUser(@PathVariable String username) {
+    public ApiResponseDto<MessageResponseDto> checkUser(@PathVariable final String username) {
 
         return userService.checkUser(username);
     }
 
     @PostMapping("/user/nicknameCheck/{nickname}")
-    public ApiResponseDto<MessageResponseDto> checkNickname(@PathVariable String nickname) {
+    public ApiResponseDto<MessageResponseDto> checkNickname(@PathVariable final String nickname) {
 
         return userService.checkNickname(nickname);
     }
 
     @RequestMapping(value = "/mypage/password", method = RequestMethod.PUT)
-    public ApiResponseDto<MessageResponseDto> passwordUpdate(@RequestBody UserUpdateRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ApiResponseDto<MessageResponseDto> passwordUpdate(@RequestBody final UserUpdateRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         return userService.updatePassword(requestDto, userDetails.getUser());
     }
 
     @RequestMapping(value = "/mypage/image", method = RequestMethod.PUT)
-    public ApiResponseDto<MessageResponseDto> imageUpdate(@NotNull@RequestPart("imageUrl") MultipartFile multipartFiles,
+    public ApiResponseDto<MessageResponseDto> imageUpdate(@NotNull@RequestPart("imageUrl") final MultipartFile multipartFiles,
                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         String imgPaths = s3Service.uploadOne(multipartFiles);

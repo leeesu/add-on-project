@@ -12,6 +12,7 @@ import com.onpurple.repository.CommentRepository;
 import com.onpurple.repository.PostRepository;
 import com.onpurple.helper.ImageUploaderManager;
 import com.onpurple.helper.EntityValidatorManager;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -36,17 +37,17 @@ public class PostService {
 
     /**
      * 게시글 작성
-     * @param requestDto
+     * @param postRequestDto
      * @param user
      * @param imgPaths
      * @return ApiResponseDto<PostResponseDto>
      */
     @Transactional
-    public ApiResponseDto<PostResponseDto> createPost(PostRequestDto requestDto,
+    public ApiResponseDto<PostResponseDto> createPost(PostRequestDto postRequestDto,
                                                       User user, List<String> imgPaths) {
         // 카테고리 Business Validation
-        validateCategory(requestDto.getCategory());
-        Post post = postFromRequest(requestDto, user);
+        validateCategory(postRequestDto.getCategory());
+        Post post = postFromRequest(postRequestDto, user);
         postRepository.save(post);
 
         List<String> imgList = imageUploaderManager.addImage(imgPaths, post);
@@ -186,7 +187,7 @@ public class PostService {
      * @param post
      * @param user
      */
-    public void validatePostUser(Post post, User user) {
+    public void validatePostUser(@NotNull Post post, User user) {
         if (post.validateUser(user)) {
             throw new CustomException(ErrorCode.INVALID_USER_MATCH);
         }
