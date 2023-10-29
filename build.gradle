@@ -71,6 +71,10 @@ dependencies {
 	implementation 'org.springframework:spring-aop'
 	// websocket
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	//image resize
+	implementation 'com.github.downgoon:marvin:1.5.5'
+	implementation 'com.github.downgoon:MarvinPlugins:1.5.5'
+	implementation 'org.springframework:spring-test'
 
 }
 
