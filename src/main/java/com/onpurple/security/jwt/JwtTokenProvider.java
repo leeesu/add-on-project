@@ -6,6 +6,7 @@ import com.onpurple.exception.CustomException;
 import com.onpurple.enums.ErrorCode;
 import com.onpurple.model.Authority;
 import com.onpurple.model.User;
+import com.onpurple.redis.cacheRepository.UserCacheRepository;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.redis.repository.RefreshTokenRepository;
 import io.jsonwebtoken.*;
@@ -52,6 +53,7 @@ public class JwtTokenProvider {
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final UserCacheRepository userCacheRepository;
 
     // secretKey Base64 Decode
     @PostConstruct
@@ -144,13 +146,21 @@ public class JwtTokenProvider {
     }
     // RTR(Refresh Token Rotation) -> Access/RefreshToken 발급-재발급
     public TokenDto reissueToken(String username) {
-        User user = userRepository.findByUsername(username).orElseThrow(
-                ()->new CustomException(ErrorCode.USER_NOT_FOUND)
-        );
+        User user = findUserOrCache(username);
         TokenDto tokenDto = createAllToken(createAccessToken(user),createRefreshToken(user));
         logger.info("{} 회원의 토큰이 발급 되었습니다.", user.getUsername());
         // header 로 토큰 send
         return tokenDto;
+    }
+
+    private User findUserOrCache(String username) {
+        return userCacheRepository.getUser(username)
+                .orElseGet(() -> {
+                    User findDbUser = userRepository.findByUsername(username)
+                            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                    userCacheRepository.saveUser(findDbUser);
+                    return findDbUser;
+                });
     }
 
     // JWT Cookie 에 저장
