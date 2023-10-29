@@ -1,4 +1,4 @@
-package com.onpurple.external.s3;
+package com.onpurple.external;
 
 import com.amazonaws.services.s3.model.ObjectMetadata;
 

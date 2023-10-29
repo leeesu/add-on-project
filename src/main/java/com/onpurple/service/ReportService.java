@@ -12,7 +12,7 @@ import com.onpurple.model.Report;
 import com.onpurple.model.User;
 import com.onpurple.repository.ReportRepository;
 import com.onpurple.repository.UserRepository;
-import com.onpurple.external.s3.AwsS3UploadService;
+import com.onpurple.external.AwsS3UploadService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

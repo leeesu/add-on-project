@@ -3,7 +3,7 @@ package com.onpurple.helper;
 import com.onpurple.model.Img;
 import com.onpurple.model.Post;
 import com.onpurple.repository.ImgRepository;
-import com.onpurple.external.s3.AwsS3UploadService;
+import com.onpurple.external.AwsS3UploadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

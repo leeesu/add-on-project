@@ -7,7 +7,7 @@ import com.onpurple.dto.response.MessageResponseDto;
 import com.onpurple.dto.response.PostResponseDto;
 import com.onpurple.security.UserDetailsImpl;
 import com.onpurple.service.PostService;
-import com.onpurple.external.s3.AwsS3UploadService;
+import com.onpurple.external.AwsS3UploadService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;

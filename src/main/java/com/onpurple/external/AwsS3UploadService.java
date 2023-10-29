@@ -1,4 +1,4 @@
-package com.onpurple.external.s3;
+package com.onpurple.external;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
@@ -7,8 +7,9 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.onpurple.exception.CustomException;
 import com.onpurple.enums.ErrorCode;
-import com.onpurple.external.s3.dto.S3Component;
+import com.onpurple.external.dto.S3Component;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,13 +26,15 @@ import java.util.UUID;
 public class
 AwsS3UploadService implements UploadService {
 
+    @Value("${cloudFront.url}")
+    private String cloudFrontUrl;
+
     private final AmazonS3 s3Client;
     private final S3Component component;  // AWS S3 를 위한 설정이 담긴 클래스
 
     public List<String> upload(List<MultipartFile> multipartFile) {
         List<String> imgUrlList = new ArrayList<>();
 
-        // forEach 구문을 통해 multipartFile로 넘어온 파일들 하나씩 fileNameList에 추가
         for (MultipartFile file : multipartFile) {
             String fileName = createFileName(file.getOriginalFilename());
             ObjectMetadata objectMetadata = new ObjectMetadata();
@@ -39,9 +42,11 @@ AwsS3UploadService implements UploadService {
             objectMetadata.setContentType(file.getContentType());
 
             try (InputStream inputStream = file.getInputStream()) {
-                s3Client.putObject(new PutObjectRequest(component.getBucket(), fileName, inputStream, objectMetadata)
-                        .withCannedAcl(CannedAccessControlList.PublicRead));
-                imgUrlList.add(s3Client.getUrl(component.getBucket(), fileName).toString());
+                // CloudFront 도메인을 사용하여 파일 업로드
+                uploadFile(inputStream, objectMetadata, fileName);
+
+                // CloudFront 도메인을 사용하여 이미지 URL 생성
+                imgUrlList.add(getFileUrl(fileName));
             } catch (IOException e) {
                 throw new IllegalArgumentException(String.format("파일 변환 중 에러가 발생하였습니다 (%s)", file.getOriginalFilename()));
             }
@@ -49,9 +54,8 @@ AwsS3UploadService implements UploadService {
         return imgUrlList;
     }
 
-    // 단일 이미지 업로드
     public String uploadOne(MultipartFile file) {
-        String imageName="";
+        String imageName = "";
 
         String fileName = createFileName(file.getOriginalFilename());
         ObjectMetadata objectMetadata = new ObjectMetadata();
@@ -59,11 +63,13 @@ AwsS3UploadService implements UploadService {
         objectMetadata.setContentType(file.getContentType());
 
         try (InputStream inputStream = file.getInputStream()) {
-            s3Client.putObject(new PutObjectRequest(component.getBucket(), fileName, inputStream, objectMetadata)
-                    .withCannedAcl(CannedAccessControlList.PublicRead));
-            imageName = s3Client.getUrl(component.getBucket(), fileName).toString();
+            // CloudFront 도메인을 사용하여 파일 업로드
+            uploadFile(inputStream, objectMetadata, fileName);
+
+            // CloudFront 도메인을 사용하여 이미지 URL 생성
+            imageName = getFileUrl(fileName);
         } catch (IOException e) {
-            new CustomException(ErrorCode.IMAGE_CONVERT_FAILD);
+            throw new CustomException(ErrorCode.IMAGE_CONVERT_FAILD);
         }
         return imageName;
     }
@@ -72,23 +78,23 @@ AwsS3UploadService implements UploadService {
 
 
 
-    // Amazon S3 를 사용해서 파일 업로드
+    // 파일 업로드 메서드
     @Override
     public void uploadFile(InputStream inputStream, ObjectMetadata objectMetadata, String fileName) {
         s3Client.putObject(new PutObjectRequest(component.getBucket(), fileName, inputStream, objectMetadata)
                 .withCannedAcl(CannedAccessControlList.PublicRead));
     }
 
-    // 업로드한 파일의 Url 가져오는
+    // 업로드한 파일의 URL 가져오기
     @Override
     public String getFileUrl(String fileName) {
-        return s3Client.getUrl(component.getBucket(), fileName).toString();
+        return cloudFrontUrl +"/"+ fileName; // CloudFront 도메인으로 수정
     }
 
     // 파일 삭제
     public void deleteFile(String fileName) {
         try {
-            s3Client.deleteObject(component.getBucket(), (fileName).replace(File.separatorChar, '/'));
+            s3Client.deleteObject(component.getBucket(), fileName);
         } catch (AmazonServiceException e) {
             System.err.println(e.getErrorMessage());
         }
