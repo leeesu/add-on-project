@@ -13,6 +13,7 @@ import com.onpurple.model.User;
 import com.onpurple.repository.ReportRepository;
 import com.onpurple.repository.UserRepository;
 import com.onpurple.external.s3.AwsS3UploadService;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -147,7 +148,7 @@ public class ReportService {
      * @return Report
      */
     @Transactional(readOnly = true)
-    public Report isPresentReport(Long reportId) {
+    public Report isPresentReport(@NotNull Long reportId) {
         Optional<Report> optionalReport = reportRepository.findById(reportId);
         return optionalReport.orElse(null);
     }

@@ -19,7 +19,7 @@ public class MypageController {
 
     @GetMapping("/mypage/{userId}")
     public ApiResponseDto<MypageResponseDto> getMypage(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                       @PathVariable Long userId){
+                                                       @PathVariable final Long userId){
 
         return mypageService.getMyPage(userDetails.getUser(), userId);
     }

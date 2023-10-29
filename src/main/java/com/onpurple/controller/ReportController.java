@@ -25,9 +25,9 @@ public class ReportController {
 
     // 신고글 작성
     @PostMapping( "/report")
-    public ApiResponseDto<ReportResponseDto> createReport(@RequestPart(value = "data",required = false) ReportRequestDto requestDto,
+    public ApiResponseDto<ReportResponseDto> createReport(@RequestPart(value = "data",required = false) final ReportRequestDto requestDto,
                                                           @AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                          @NotNull @RequestPart(value = "imageUrl",required = false) MultipartFile multipartFiles) {
+                                                          @NotNull @RequestPart(value = "imageUrl",required = false) final MultipartFile multipartFiles) {
         String imgPaths = s3Service.uploadOne(multipartFiles);
         return reportService.createReport(requestDto,userDetails.getUser(), imgPaths);
     }
@@ -39,7 +39,7 @@ public class ReportController {
 
     // 상세 신고글 가져오기
     @GetMapping( "/report/{reportId}")
-    public ApiResponseDto<ReportResponseDto> getReport(@PathVariable Long reportId) {
+    public ApiResponseDto<ReportResponseDto> getReport(@PathVariable final Long reportId) {
         return reportService.getReport(reportId);
     }
 
@@ -47,7 +47,7 @@ public class ReportController {
 
     //신고글 삭제
     @DeleteMapping( "/report/{reportId}")
-    public ApiResponseDto<MessageResponseDto> deleteReport(@PathVariable Long reportId,
+    public ApiResponseDto<MessageResponseDto> deleteReport(@PathVariable final Long reportId,
                                                            @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return reportService.deleteReport(reportId, userDetails.getUser());
     }

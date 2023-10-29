@@ -12,6 +12,7 @@ import com.onpurple.model.Post;
 import com.onpurple.model.User;
 import com.onpurple.repository.CommentRepository;
 import com.onpurple.helper.EntityValidatorManager;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -120,7 +121,7 @@ public class CommentService {
    * @param user
    */
 
-  public void validateUser(Comment comment, User user) {
+  public void validateUser(@NotNull Comment comment, User user) {
     if (comment.validateUser(user)) {
       throw new CustomException(ErrorCode.INVALID_USER_MATCH);
     }

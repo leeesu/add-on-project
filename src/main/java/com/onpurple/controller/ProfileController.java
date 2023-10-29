@@ -27,13 +27,13 @@ public class ProfileController {
     }
 
     @GetMapping( "/profile/{userId}")
-    public ApiResponseDto<ProfileResponseDto> getProfile(@PathVariable Long userId) {
+    public ApiResponseDto<ProfileResponseDto> getProfile(@PathVariable final Long userId) {
 
         return profileService.getProfile(userId);
     }
 
     @PatchMapping( "/mypage/userInfo")
-    public ApiResponseDto<MessageResponseDto> updateProfile(@RequestBody ProfileUpdateRequestDto requestDto,
+    public ApiResponseDto<MessageResponseDto> updateProfile(@RequestBody final ProfileUpdateRequestDto requestDto,
                                                             @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
        return profileService.updateProfile(requestDto, userDetails.getUser());

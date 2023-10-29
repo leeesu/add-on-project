@@ -10,6 +10,7 @@ import com.onpurple.repository.CommentRepository;
 import com.onpurple.repository.PostRepository;
 import com.onpurple.repository.ReCommentRepository;
 import com.onpurple.repository.UserRepository;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
@@ -27,23 +28,23 @@ public class EntityValidatorManager {
     private final ReCommentRepository reCommentRepository;
 
     // 게시글 정보가 없을 경우 에러 메시지 전송.
-    public Post validatePost(Long postId) {
+    public Post validatePost(@NotNull Long postId) {
         return validateOrThrow(postRepository, postId, ErrorCode.POST_NOT_FOUND);
     }
 
     // 댓글 정보가 없을 경우 에러 메시지 전송.
-    public Comment validateComment (Long commentId) {
+    public Comment validateComment (@NotNull Long commentId) {
         return validateOrThrow(commentRepository, commentId, ErrorCode.COMMENT_NOT_FOUND);
     }
     // 회원 정보가 없을 경우 에러 메시지 전송.
-    public User validateProfile(Long userId) {
+    public User validateProfile(@NotNull Long userId) {
         return validateOrThrow(userRepository, userId,ErrorCode.PROFILE_NOT_FOUND);
     }
 
 
 
     // 대댓글 정보가 없을 경우 에러 메시지 전송.
-    public ReComment validateReComment(Long reCommentId) {
+    public ReComment validateReComment(@NotNull Long reCommentId) {
         return validateOrThrow(reCommentRepository, reCommentId, ErrorCode.NOT_FOUND_RECOMMENT);
     }
 

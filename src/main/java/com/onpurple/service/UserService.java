@@ -16,6 +16,7 @@ import com.onpurple.external.s3.AwsS3UploadService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -206,7 +207,7 @@ public class UserService {
      * @param username
      * @return
      */
-    public User isPresentUser(String username) {
+    public User isPresentUser(@NotNull String username) {
         Optional<User> optionalUser = userRepository.findByUsername(username);
         return optionalUser.orElse(null);
     }
@@ -216,7 +217,7 @@ public class UserService {
      * @param nickname
      * @return
      */
-    public User isPresentNickname(String nickname) {
+    public User isPresentNickname(@NotNull String nickname) {
         Optional<User> optionalUser = userRepository.findByNickname(nickname);
         return optionalUser.orElse(null);
     }
