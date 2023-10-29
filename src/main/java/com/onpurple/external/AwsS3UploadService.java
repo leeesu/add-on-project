@@ -5,9 +5,11 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.onpurple.enums.ResizeEnum;
 import com.onpurple.exception.CustomException;
 import com.onpurple.enums.ErrorCode;
 import com.onpurple.external.dto.S3Component;
+import com.onpurple.util.ImageResizeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -23,8 +25,7 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 @Component
-public class
-AwsS3UploadService implements UploadService {
+public class AwsS3UploadService implements UploadService {
 
     @Value("${cloudFront.url}")
     private String cloudFrontUrl;
@@ -36,45 +37,33 @@ AwsS3UploadService implements UploadService {
         List<String> imgUrlList = new ArrayList<>();
 
         for (MultipartFile file : multipartFile) {
-            String fileName = createFileName(file.getOriginalFilename());
-            ObjectMetadata objectMetadata = new ObjectMetadata();
-            objectMetadata.setContentLength(file.getSize());
-            objectMetadata.setContentType(file.getContentType());
-
-            try (InputStream inputStream = file.getInputStream()) {
-                // CloudFront 도메인을 사용하여 파일 업로드
-                uploadFile(inputStream, objectMetadata, fileName);
-
-                // CloudFront 도메인을 사용하여 이미지 URL 생성
-                imgUrlList.add(getFileUrl(fileName));
-            } catch (IOException e) {
-                throw new IllegalArgumentException(String.format("파일 변환 중 에러가 발생하였습니다 (%s)", file.getOriginalFilename()));
-            }
+            imgUrlList.add(uploadFileReturnUrl(file));
         }
         return imgUrlList;
     }
 
     public String uploadOne(MultipartFile file) {
-        String imageName = "";
+        return uploadFileReturnUrl(file);
+    }
 
+    private String uploadFileReturnUrl(MultipartFile file) {
         String fileName = createFileName(file.getOriginalFilename());
+        String fileFormatName = fileFormatName(file);
+        MultipartFile resizedFile = ImageResizeUtil.resizeImage(fileName, fileFormatName, file, ResizeEnum.IMG_WIDTH.getSize());
         ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentLength(file.getSize());
+        objectMetadata.setContentLength(resizedFile.getSize());
         objectMetadata.setContentType(file.getContentType());
 
-        try (InputStream inputStream = file.getInputStream()) {
+        try (InputStream inputStream = resizedFile.getInputStream()) {
             // CloudFront 도메인을 사용하여 파일 업로드
             uploadFile(inputStream, objectMetadata, fileName);
 
             // CloudFront 도메인을 사용하여 이미지 URL 생성
-            imageName = getFileUrl(fileName);
+            return getFileUrl(fileName);
         } catch (IOException e) {
-            throw new CustomException(ErrorCode.IMAGE_CONVERT_FAILD);
+            throw new IllegalArgumentException(String.format("파일 변환 중 에러가 발생하였습니다 (%s)", file.getOriginalFilename()));
         }
-        return imageName;
     }
-
-
 
 
 
@@ -98,6 +87,10 @@ AwsS3UploadService implements UploadService {
         } catch (AmazonServiceException e) {
             System.err.println(e.getErrorMessage());
         }
+    }
+
+    public String fileFormatName(MultipartFile file) {
+        return file.getContentType().substring(file.getContentType().lastIndexOf("/") + 1);
     }
 
     // 파일 이름 생성 (이름 중복 방지 목적)
