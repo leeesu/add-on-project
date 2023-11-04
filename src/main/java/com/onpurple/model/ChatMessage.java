@@ -37,9 +37,9 @@ public class ChatMessage extends Timestamped {
     private ChatRoom chatRoom;
 
     // 대화 저장
-    public ChatMessage(String sender, String roomId, String message) {
-        super();
+    public ChatMessage(String sender, String receiver, String roomId, String message) {
         this.sender = sender;
+        this.receiver = receiver;
         this.roomId = roomId;
         this.message = message;
     }

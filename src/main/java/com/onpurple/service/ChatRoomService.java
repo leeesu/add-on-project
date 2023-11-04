@@ -2,6 +2,9 @@ package com.onpurple.service;
 
 import com.onpurple.dto.request.ChatMessageRequestDto;
 import com.onpurple.dto.response.*;
+import com.onpurple.enums.ErrorCode;
+import com.onpurple.enums.RedisKeyEnum;
+import com.onpurple.exception.CustomException;
 import com.onpurple.model.ChatMessage;
 import com.onpurple.model.ChatRoom;
 import com.onpurple.model.User;
@@ -22,6 +25,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.onpurple.enums.RedisKeyEnum.*;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -29,6 +35,7 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
+    private final RedisTemplate<String, ChatMessage> redisTemplateMessage;
 
     // 채팅방(topic)에 발행되는 메시지 처리하는 리스너
     private final RedisMessageListenerContainer redisMessageListener;
@@ -53,6 +60,7 @@ public class ChatRoomService {
 
     /**
      * 채팅방 생성
+     *
      * @param chatMessageRequestDto
      * @param user
      * @return ChatMessageResponseDto
@@ -78,6 +86,7 @@ public class ChatRoomService {
 
     /**
      * 사용자 관련 채팅방 전체 조회
+     *
      * @param user
      * @return List<ChatMessageResponseDto>
      */
@@ -113,19 +122,29 @@ public class ChatRoomService {
                         chatRoom.getSender(),
                         chatRoom.getReceiver());
 
-                // 가장 최신 메시지 & 생성 시간 조회
-                ChatMessage latestMessage = chatMessageRepository.findTopByRoomIdOrderByCreatedAtDesc(chatRoom.getRoomId());
-                if (latestMessage != null) {
-                    chatMessageResponseDto.setLatestChatMessageCreatedAt(latestMessage.getCreatedAt());
-                    chatMessageResponseDto.setLatestChatMessageContent(latestMessage.getMessage());
+                // Redis에서 메시지 가져오기
+                List<ChatMessage> redisMessageList = redisTemplateMessage.opsForList().range(ChatRoom_KEY + chatRoom.getRoomId(), 0, -1);
+
+
+                ChatMessage latestMessage;
+                if (redisMessageList == null || redisMessageList.isEmpty()) {
+                    // Redis에서 가져온 메시지가 없다면, DB에서 메시지 가져오기
+                    latestMessage = chatMessageRepository.findTopByRoomIdOrderByCreatedAtDesc(chatRoom.getRoomId());
+                } else {
+                    // Redis에서 가져온 메시지가 있다면, 가장 최신 메시지를 가져오기
+                    latestMessage = redisMessageList.get(redisMessageList.size() - 1);
                 }
+
+                chatMessageResponseDto.setLatestChatMessageCreatedAt(latestMessage.getCreatedAt());
+                chatMessageResponseDto.setLatestChatMessageContent(latestMessage.getMessage());
 
                 chatMessageResponseDtos.add(chatMessageResponseDto);
             }
         }
 
-        return chatMessageResponseDtos;
+            return chatMessageResponseDtos;
     }
+
 
     /**
      * 사용자 관련 채팅방 선택 조회
@@ -139,13 +158,13 @@ public class ChatRoomService {
 
         // 사용자 조회
         User receiver = userRepository.findById(userId).orElseThrow(
-                () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
         // 9. sender & receiver 모두 messageRoom 조회 가능
         chatRoom = chatRoomRepository.findByRoomIdAndUserOrRoomIdAndReceiver(roomId, user, roomId, receiver.getNickname());
         if (chatRoom == null) {
-            throw new IllegalArgumentException("채팅방이 존재하지 않습니다.");
+            throw new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND);
         }
 
         ChatRoomDto chatRoomDto = new ChatRoomDto(
