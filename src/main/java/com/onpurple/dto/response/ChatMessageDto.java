@@ -13,11 +13,13 @@ public class ChatMessageDto {
     private String roomId;
     private String message;
     private String sentTime;
+    private String receiver;
 
     // 대화 조회
     public ChatMessageDto(ChatMessage chatMessage) {
         this.sender = chatMessage.getSender();
         this.roomId = chatMessage.getRoomId();
         this.message = chatMessage.getMessage();
+        this.receiver = chatMessage.getReceiver();
     }
 }
