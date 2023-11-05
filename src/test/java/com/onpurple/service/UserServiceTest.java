@@ -1,14 +1,15 @@
 package com.onpurple.service;
 
-import com.onpurple.dto.request.SignupRequestDto;
-import com.onpurple.dto.request.TokenDto;
-import com.onpurple.dto.request.UserInfoRequestDto;
-import com.onpurple.enums.ErrorCode;
-import com.onpurple.exception.CustomException;
-import com.onpurple.model.User;
-import com.onpurple.repository.UserRepository;
-import com.onpurple.security.jwt.JwtTokenProvider;
-import com.onpurple.external.AwsS3UploadService;
+import com.onpurple.domain.user.dto.SignupRequestDto;
+import com.onpurple.domain.user.dto.UserInfoRequestDto;
+import com.onpurple.domain.user.model.User;
+import com.onpurple.domain.user.repository.UserRepository;
+import com.onpurple.domain.user.service.UserService;
+import com.onpurple.global.enums.ErrorCode;
+import com.onpurple.global.exception.CustomException;
+import com.onpurple.global.external.AwsS3UploadService;
+import com.onpurple.global.security.dto.TokenDto;
+import com.onpurple.global.security.jwt.JwtTokenProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

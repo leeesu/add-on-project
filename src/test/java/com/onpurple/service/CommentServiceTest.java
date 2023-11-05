@@ -1,15 +1,16 @@
 package com.onpurple.service;
 
-import com.onpurple.dto.request.CommentRequestDto;
-import com.onpurple.dto.response.ApiResponseDto;
-import com.onpurple.dto.response.CommentResponseDto;
-import com.onpurple.dto.response.MessageResponseDto;
-import com.onpurple.enums.SuccessCode;
-import com.onpurple.model.Comment;
-import com.onpurple.model.Post;
-import com.onpurple.model.User;
-import com.onpurple.repository.CommentRepository;
-import com.onpurple.helper.EntityValidatorManager;
+import com.onpurple.domain.comment.dto.CommentRequestDto;
+import com.onpurple.domain.comment.dto.CommentResponseDto;
+import com.onpurple.domain.comment.model.Comment;
+import com.onpurple.domain.comment.repository.CommentRepository;
+import com.onpurple.domain.comment.service.CommentService;
+import com.onpurple.domain.post.model.Post;
+import com.onpurple.domain.user.model.User;
+import com.onpurple.global.dto.ApiResponseDto;
+import com.onpurple.global.dto.MessageResponseDto;
+import com.onpurple.global.enums.SuccessCode;
+import com.onpurple.global.helper.EntityValidatorManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

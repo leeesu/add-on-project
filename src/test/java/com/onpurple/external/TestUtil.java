@@ -1,11 +1,11 @@
 package com.onpurple.external;
 
-import com.onpurple.category.PostCategory;
-import com.onpurple.dto.request.PostRequestDto;
-import com.onpurple.model.Comment;
-import com.onpurple.model.Likes;
-import com.onpurple.model.Post;
-import com.onpurple.model.User;
+import com.onpurple.domain.comment.model.Comment;
+import com.onpurple.domain.like.model.Likes;
+import com.onpurple.domain.post.category.PostCategory;
+import com.onpurple.domain.post.dto.PostRequestDto;
+import com.onpurple.domain.post.model.Post;
+import com.onpurple.domain.user.model.User;
 import org.springframework.stereotype.Component;
 
 @Component

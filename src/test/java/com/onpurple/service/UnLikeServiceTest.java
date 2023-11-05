@@ -1,14 +1,15 @@
 package com.onpurple.service;
 
-import com.onpurple.dto.response.ApiResponseDto;
-import com.onpurple.dto.response.MessageResponseDto;
-import com.onpurple.enums.ErrorCode;
-import com.onpurple.enums.SuccessCode;
-import com.onpurple.exception.CustomException;
-import com.onpurple.model.UnLike;
-import com.onpurple.model.User;
-import com.onpurple.repository.UnLikeRepository;
-import com.onpurple.helper.EntityValidatorManager;
+import com.onpurple.domain.unLike.model.UnLike;
+import com.onpurple.domain.unLike.repository.UnLikeRepository;
+import com.onpurple.domain.unLike.service.UnLikeService;
+import com.onpurple.domain.user.model.User;
+import com.onpurple.global.dto.ApiResponseDto;
+import com.onpurple.global.dto.MessageResponseDto;
+import com.onpurple.global.enums.ErrorCode;
+import com.onpurple.global.enums.SuccessCode;
+import com.onpurple.global.exception.CustomException;
+import com.onpurple.global.helper.EntityValidatorManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
