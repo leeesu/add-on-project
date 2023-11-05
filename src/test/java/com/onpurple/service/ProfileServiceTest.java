@@ -1,13 +1,14 @@
 package com.onpurple.service;
 
-import com.onpurple.dto.request.ProfileUpdateRequestDto;
-import com.onpurple.dto.response.ApiResponseDto;
-import com.onpurple.dto.response.MessageResponseDto;
-import com.onpurple.dto.response.ProfileResponseDto;
-import com.onpurple.enums.SuccessCode;
-import com.onpurple.model.User;
-import com.onpurple.repository.UserRepository;
-import com.onpurple.helper.EntityValidatorManager;
+import com.onpurple.domain.profile.dto.ProfileResponseDto;
+import com.onpurple.domain.profile.dto.ProfileUpdateRequestDto;
+import com.onpurple.domain.profile.service.ProfileService;
+import com.onpurple.domain.user.model.User;
+import com.onpurple.domain.user.repository.UserRepository;
+import com.onpurple.global.dto.ApiResponseDto;
+import com.onpurple.global.dto.MessageResponseDto;
+import com.onpurple.global.enums.SuccessCode;
+import com.onpurple.global.helper.EntityValidatorManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +22,6 @@ import org.springframework.data.domain.PageRequest;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.onpurple.enums.SuccessCode.SUCCESS_PROFILE_GET_ALL;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -68,7 +68,7 @@ class ProfileServiceTest {
 
         assertNotNull(response);
 
-        assertEquals(SUCCESS_PROFILE_GET_ALL.getMessage(), response.getMessage());
+        assertEquals(SuccessCode.SUCCESS_PROFILE_GET_ALL.getMessage(), response.getMessage());
 
         assertFalse(response.getData().isEmpty());
 
