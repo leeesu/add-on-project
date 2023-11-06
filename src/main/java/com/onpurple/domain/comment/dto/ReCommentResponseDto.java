@@ -1,6 +1,6 @@
 package com.onpurple.domain.comment.dto;
 
-import com.onpurple.domain.reComment.model.ReComment;
+import com.onpurple.domain.comment.model.ReComment;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

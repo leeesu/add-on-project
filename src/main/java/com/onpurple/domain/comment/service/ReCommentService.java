@@ -3,7 +3,7 @@ package com.onpurple.domain.comment.service;
 
 import com.onpurple.domain.comment.dto.ReCommentRequestDto;
 import com.onpurple.domain.comment.dto.ReCommentResponseDto;
-import com.onpurple.domain.reComment.model.ReComment;
+import com.onpurple.domain.comment.model.ReComment;
 import com.onpurple.domain.comment.repository.ReCommentRepository;
 import com.onpurple.domain.user.model.User;
 import com.onpurple.global.dto.ApiResponseDto;
