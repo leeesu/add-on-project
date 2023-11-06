@@ -1,6 +1,6 @@
 package com.onpurple.global.redis.pubsub;
 
-import com.onpurple.domain.chatMessage.dto.ChatMessageDto;
+import com.onpurple.domain.chat.dto.ChatMessageDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;

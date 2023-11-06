@@ -1,8 +1,8 @@
 package com.onpurple.service;
 
-import com.onpurple.domain.profile.dto.ProfileResponseDto;
-import com.onpurple.domain.profile.dto.ProfileUpdateRequestDto;
-import com.onpurple.domain.profile.service.ProfileService;
+import com.onpurple.domain.user.dto.ProfileResponseDto;
+import com.onpurple.domain.user.dto.ProfileUpdateRequestDto;
+import com.onpurple.domain.user.service.ProfileService;
 import com.onpurple.domain.user.model.User;
 import com.onpurple.domain.user.repository.UserRepository;
 import com.onpurple.global.dto.ApiResponseDto;

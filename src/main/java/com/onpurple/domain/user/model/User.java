@@ -1,7 +1,7 @@
 package com.onpurple.domain.user.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.onpurple.domain.profile.dto.ProfileUpdateRequestDto;
+import com.onpurple.domain.user.dto.ProfileUpdateRequestDto;
 import com.onpurple.domain.user.dto.UserUpdateRequestDto;
 
 import com.onpurple.global.dto.Timestamped;

@@ -1,8 +1,8 @@
 package com.onpurple.service;
 
-import com.onpurple.domain.unLike.model.UnLike;
-import com.onpurple.domain.unLike.repository.UnLikeRepository;
-import com.onpurple.domain.unLike.service.UnLikeService;
+import com.onpurple.domain.like.model.UnLike;
+import com.onpurple.domain.like.repository.UnLikeRepository;
+import com.onpurple.domain.like.service.UnLikeService;
 import com.onpurple.domain.user.model.User;
 import com.onpurple.global.dto.ApiResponseDto;
 import com.onpurple.global.dto.MessageResponseDto;

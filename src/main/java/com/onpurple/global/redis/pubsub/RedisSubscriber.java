@@ -1,7 +1,7 @@
 package com.onpurple.global.redis.pubsub;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onpurple.domain.chatMessage.dto.ChatMessageDto;
+import com.onpurple.domain.chat.dto.ChatMessageDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.Message;

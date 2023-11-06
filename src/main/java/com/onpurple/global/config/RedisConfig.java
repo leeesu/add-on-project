@@ -1,6 +1,6 @@
 package com.onpurple.global.config;
 
-import com.onpurple.domain.chatMessage.model.ChatMessage;
+import com.onpurple.domain.chat.model.ChatMessage;
 import com.onpurple.domain.user.model.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

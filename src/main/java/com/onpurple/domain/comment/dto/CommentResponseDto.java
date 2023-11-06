@@ -2,7 +2,6 @@ package com.onpurple.domain.comment.dto;
 
 import java.util.List;
 
-import com.onpurple.domain.reComment.dto.ReCommentResponseDto;
 import com.onpurple.domain.comment.model.Comment;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

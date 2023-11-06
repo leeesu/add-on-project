@@ -4,7 +4,7 @@ import com.onpurple.domain.comment.repository.CommentRepository;
 import com.onpurple.domain.post.model.Post;
 import com.onpurple.domain.post.repository.PostRepository;
 import com.onpurple.domain.reComment.model.ReComment;
-import com.onpurple.domain.reComment.repository.ReCommentRepository;
+import com.onpurple.domain.comment.repository.ReCommentRepository;
 import com.onpurple.domain.user.model.User;
 import com.onpurple.domain.user.repository.UserRepository;
 import com.onpurple.global.exception.CustomException;

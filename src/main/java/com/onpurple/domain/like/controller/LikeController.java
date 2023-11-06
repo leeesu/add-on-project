@@ -3,7 +3,7 @@ package com.onpurple.domain.like.controller;
 import com.onpurple.domain.like.dto.LikeResponseDto;
 import com.onpurple.domain.like.dto.LikesResponseDto;
 import com.onpurple.domain.like.service.LikeService;
-import com.onpurple.domain.unLike.service.UnLikeService;
+import com.onpurple.domain.like.service.UnLikeService;
 import com.onpurple.domain.user.dto.UserResponseDto;
 import com.onpurple.global.dto.ApiResponseDto;
 import com.onpurple.global.dto.MessageResponseDto;
