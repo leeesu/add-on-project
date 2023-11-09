@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.onpurple.global.enums.SuccessCode.*;
 
@@ -101,19 +102,16 @@ public class ReportService {
      */
     @Transactional(readOnly = true)
     public ApiResponseDto<List<ReportResponseDto>> getAllReport() {
-        List<Report> reportList = reportRepository.findAllByOrderByModifiedAtDesc();
-        List<ReportResponseDto> reportResponseDto = new ArrayList<>();
-        for (Report report : reportList) {
-            reportResponseDto.add(
-                    ReportResponseDto.AllFromEntity(report)
-            );
-        }
+        List<ReportResponseDto> reportResponseDtoList = reportRepository.findAllByOrderByModifiedAtDesc()
+                .stream()
+                .map(ReportResponseDto::AllFromEntity)
+                .collect(Collectors.toList());
 
         return ApiResponseDto.success(
                 SUCCESS_REPORT_GET_ALL.getMessage(),
-                reportResponseDto);
-
+                reportResponseDtoList);
     }
+
 
     /**
      * 신고글 삭제

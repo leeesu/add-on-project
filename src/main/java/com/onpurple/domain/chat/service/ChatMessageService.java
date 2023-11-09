@@ -10,7 +10,10 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.onpurple.global.enums.RedisKeyEnum.*;
 
@@ -32,26 +35,24 @@ public class ChatMessageService {
                 chatMessageDto.getMessage());
 
         redisTemplateMessage.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatMessage.class));
-        redisTemplateMessage.opsForList().rightPush(ChatRoom_KEY+chatMessageDto.getRoomId(), chatMessage);
+        redisTemplateMessage.opsForList().rightPush(ChatRoom_KEY + chatMessageDto.getRoomId(), chatMessage);
     }
 
     public List<ChatMessageDto> loadMessage(String roomId) {
-        List<ChatMessageDto> messageList = new ArrayList<>();
-
         // Redis에서 메시지 가져오기
-        List<ChatMessage> redisMessageList = redisTemplateMessage.opsForList().range(ChatRoom_KEY+roomId, 0, MAX_MESSAGE_COUNT - 1);
+        List<ChatMessage> redisMessageList = Optional.ofNullable(
+                redisTemplateMessage.opsForList().range(
+                        ChatRoom_KEY + roomId, 0, MAX_MESSAGE_COUNT - 1))
+                .orElse(Collections.emptyList());
 
-        if (redisMessageList == null || redisMessageList.isEmpty()) {
-            // Redis에서 가져온 메시지가 없다면, DB에서 메시지 가져오기
-            List<ChatMessage> dbMessageList = chatMessageRepository.findTop100ByRoomIdOrderByCreatedAtAsc(roomId);
-            for (ChatMessage message : dbMessageList) {
-                messageList.add(new ChatMessageDto(message));
-            }
-        } else {
-            for (ChatMessage message : redisMessageList) {
-                messageList.add(new ChatMessageDto(message));
-            }
-        }
+        // 만약 Redis에서 메시지를 가져오지 못하거나 비어있다면 DB에서 메시지를 가져옴
+        List<ChatMessageDto> messageList = redisMessageList.isEmpty() ?
+                chatMessageRepository.findTop100ByRoomIdOrderByCreatedAtAsc(roomId).stream()
+                        .map(ChatMessageDto::new)
+                        .collect(Collectors.toList()) :
+                redisMessageList.stream()
+                        .map(ChatMessageDto::new)
+                        .collect(Collectors.toList());
 
         return messageList;
     }

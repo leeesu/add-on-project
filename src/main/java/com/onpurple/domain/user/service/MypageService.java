@@ -65,16 +65,13 @@ public class MypageService {
                 .stream()
                 .distinct()
                 .collect(Collectors.toList());
-        List<User> getLikeUser = userRepository.matchingUser(likeList);
-        List<OtherLikeResponseDto> otherLikeResponseDtoList = new ArrayList<>();
 
-        for (User list : getLikeUser) {
-            otherLikeResponseDtoList.add(
-                    OtherLikeResponseDto.fromEntity(list)
-            );
-        }
-        return otherLikeResponseDtoList;
+        return userRepository.matchingUser(likeList)
+                .stream()
+                .map(OtherLikeResponseDto::fromEntity)
+                .collect(Collectors.toList());
     }
+
 
     /**
      * 나를 좋아요 한 사람 리스트
@@ -82,14 +79,11 @@ public class MypageService {
      * @return List<LikedResponseDto>
      */
     public List<LikedResponseDto> getLikeMeList(Long userId) {
-        List<Likes> likeMeList = likeRepository.findByTargetId(userId);
-        List<LikedResponseDto> likedResponseDtoList = new ArrayList<>();
-        for (Likes list : likeMeList) {
-            likedResponseDtoList.add(
-                    LikedResponseDto.fromEntity(list)
-            );
-        }
-        return likedResponseDtoList;
+        return likeRepository.findByTargetId(userId)
+                .stream()
+                .map(LikedResponseDto::fromEntity)
+                .collect(Collectors.toList());
     }
+
 
 }

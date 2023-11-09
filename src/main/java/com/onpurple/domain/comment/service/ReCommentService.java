@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.onpurple.global.enums.SuccessCode.*;
 
@@ -66,24 +67,18 @@ public class ReCommentService {
      */
     @Transactional(readOnly = true)
     public ApiResponseDto<List<ReCommentResponseDto>> getAllReCommentsByComment(Long commentId) {
-
-
         Comment comment = entityValidatorManager.validateComment(commentId);
 
-        List<ReComment> reCommentList = reCommentRepository.findAllByComment(comment);
-        List<ReCommentResponseDto> reCommentResponseDto = new ArrayList<>();
-
-        for (ReComment reComment : reCommentList) {
-            reCommentResponseDto.add(
-                    ReCommentResponseDto.fromEntity(reComment)
-            );
-        }
+        List<ReCommentResponseDto> reCommentResponseDtoList = reCommentRepository.findAllByComment(comment)
+                .stream()
+                .map(ReCommentResponseDto::fromEntity)
+                .collect(Collectors.toList());
 
         return ApiResponseDto.success(
                 SUCCESS_RECOMMENT_GET_ALL.getMessage(),
-                reCommentResponseDto);
-
+                reCommentResponseDtoList);
     }
+
 
     /**
      * 대댓글 수정

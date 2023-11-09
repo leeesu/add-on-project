@@ -71,47 +71,29 @@ public class UserService {
 
     /**
      * 회원가입
-     * @param requestDto
+     * @param signupRequestDto
      * @param userInfoRequestDto
      * @param imgPaths
      * @return ApiResponseDto<UserResponseDto>
      */
     @Transactional
-    public ApiResponseDto<UserResponseDto> createUser(SignupRequestDto requestDto, UserInfoRequestDto userInfoRequestDto,
+    public ApiResponseDto<UserResponseDto> createUser(SignupRequestDto signupRequestDto, UserInfoRequestDto userInfoRequestDto,
                                                       String imgPaths) {
-        if (!requestDto.getPassword().equals(requestDto.getPasswordConfirm())) {
+        if (!signupRequestDto.getPassword().equals(signupRequestDto.getPasswordConfirm())) {
             throw new CustomException(ErrorCode.PASSWORD_CONFIRM_NOT_MATCHED);
         }
 //     역할 확인. requestDto에 따라 아무 설정도 하지 않을 경우 자동으로 역할이 user로 고정.
 //     관리자의 경우 isAdmin이 true여야하고 adminToken을 입력하여 일치할 경우 회원가입 완료시에 역할이 Admin으로 반환
         Authority role = Authority.USER;
-        if (requestDto.isAdmin()) {
-            if (!requestDto.getAdminToken().equals(ADMIN_TOKEN)) {
+        if (signupRequestDto.isAdmin()) {
+            if (!signupRequestDto.getAdminToken().equals(ADMIN_TOKEN)) {
                 throw new CustomException(ErrorCode.ADMIN_PASSWORD_NOT_MATCHED);
 
             }
             role = Authority.ADMIN;
         }
 
-        User user = User.builder()
-                .username(requestDto.getUsername())
-                .password(passwordEncoder.encode(requestDto.getPassword()))
-                .nickname(requestDto.getNickname())
-                .gender(requestDto.getGender())
-                .imageUrl(imgPaths)
-                .role(role)
-                .age(userInfoRequestDto.getAge())
-                .mbti(userInfoRequestDto.getMbti())
-                .introduction(userInfoRequestDto.getIntroduction())
-                .area(userInfoRequestDto.getArea())
-                .idealType(userInfoRequestDto.getIdealType())
-                .job(userInfoRequestDto.getJob())
-                .hobby(userInfoRequestDto.getHobby())
-                .smoke(userInfoRequestDto.getSmoke())
-                .drink(userInfoRequestDto.getDrink())
-                .likeMovieType(userInfoRequestDto.getLikeMovieType())
-                .pet(userInfoRequestDto.getPet())
-                .build();
+        User user = userFromRequest(signupRequestDto, userInfoRequestDto, imgPaths, role);
         userRepository.save(user);
 
 
@@ -126,6 +108,29 @@ public class UserService {
                 SUCCESS_SIGNUP.getMessage(),
                 UserResponseDto.createFromEntity(user));
 
+    }
+
+    private User userFromRequest(SignupRequestDto signupRequestDto, UserInfoRequestDto userInfoRequestDto,
+                                 String imgPaths, Authority role) {
+        return User.builder()
+                .username(signupRequestDto.getUsername())
+                .password(passwordEncoder.encode(signupRequestDto.getPassword()))
+                .nickname(signupRequestDto.getNickname())
+                .gender(signupRequestDto.getGender())
+                .imageUrl(imgPaths)
+                .role(role)
+                .age(userInfoRequestDto.getAge())
+                .mbti(userInfoRequestDto.getMbti())
+                .introduction(userInfoRequestDto.getIntroduction())
+                .area(userInfoRequestDto.getArea())
+                .idealType(userInfoRequestDto.getIdealType())
+                .job(userInfoRequestDto.getJob())
+                .hobby(userInfoRequestDto.getHobby())
+                .smoke(userInfoRequestDto.getSmoke())
+                .drink(userInfoRequestDto.getDrink())
+                .likeMovieType(userInfoRequestDto.getLikeMovieType())
+                .pet(userInfoRequestDto.getPet())
+                .build();
     }
 
     /**
