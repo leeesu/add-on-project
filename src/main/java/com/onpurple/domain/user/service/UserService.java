@@ -210,7 +210,7 @@ public class UserService {
 
 
     /**
-     * 회원명 중복확인
+     * 회원명 유효성체크
      * @param username
      * @return
      */
@@ -220,7 +220,7 @@ public class UserService {
     }
 
     /**
-     * 닉네임 중복확인
+     * 닉네임 유효성체크
      * @param nickname
      * @return
      */
