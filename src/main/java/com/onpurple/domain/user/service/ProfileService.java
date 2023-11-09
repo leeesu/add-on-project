@@ -7,6 +7,7 @@ import com.onpurple.domain.user.model.User;
 import com.onpurple.domain.user.repository.UserRepository;
 import com.onpurple.global.dto.ApiResponseDto;
 import com.onpurple.global.dto.MessageResponseDto;
+import com.onpurple.global.enums.PageEnum;
 import com.onpurple.global.helper.EntityValidatorManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CachePut;
@@ -31,6 +32,7 @@ public class ProfileService {
 
     private final UserRepository userRepository;
     private final EntityValidatorManager entityValidatorManager;
+    private final int PAGE_SIZE = 10;
 
     /**
      * 전체 프로필 조회
@@ -39,7 +41,7 @@ public class ProfileService {
      */
     @Transactional(readOnly = true)
     public ApiResponseDto<List<ProfileResponseDto>> getAllProfiles() {
-        int pageSize = 10; // 페이지당 표시할 사용자 수 설정
+        int pageSize = PAGE_SIZE; // 페이지당 표시할 사용자 수 설정
 
         long totalUsers = userRepository.count(); // 전체 사용자 수
         int totalPages = (int) Math.ceil((double) totalUsers / pageSize); // 전체 페이지 수 계산
