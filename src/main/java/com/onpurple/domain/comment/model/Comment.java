@@ -3,7 +3,6 @@ package com.onpurple.domain.comment.model;
 
 import com.onpurple.domain.comment.dto.CommentRequestDto;
 import com.onpurple.domain.post.model.Post;
-import com.onpurple.domain.reComment.model.ReComment;
 import com.onpurple.domain.user.model.User;
 import com.onpurple.global.dto.Timestamped;
 import jakarta.persistence.*;
