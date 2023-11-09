@@ -62,6 +62,7 @@ public class WebSecurityConfig {
             "/ws/chat",
             "/pub/**",
             "/sub/**"
+            ,"/","/swagger-ui/**", "/v3/api-docs/**"
     };
 
 
