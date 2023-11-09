@@ -5,6 +5,12 @@ import com.onpurple.domain.chat.dto.ChatMessageResponseDto;
 import com.onpurple.domain.chat.repository.ChatMessageRepository;
 import com.onpurple.domain.chat.dto.ChatRoomDto;
 import com.onpurple.domain.chat.dto.ChatMessageRequestDto;
+import com.onpurple.domain.like.dto.LikedResponseDto;
+import com.onpurple.domain.like.dto.LikesResponseDto;
+import com.onpurple.domain.like.model.Likes;
+import com.onpurple.domain.like.service.LikeService;
+import com.onpurple.domain.like.service.UnLikeService;
+import com.onpurple.domain.user.dto.UserResponseDto;
 import com.onpurple.domain.user.model.User;
 import com.onpurple.domain.user.repository.UserRepository;
 import com.onpurple.global.dto.ApiResponseDto;
@@ -22,13 +28,13 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.onpurple.global.enums.RedisKeyEnum.*;
+import static com.onpurple.global.enums.SuccessCode.SUCCESS_LIKE_USER_FOUND;
 
 @Slf4j
 @Service
@@ -38,6 +44,7 @@ public class ChatRoomService {
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
     private final RedisTemplate<String, ChatMessage> redisTemplateMessage;
+    private final LikeService likeService;
 
     // 채팅방(topic)에 발행되는 메시지 처리하는 리스너
     private final RedisMessageListenerContainer redisMessageListener;
@@ -67,16 +74,37 @@ public class ChatRoomService {
      * @param user
      * @return ChatMessageResponseDto
      */
-    public ChatMessageResponseDto createRoom(ChatMessageRequestDto chatMessageRequestDto, User user) {
+    public ChatMessageResponseDto createRoom(
+            ChatMessageRequestDto chatMessageRequestDto, User user) {
 
+        User receiver = validateReceiver(chatMessageRequestDto);
+        // 나랑 서로 좋아요로 매칭된 회원리스트
+        List<UserResponseDto> likeUsers = validateUserAndMatching(user);
+        // 나를 좋아요한 회원 리스트
+        List<LikesResponseDto> likedUsers = validateGetMeLike(user);
+        // 매칭된 회원리스트에 receiver가 존재하는지 확인 || 나를 좋아요한 회원 리스트에 receiver가 존재하는지 확인
+        boolean isChatRoom = isMatchingReceiver(likeUsers, receiver) || isLikeMeReceiver(likedUsers, receiver);
+        // 둘다 존재하지 않으면 챗방 생성 불가
+        if (!isChatRoom) {
+            throw new CustomException(ErrorCode.NOT_FOUND_MATCHING_INFO);
+        }
         // 4.
-        ChatRoom chatRoom = chatRoomRepository.findBySenderAndReceiver(user.getNickname(), chatMessageRequestDto.getReceiver());
+        ChatRoom chatRoom =
+                chatRoomRepository.findBySenderAndReceiver(user.getNickname(), chatMessageRequestDto.getReceiver());
 
         // 5. 처음 채팅방 생성 또는 이미 생성된 채팅방이 아닌 경우
-        if ((chatRoom == null) || (chatRoom != null && (!user.getNickname().equals(chatRoom.getSender()) && !chatMessageRequestDto.getReceiver().equals(chatRoom.getReceiver())))) {
+        if ((chatRoom == null) || (chatRoom != null && (!user.getNickname().equals(chatRoom.getSender()) &&
+                !chatMessageRequestDto.getReceiver().equals(chatRoom.getReceiver())))) {
             ChatRoomDto chatRoomDto = ChatRoomDto.create(chatMessageRequestDto, user);
-            opsHashMessageRoom.put(Chat_Rooms, chatRoomDto.getRoomId(), chatRoomDto);      // redis hash 에 채팅방 저장해서, 서버간 채팅방 공유
-            chatRoom = chatRoomRepository.save(new ChatRoom(chatRoomDto.getId(), chatRoomDto.getRoomName(), chatRoomDto.getSender(), chatRoomDto.getRoomId(), chatRoomDto.getReceiver(), user));
+            // redis hash 에 채팅방 저장해서, 서버간 채팅방 공유
+            opsHashMessageRoom.put(Chat_Rooms, chatRoomDto.getRoomId(), chatRoomDto);
+            chatRoom = chatRoomRepository.save(
+                    new ChatRoom(chatRoomDto.getId(),
+                            chatRoomDto.getRoomName(),
+                            chatRoomDto.getSender(),
+                            chatRoomDto.getRoomId(),
+                            chatRoomDto.getReceiver(),
+                            user));
 
             return new ChatMessageResponseDto(chatRoom);
             // 6. 이미 생성된 채팅방인 경우
@@ -84,6 +112,46 @@ public class ChatRoomService {
             return new ChatMessageResponseDto(chatRoom.getRoomId());
         }
     }
+    // Receiver가 실존하는 회원인지 확인
+    private User validateReceiver(ChatMessageRequestDto chatMessageRequestDto) {
+        User receiver =
+                userRepository.findByNickname(chatMessageRequestDto.getReceiver()).orElseThrow(
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+        );
+        return receiver;
+    }
+
+    // 회원 매칭 정보가 있는지 확인 없다면 채팅 불가
+    private List<UserResponseDto> validateUserAndMatching(User user) {
+        ApiResponseDto<List<UserResponseDto>> likeResponse = likeService.likeCheck(user);
+        if (likeResponse.getData().isEmpty()) {
+            throw new CustomException(ErrorCode.MATCHING_NOT_FOUND);
+        }
+        List<UserResponseDto> likedUsers = likeResponse.getData();
+        return likedUsers;
+    }
+    // receiver가 좋아요한 목록에 있는지 확인
+    private boolean isMatchingReceiver(List<UserResponseDto> likedUsers, User receiver) {
+        boolean isLikedByReceiver = likedUsers.stream()
+                .anyMatch(likedUser -> likedUser.getUserId().equals(receiver.getId()));
+        return isLikedByReceiver;
+    }
+    // 나를 좋아요한 회원 리스트
+    private List<LikesResponseDto> validateGetMeLike(User user) {
+        ApiResponseDto<List<LikesResponseDto>> likeResponse = likeService.getLike(user);
+        if(likeResponse.getData().isEmpty()){
+            throw new CustomException(ErrorCode.LIKE_ME_USER_NOT_FOUND);
+        }
+        List<LikesResponseDto> likesList = likeResponse.getData();
+        return likesList;
+    }
+    // 나를 좋아요한 회원에 Recevier가 있는지 확인
+    private boolean isLikeMeReceiver(List<LikesResponseDto> likesList, User receiver) {
+        boolean isLikedByReceiver = likesList.stream()
+                .anyMatch(likedUser -> likedUser.getUserId().equals(receiver.getId()));
+        return isLikedByReceiver;
+    }
+
 
 
     /**
@@ -93,7 +161,8 @@ public class ChatRoomService {
      * @return List<ChatMessageResponseDto>
      */
     public List<ChatMessageResponseDto> findAllRoomByUser(User user) {
-        List<ChatRoom> chatRooms = chatRoomRepository.findByUserOrReceiver(user, user.getNickname());      // sender & receiver 모두 해당 쪽지방 조회 가능 (1:1 대화)
+        // sender & receiver 모두 해당 채팅방 조회 가능 (1:1 대화)
+        List<ChatRoom> chatRooms = chatRoomRepository.findByUserOrReceiver(user, user.getNickname());
 
         List<ChatMessageResponseDto> chatMessageResponseDtos = new ArrayList<>();
 
@@ -108,7 +177,8 @@ public class ChatRoomService {
                         chatRoom.getReceiver());
 
                 // 8. 가장 최신 메시지 & 생성 시간 조회
-                ChatMessage latestMessage = chatMessageRepository.findTopByRoomIdOrderByCreatedAtDesc(chatRoom.getRoomId());
+                ChatMessage latestMessage =
+                        chatMessageRepository.findTopByRoomIdOrderByCreatedAtDesc(chatRoom.getRoomId());
                 if (latestMessage != null) {
                     chatMessageResponseDto.setLatestChatMessageCreatedAt(latestMessage.getCreatedAt());
                     chatMessageResponseDto.setLatestChatMessageContent(latestMessage.getMessage());
@@ -125,13 +195,16 @@ public class ChatRoomService {
                         chatRoom.getReceiver());
 
                 // Redis에서 메시지 가져오기
-                List<ChatMessage> redisMessageList = redisTemplateMessage.opsForList().range(ChatRoom_KEY + chatRoom.getRoomId(), 0, -1);
+                List<ChatMessage> redisMessageList =
+                        redisTemplateMessage.opsForList().range(
+                                ChatRoom_KEY + chatRoom.getRoomId(), 0, -1);
 
 
                 ChatMessage latestMessage;
                 if (redisMessageList == null || redisMessageList.isEmpty()) {
                     // Redis에서 가져온 메시지가 없다면, DB에서 메시지 가져오기
-                    latestMessage = chatMessageRepository.findTopByRoomIdOrderByCreatedAtDesc(chatRoom.getRoomId());
+                    latestMessage =
+                            chatMessageRepository.findTopByRoomIdOrderByCreatedAtDesc(chatRoom.getRoomId());
                 } else {
                     // Redis에서 가져온 메시지가 있다면, 가장 최신 메시지를 가져오기
                     latestMessage = redisMessageList.get(redisMessageList.size() - 1);
@@ -164,7 +237,9 @@ public class ChatRoomService {
         );
 
         // 9. sender & receiver 모두 messageRoom 조회 가능
-        chatRoom = chatRoomRepository.findByRoomIdAndUserOrRoomIdAndReceiver(roomId, user, roomId, receiver.getNickname());
+        chatRoom =
+                chatRoomRepository.findByRoomIdAndUserOrRoomIdAndReceiver(
+                        roomId, user, roomId, receiver.getNickname());
         if (chatRoom == null) {
             throw new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND);
         }
@@ -186,7 +261,8 @@ public class ChatRoomService {
      * @return ApiResponseDto<MessageResponseDto>
      */
     public ApiResponseDto<MessageResponseDto> deleteRoom(Long id, User user) {
-        ChatRoom chatRoom = chatRoomRepository.findByIdAndUserOrIdAndReceiver(id, user, id, user.getNickname());
+        ChatRoom chatRoom =
+                chatRoomRepository.findByIdAndUserOrIdAndReceiver(id, user, id, user.getNickname());
 
         // sender 가 삭제할 경우
         if (user.getNickname().equals(chatRoom.getSender())) {
@@ -207,7 +283,8 @@ public class ChatRoomService {
 
         if (topic == null) {
             topic = new ChannelTopic(roomId);
-            redisMessageListener.addMessageListener(redisSubscriber, topic);        // pub/sub 통신을 위해 리스너를 설정. 대화가 가능해진다
+            // pub/sub 통신을 위해 리스너를 설정. 대화가 가능해진다
+            redisMessageListener.addMessageListener(redisSubscriber, topic);
             topics.put(roomId, topic);
         }
     }
