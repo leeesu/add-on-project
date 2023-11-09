@@ -4,7 +4,7 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
-
+db
 ### STS ###
 .apt_generated
 .classpath
@@ -35,3 +35,20 @@ out/
 
 ### VS Code ###
 .vscode/
+
+
+### CUSTOM
+.env
+/db
+/build
+/gradle
+### Aws S3 bucket ###
+application-awsS3.yml
+## Mysql ##
+application-dev.yml
+## echo ##
+application-echo.yml
+
+### setting ###
+src/main/resources/application.properties
+application-embedded.yml

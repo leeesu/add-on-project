@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.1.3'
 	id 'io.spring.dependency-management' version '1.1.3'
+	id 'jacoco'
 }
 
 group = 'com.onpurple'
@@ -22,12 +23,112 @@ repositories {
 }
 
 dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	compileOnly 'org.projectlombok:lombok'
+	implementation 'com.mysql:mysql-connector-j:8.0.31'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+
+	//  JWT
+	compileOnly group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.2'
+	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.2'
+	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.2'
+
+	//  validation
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// AWS S3 이미지 업로드를 위한 디펜던시
+	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.112'
+	implementation 'javax.xml.bind:jaxb-api:2.3.1'
+
+	//websocket
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	implementation 'org.springframework.boot:spring-boot-devtools'
+
+	//websocket 지원 안하는 낮은 버전 브라우저에서도 websocket 사용할 수 있게 해주는 라이브러리
+	//implementation 'org.webjars:sockjs-client:1.1.2'
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+	//stomp 라이브러리
+	implementation 'org.webjars:stomp-websocket:2.3.3-1'
+
+	//Redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
+	// redisson
+	implementation 'org.redisson:redisson-spring-boot-starter:3.18.0'
+	//embedded-redis
+	implementation group: 'it.ozimov', name: 'embedded-redis', version: '0.7.2'
+	// QueryDSL 적용을 위한 의존성 (SpringBoot3.0 부터는 jakarta 사용해야함)
+	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+	annotationProcessor 'com.querydsl:querydsl-apt:5.0.0:jakarta'
+	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+	// AOP
+	implementation 'org.springframework:spring-aop'
+	// websocket
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	//image resize
+	implementation 'com.github.downgoon:marvin:1.5.5'
+	implementation 'com.github.downgoon:MarvinPlugins:1.5.5'
+	implementation 'org.springframework:spring-test'
+	// swagger
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
+
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+/* Jacoco 설정 */
+
+jacocoTestCoverageVerification {
+	violationRules {
+		rule {
+			// 'element'가 없으면 프로젝트의 전체 파일을 합친 값을 기준으로 한다.
+			limit {
+				// 'counter'를 지정하지 않으면 default는 'INSTRUCTION'
+				// 'value'를 지정하지 않으면 default는 'COVEREDRATIO'
+				minimum = 0.30
+			}
+		}
+
+		rule {
+			// 룰을 간단히 켜고 끌 수 있다.
+			enabled = true
+
+			// 룰을 체크할 단위는 클래스 단위
+			element = 'CLASS'
+
+			// 브랜치 커버리지를 최소한 90% 만족시켜야 한다.
+			limit {
+				counter = 'BRANCH'
+				value = 'COVEREDRATIO'
+				minimum = 0.90
+			}
+
+			// 라인 커버리지를 최소한 80% 만족시켜야 한다.
+			limit {
+				counter = 'LINE'
+				value = 'COVEREDRATIO'
+				minimum = 0.80
+			}
+
+			// 빈 줄을 제외한 코드의 라인수를 최대 200라인으로 제한한다.
+			limit {
+				counter = 'LINE'
+				value = 'TOTALCOUNT'
+				maximum = 200
+			}
+
+			// 커버리지 체크를 제외할 클래스들
+			excludes = [
+//                    '*.test.*',
+			]
+		}
+	}
 }
