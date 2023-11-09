@@ -58,10 +58,9 @@ public class LikeController {
 
     @PostMapping( "/user/match/{userId}")
     @Operation(summary = "회원 매칭", description = "서로 좋아요한 회원 매칭")
-    @Parameter(name = "userId", description = "매칭할 회원의 id", required = true)
-    @Parameter(name = "userDetails", description = "매칭할 사용자의 정보", required = true)
+    @Parameter(name = "userDetails", description = "매칭 확인할 사용자의 정보", required = true)
     public ApiResponseDto<List<UserResponseDto>> createCheckUser(@PathVariable final Long userId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return likeService.likeCheck(userId, userDetails.getUser());
+        return likeService.likeCheck(userDetails.getUser());
     }
     @GetMapping("/user/like")
     @Operation(summary = "좋아요한 회원 리스트 조회", description = "나를 좋아요한 회원 리스트 조회")

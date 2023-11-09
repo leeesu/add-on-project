@@ -142,13 +142,12 @@ public class LikeService {
 
     /**
      * 매칭 조회
-     * @param userId
      * @param user
      * @return ApiResponseDto<List<UserResponseDto>>
      */
     @Transactional(readOnly = true)
-    public ApiResponseDto<List<UserResponseDto>> likeCheck(Long userId, User user) {
-        List<Integer> likeList = likeRepository.likeToLikeUserId(userId)
+    public ApiResponseDto<List<UserResponseDto>> likeCheck(User user) {
+        List<Integer> likeList = likeRepository.likeToLikeUserId(user.getId())
                 .stream()
                 .distinct()
                 .collect(Collectors.toList());
