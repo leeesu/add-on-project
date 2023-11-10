@@ -1,6 +1,6 @@
 package com.onpurple.global.security.jwt;
 
-import com.onpurple.global.redis.repository.RefreshTokenRepository;
+import com.onpurple.global.redis.repository.TokenRepository;
 import com.onpurple.global.security.UserDetailsServiceImpl;
 import com.onpurple.global.security.dto.TokenDto;
 import io.jsonwebtoken.Claims;
@@ -26,13 +26,13 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsServiceImpl userDetailsService;
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final TokenRepository tokenRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
         // 토큰 검증 AccessToken
         String accessToken = jwtTokenProvider.resolveToken(req, JwtTokenProvider.ACCESS_TOKEN);
-        if (StringUtils.hasText(accessToken) && !(refreshTokenRepository.isTokenBlacklisted(accessToken))) {
+        if (StringUtils.hasText(accessToken) && !(tokenRepository.isTokenBlacklisted(accessToken))) {
             if (!jwtTokenProvider.validateToken(accessToken)) {
                 log.warn("[FAIL] AccessToken 검증 실패했습니다.");
                 // 쿠키에서 토큰 추출후, 헤더로 토큰보내서 가져오기
