@@ -7,7 +7,6 @@ import com.onpurple.domain.user.model.User;
 import com.onpurple.domain.user.repository.UserRepository;
 import com.onpurple.global.dto.ApiResponseDto;
 import com.onpurple.global.dto.MessageResponseDto;
-import com.onpurple.global.enums.PageEnum;
 import com.onpurple.global.helper.EntityValidatorManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CachePut;

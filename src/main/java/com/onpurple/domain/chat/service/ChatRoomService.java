@@ -79,11 +79,11 @@ public class ChatRoomService {
 
         User receiver = validateReceiver(chatMessageRequestDto);
         // 나랑 서로 좋아요로 매칭된 회원리스트
-        List<UserResponseDto> likeUsers = validateUserAndMatching(user);
+        List<UserResponseDto> likeMatchingUser = validateUserAndMatching(user);
         // 나를 좋아요한 회원 리스트
         List<LikesResponseDto> likedUsers = validateGetMeLike(user);
         // 매칭된 회원리스트에 receiver가 존재하는지 확인 || 나를 좋아요한 회원 리스트에 receiver가 존재하는지 확인
-        boolean isChatRoom = isMatchingReceiver(likeUsers, receiver) || isLikeMeReceiver(likedUsers, receiver);
+        boolean isChatRoom = isMatchingReceiver(likeMatchingUser, receiver) || isLikeMeReceiver(likedUsers, receiver);
         // 둘다 존재하지 않으면 챗방 생성 불가
         if (!isChatRoom) {
             throw new CustomException(ErrorCode.NOT_FOUND_MATCHING_INFO);
