@@ -14,9 +14,10 @@ import com.onpurple.global.enums.SuccessCode;
 import com.onpurple.global.exception.CustomException;
 
 import com.onpurple.global.external.AwsS3UploadService;
-import com.onpurple.global.redis.repository.RefreshTokenRepository;
+import com.onpurple.global.redis.repository.TokenRepository;
 import com.onpurple.global.role.Authority;
 import com.onpurple.global.security.jwt.JwtTokenProvider;
+import com.onpurple.global.util.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
@@ -37,7 +38,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final AwsS3UploadService awsS3UploadService;
     private final JwtTokenProvider jwtTokenProvider;
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final TokenRepository tokenRepository;
 
     private static final String ADMIN_TOKEN = ("AAABnvxRVklrnYxKZ0aHgTBcXukeZygoC");
 
@@ -203,7 +204,7 @@ public class UserService {
         // 리프레시 토큰 삭제, AccessToken 만료시간까지 저장
         jwtTokenProvider.logoutBlackListToken(request);
         // 쿠키에서 JWT 삭제
-        jwtTokenProvider.deleteJwtFromCookie(response);
+        CookieUtil.deleteJwtFromCookie(response);
 
         return ApiResponseDto.success(SuccessCode.SUCCESS_LOGOUT.getMessage());
     }

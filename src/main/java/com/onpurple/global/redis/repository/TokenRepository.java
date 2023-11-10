@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 @Component
-public class RefreshTokenRepository {
+public class TokenRepository {
 
 
     private final RedisTemplate<String, Object> redisTemplate;

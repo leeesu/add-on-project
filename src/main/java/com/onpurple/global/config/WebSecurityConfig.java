@@ -3,7 +3,7 @@ package com.onpurple.global.config;
 import com.onpurple.domain.user.repository.UserRepository;
 import com.onpurple.global.exception.CustomAuthenticationEntryPoint;
 import com.onpurple.global.redis.cacheRepository.UserCacheRepository;
-import com.onpurple.global.redis.repository.RefreshTokenRepository;
+import com.onpurple.global.redis.repository.TokenRepository;
 import com.onpurple.global.security.UserDetailsServiceImpl;
 import com.onpurple.global.security.jwt.JwtAuthenticationFilter;
 import com.onpurple.global.security.jwt.JwtAuthorizationFilter;
@@ -34,7 +34,7 @@ public class WebSecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final UserRepository userRepository;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final TokenRepository tokenRepository;
     private final UserCacheRepository userCacheRepository;
 
 
@@ -53,7 +53,7 @@ public class WebSecurityConfig {
 
     @Bean
     public JwtAuthorizationFilter jwtAuthorizationFilter() {
-        return new JwtAuthorizationFilter(jwtTokenProvider, userDetailsService, refreshTokenRepository);
+        return new JwtAuthorizationFilter(jwtTokenProvider, userDetailsService, tokenRepository);
     }
 
     private static final String[] PERMIT = {
