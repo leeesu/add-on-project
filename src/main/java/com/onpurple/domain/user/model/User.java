@@ -98,6 +98,9 @@ public class User extends Timestamped {
     @Column
     private String area;
 
+    @Column
+    private int reportCount;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -164,4 +167,7 @@ public class User extends Timestamped {
     }
 
 
+    public void increaseReportCount() {
+        this.reportCount += 1;
+    }
 }

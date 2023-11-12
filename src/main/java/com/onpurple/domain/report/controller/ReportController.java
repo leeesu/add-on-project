@@ -52,8 +52,8 @@ public class ReportController {
     @GetMapping( "/report/{reportId}")
     @Operation(summary = "상세 신고글 조회", description = "상세 신고글 조회")
     @Parameter(name = "reportId", description = "조회할 신고글의 id", required = true)
-    public ApiResponseDto<ReportResponseDto> getReport(@PathVariable final Long reportId) {
-        return reportService.getReport(reportId);
+    public ApiResponseDto<ReportResponseDto> getReport(@PathVariable final Long reportId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return reportService.getReport(reportId, userDetails.getUser());
     }
 
 
