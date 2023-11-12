@@ -13,6 +13,8 @@ import com.onpurple.global.dto.MessageResponseDto;
 import com.onpurple.global.exception.CustomException;
 import com.onpurple.global.enums.ErrorCode;
 import com.onpurple.global.external.AwsS3UploadService;
+import com.onpurple.global.helper.EntityValidatorManager;
+import com.onpurple.global.role.Authority;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +36,7 @@ public class ReportService {
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
     private final AwsS3UploadService awsS3UploadService;
+    private final EntityValidatorManager entityValidatorManager;
 
 
     /**
@@ -51,6 +54,7 @@ public class ReportService {
         User target = userRepository.findByNickname(requestDto.getReportNickname()).orElseThrow(
                 ()-> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
+
         // 본인은 신고할 수 없도록 처리
         if(user == target) {
             throw new CustomException(ErrorCode.INVALID_SELF_REPORT);
@@ -60,6 +64,8 @@ public class ReportService {
         Report report = ReportFromRequest(requestDto, user, imgPaths);
 
         reportRepository.save(report);
+        target.increaseReportCount();
+
         return ApiResponseDto.success(
                 SUCCESS_REPORT_REGISTER.getMessage(),
                 ReportResponseDto.fromEntity(report)
@@ -79,16 +85,22 @@ public class ReportService {
     }
 
     /**
-     * 신고글 단건 조회
+     * 신고글 단건 조회, ADMIN과 글쓴이만 조회 가능한 게시판
      * @param reportId
      * @return ApiResponseDto<ReportResponseDto>
      */
     @Transactional// readOnly설정시 데이터가 Mapping되지 않는문제로 해제
-    public ApiResponseDto<ReportResponseDto> getReport(Long reportId) {
+    public ApiResponseDto<ReportResponseDto> getReport(Long reportId, User user) {
+
+        Authority role = user.getRole();
         Report report = isPresentReport(reportId);
-        if (null == report) {
-            throw new CustomException(ErrorCode.REPORT_POST_NOT_FOUND);
+
+        // 회원등급이 ADMIN이 아니고 글쓴이가 아닐 경우 조회 불가
+        if(role.equals(Authority.USER) && !report.validateUser(user)) {
+            throw new CustomException(ErrorCode.NOT_ADMIN_ERROR);
         }
+
+
 
         return ApiResponseDto.success(
                 SUCCESS_REPORT_GET_DETAIL.getMessage(),
@@ -148,7 +160,8 @@ public class ReportService {
     @Transactional(readOnly = true)
     public Report isPresentReport(@NotNull Long reportId) {
         Optional<Report> optionalReport = reportRepository.findById(reportId);
-        return optionalReport.orElse(null);
+        return optionalReport.orElseThrow(
+                () -> new CustomException(ErrorCode.REPORT_POST_NOT_FOUND));
     }
 
     /**
