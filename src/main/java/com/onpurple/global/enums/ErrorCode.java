@@ -69,7 +69,11 @@ public enum ErrorCode {
 
     // Report
     INVALID_SELF_REPORT("신고 대상이 올바르지 않습니다."),
-    REPORT_POST_NOT_FOUND("신고글을 찾을 수 없습니다."),;
+    REPORT_POST_NOT_FOUND("신고글을 찾을 수 없습니다."),
+
+    // Notification
+    NOTIFICATION_NOT_FOUND("알림을 찾을 수 없습니다."),
+    ;
 
     private final String message;
 }

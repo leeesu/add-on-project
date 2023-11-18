@@ -5,6 +5,7 @@ import com.onpurple.domain.like.dto.LikeResponseDto;
 import com.onpurple.domain.like.model.Likes;
 import com.onpurple.domain.like.repository.LikeRepository;
 import com.onpurple.domain.like.service.LikeService;
+import com.onpurple.domain.notification.helper.NotificationRequestManager;
 import com.onpurple.domain.post.model.Post;
 import com.onpurple.domain.user.model.User;
 import com.onpurple.global.dto.ApiResponseDto;
@@ -40,6 +41,9 @@ class LikeServiceTest {
     @Mock
     EntityValidatorManager entityValidatorManager;
 
+    @Mock
+    NotificationRequestManager notificationRequestManager;
+
     @InjectMocks
     LikeService likeService;
 
@@ -70,6 +74,7 @@ class LikeServiceTest {
             // then
             assertEquals(SuccessCode.SUCCESS_POST_LIKE.getMessage(), responseDto.getMessage());
             assertEquals(post.getLikes(), 1);
+            verify(notificationRequestManager).sendPostLikeNotification(post, user);
             System.out.println("현재 좋아요 수 : " + 1);
         }
 
@@ -127,6 +132,7 @@ class LikeServiceTest {
 
             // then
             assertEquals(SuccessCode.SUCCESS_COMMENT_LIKE.getMessage(), responseDto.getMessage());
+            verify(notificationRequestManager).sendCommentLikeNotification(comment.getPost(), user);
         }
 
         @Test
@@ -181,6 +187,7 @@ class LikeServiceTest {
 
             // then
             assertEquals(SuccessCode.SUCCESS_USER_LIKE.getMessage(), responseDto.getMessage());
+            verify(notificationRequestManager).sendUserLikeNotification(targetUser, user);
         }
 
         @Test

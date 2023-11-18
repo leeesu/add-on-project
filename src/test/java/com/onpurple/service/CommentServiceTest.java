@@ -5,6 +5,7 @@ import com.onpurple.domain.comment.dto.CommentResponseDto;
 import com.onpurple.domain.comment.model.Comment;
 import com.onpurple.domain.comment.repository.CommentRepository;
 import com.onpurple.domain.comment.service.CommentService;
+import com.onpurple.domain.notification.helper.NotificationRequestManager;
 import com.onpurple.domain.post.model.Post;
 import com.onpurple.domain.user.model.User;
 import com.onpurple.global.dto.ApiResponseDto;
@@ -24,17 +25,19 @@ import java.util.List;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CommentServiceTest {
+
 
     @Mock
     EntityValidatorManager entityValidatorManager;
 
     @Mock
     CommentRepository commentRepository;
+    @Mock
+    NotificationRequestManager notificationRequestManager;
 
     @InjectMocks
     CommentService commentService;
@@ -46,24 +49,27 @@ class CommentServiceTest {
             .comment("댓글")
             .build();
 
-    final  Comment defaultComment = Comment.builder()
+    final Comment defaultComment = Comment.builder()
             .post(post)
             .comment(requestDto.getComment())
             .user(user)
             .build();
 
-
     @Test
     @DisplayName("댓글 작성")
     void create_comment() {
-
         // given
         given(entityValidatorManager.validatePost(any())).willReturn(post);
         given(commentRepository.save(any())).willReturn(defaultComment);
+        given(post.getUser()).willReturn(mock(User.class));  // post의 사용자와 댓글 작성자가 다른 상황을 가정
+
         // when
         ApiResponseDto<CommentResponseDto> saveComment = commentService.createComment(post.getId(),requestDto, user);
+
         // then
         assertThat(saveComment.getData().getComment()).isEqualTo(requestDto.getComment());
+        // 알림이 제대로 보내졌는지 검증
+        verify(notificationRequestManager).sendCommentNotification(post, user);
     }
 
     @Test

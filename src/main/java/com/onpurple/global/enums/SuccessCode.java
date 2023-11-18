@@ -1,5 +1,6 @@
 package com.onpurple.global.enums;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -80,8 +81,15 @@ public enum SuccessCode {
     SUCCESS_RECOMMENT_DELETE("대댓글 삭제에 성공했습니다."),
     SUCCESS_RECOMMENT_REGISTER("대댓글 등록에 성공했습니다."),
     SUCCESS_RECOMMENT_GET_ALL("대댓글 전체 조회에 성공했습니다."),
-    ;
 
+
+    //알림 관련 메세지
+    SUCCESS_NOTIFICATION_GET_ALL("알림 전체 조회에 성공했습니다."),
+    SUCCESS_NOTIFICATION_DELETE("알림 삭제에 성공했습니다."),
+    SUCCESS_NOTIFICATION_DELETE_ALL("알림 전체 삭제에 성공했습니다."),
+    SUCCESS_NOTIFICATION_READ("알림 읽음 처리에 성공했습니다."),
+    SUCCESS_NOTIFICATION_GET_UNREAD("읽지 않은 알림 조회에 성공했습니다."),
+    ;
 
     private final String message;
 }

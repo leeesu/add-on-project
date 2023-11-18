@@ -4,6 +4,9 @@ package com.onpurple.domain.comment.service;
 import com.onpurple.domain.comment.dto.CommentRequestDto;
 import com.onpurple.domain.comment.dto.CommentResponseDto;
 import com.onpurple.domain.comment.repository.CommentRepository;
+import com.onpurple.domain.notification.enums.MessageType;
+import com.onpurple.domain.notification.helper.NotificationRequestManager;
+import com.onpurple.domain.notification.enums.NotificationType;
 import com.onpurple.domain.post.model.Post;
 import com.onpurple.domain.user.model.User;
 import com.onpurple.global.dto.ApiResponseDto;
@@ -28,6 +31,7 @@ public class CommentService {
 
   private final CommentRepository commentRepository;
   private final EntityValidatorManager entityValidatorManager;
+  private final NotificationRequestManager notificationRequestManager;
 
 
   /**
@@ -43,6 +47,11 @@ public class CommentService {
     Post post = entityValidatorManager.validatePost(postId);
     Comment comment = commentFromRequest(commentRequestDto, post, user);
     commentRepository.save(comment);
+    // 댓글 작성자와 게시글 작성자가 다를 경우 알림 보내기
+    if (!post.getUser().equals(user)) {
+      notificationRequestManager.sendCommentNotification(post, user);
+    }
+
     return ApiResponseDto.success(SUCCESS_COMMENT_REGISTER.getMessage(),
         CommentResponseDto.fromEntity(comment)
     );
