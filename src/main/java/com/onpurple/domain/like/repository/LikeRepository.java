@@ -28,6 +28,8 @@ public interface LikeRepository extends JpaRepository<Likes, Long> {
     //좋아요수 count
     int countByTargetId(Long targetId);
 
+    boolean existsByUserIdAndTargetId(Long userId, Long targetId);
+
     @Query(value ="select l.user.id from Likes l where l.user.id in(select l.target.id from Likes l where l.user.id =:userId)")
     List<Integer> likeToLikeUserId(@Param("userId") Long userId);
 }

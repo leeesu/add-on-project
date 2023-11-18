@@ -26,7 +26,6 @@ import java.util.List;
 public class LikeController {
 
     private final LikeService likeService;
-    private final UnLikeService unLikeService;
 
 
     // 게시글 좋아요

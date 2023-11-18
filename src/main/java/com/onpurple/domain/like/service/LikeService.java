@@ -3,13 +3,16 @@ package com.onpurple.domain.like.service;
 
 import com.onpurple.domain.comment.model.Comment;
 import com.onpurple.domain.like.dto.LikeResponseDto;
+import com.onpurple.domain.like.dto.LikedResponseDto;
 import com.onpurple.domain.like.dto.LikesResponseDto;
 import com.onpurple.domain.like.model.Likes;
 import com.onpurple.domain.like.repository.LikeRepository;
+import com.onpurple.domain.notification.helper.NotificationRequestManager;
 import com.onpurple.domain.post.model.Post;
 import com.onpurple.domain.user.dto.UserResponseDto;
 import com.onpurple.domain.user.model.User;
 import com.onpurple.domain.user.repository.UserRepository;
+import com.onpurple.domain.user.service.MypageService;
 import com.onpurple.global.config.aop.DistributedLock;
 import com.onpurple.global.dto.ApiResponseDto;
 import com.onpurple.global.dto.MessageResponseDto;
@@ -32,6 +35,7 @@ public class LikeService {
     private final LikeRepository likeRepository;
     private final UserRepository userRepository;
     private final EntityValidatorManager entityValidatorManager;
+    private final NotificationRequestManager notificationRequestManager;
 
     /**
      *  게시글 좋아요
@@ -58,6 +62,8 @@ public class LikeService {
                     .build();
             likeRepository.save(postLike);
             post.increasePostLike();
+            // 게시글 좋아요 알람
+            notificationRequestManager.sendPostLikeNotification(post, user);
             return ApiResponseDto.success(SUCCESS_POST_LIKE.getMessage(),
                     LikeResponseDto.fromPostLikesEntity(postLike)
             );
@@ -97,6 +103,8 @@ public class LikeService {
             likeRepository.save(commentLike);
             // 댓글 좋아요 수 증가
             comment.increaseCommentLike();
+            // 댓글 좋아요 알람
+            notificationRequestManager.sendCommentLikeNotification(comment.getPost(), user);
             return ApiResponseDto.success(
                     SUCCESS_COMMENT_LIKE.getMessage(),
                     LikeResponseDto.fromCommentLikesEntity(commentLike));
@@ -132,12 +140,24 @@ public class LikeService {
                     .build();
             likeRepository.save(userLike);
             target.increaseUserLike();
+            boolean isMutualLike = isMutualLike(user.getId(), targetId);
+            if(isMutualLike) {
+                // 서로 좋아요 알람
+                notificationRequestManager.sendUserMatchNotification(user, target);
+            }else {// 좋아요한 대상에게만 알람이 간다.
+                notificationRequestManager.sendUserLikeNotification(target, user);
+            }
             return ApiResponseDto.success(SUCCESS_USER_LIKE.getMessage());
         } else {
             likeRepository.delete(liked);
             target.cancelUserLike();
             return ApiResponseDto.success(SUCCESS_USER_LIKE_CANCEL.getMessage());
         }
+    }
+
+    private boolean isMutualLike(Long userId, Long targetId) {
+        // targetId 사용자가 나를 좋아하는지 확인
+        return likeRepository.existsByUserIdAndTargetId(targetId, userId);
     }
 
     /**
@@ -147,6 +167,7 @@ public class LikeService {
      */
     @Transactional(readOnly = true)
     public ApiResponseDto<List<UserResponseDto>> likeCheck(User user) {
+        // 나를 좋아요한 회원과 내 좋아요 내역을 비교해 일치하는 리스트를 확보
         List<Integer> likeList = likeRepository.likeToLikeUserId(user.getId())
                 .stream()
                 .distinct()
@@ -155,7 +176,7 @@ public class LikeService {
         if (likeList.isEmpty()) {
             throw new CustomException(ErrorCode.MATCHING_NOT_FOUND);
         }
-
+        // 뽑아온 리스트로 user객체들을를 뽑아온다.
         List<UserResponseDto> userResponseDto = userRepository.matchingUser(likeList)
                 .stream()
                 .map(UserResponseDto::createFromEntity)
