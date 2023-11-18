@@ -52,3 +52,6 @@ application-echo.yml
 ### setting ###
 src/main/resources/application.properties
 application-embedded.yml
+
+# Q파일 제외
+generated
