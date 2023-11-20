@@ -9,7 +9,9 @@ import com.onpurple.global.dto.ApiResponseDto;
 import com.onpurple.global.dto.MessageResponseDto;
 import com.onpurple.global.enums.SuccessCode;
 import com.onpurple.global.helper.EntityValidatorManager;
+import com.onpurple.global.redis.cacheRepository.CountCacheRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,7 +23,10 @@ import org.springframework.data.domain.PageRequest;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 
+import static com.onpurple.global.enums.SuccessCode.SUCCESS_PROFILE_GET_ALL;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -35,7 +40,9 @@ class ProfileServiceTest {
     @Mock
     EntityValidatorManager entityValidatorManager;
 
-    @InjectMocks
+    @Mock
+    CountCacheRepository countCacheRepository;
+
     ProfileService profileService;
 
     List<User> users;
@@ -45,39 +52,49 @@ class ProfileServiceTest {
         users = new ArrayList<>();
 
         // Add some mock user data to the list.
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 33; i++) {
             User user = mock(User.class);
             users.add(user);
         }
+
+        profileService = new ProfileService(userRepository, entityValidatorManager, countCacheRepository);
     }
 
+    // 테스트 메소드 등 나머지 코드는 동일하게 유지합니다.
+
+
     @Test
+    @DisplayName("전체 프로필 조회")
     public void testGetAllProfiles() {
         int pageSize = 10;
-        long totalUsers = users.size();
-        int totalPages = (int) Math.ceil((double) totalUsers / pageSize);
+        long totalUsers = 100;
 
-        when(userRepository.count()).thenReturn((long) users.size()); // userRepository.count()에 대한 모킹
+        List<User> users = new ArrayList<>();
+        for (int i = 0; i < totalUsers; i++) {
+            User user = new User();
+            users.add(user);
+        }
 
-        for (int i = 0; i < totalPages; ++i) {
-            Page<User> userPage = new PageImpl<>(users.subList(i * pageSize, Math.min((i + 1) * pageSize, users.size())));
-            when(userRepository.findAll(PageRequest.of(i, pageSize))).thenReturn(userPage); // userRepository.findAll(Pageable pageable)에 대한 모킹
+        when(countCacheRepository.getCount()).thenReturn(Optional.of(String.valueOf(totalUsers)));
+
+        for (int i = 0; i < totalUsers / pageSize; i++) {
+            int start = i * pageSize;
+            int end = Math.min((i + 1) * pageSize, users.size());
+            lenient().when(userRepository.findAll(PageRequest.of(i, pageSize)))
+                    .thenReturn(new PageImpl<>(users.subList(start, end)));
         }
 
         ApiResponseDto<List<ProfileResponseDto>> response = profileService.getAllProfiles();
 
         assertNotNull(response);
-
-        assertEquals(SuccessCode.SUCCESS_PROFILE_GET_ALL.getMessage(), response.getMessage());
-
+        assertEquals(SUCCESS_PROFILE_GET_ALL.getMessage(), response.getMessage());
         assertFalse(response.getData().isEmpty());
-
-        // 무작위 페이지에서 가져온 사용자 수와 같아야 함
         assertTrue(response.getData().size() <= pageSize);
     }
 
 
     @Test
+    @DisplayName("상세 프로필 조회")
     void getProfile() {
         User user = User.builder()
                 .username("회원명")
@@ -95,6 +112,7 @@ class ProfileServiceTest {
     }
 
     @Test
+    @DisplayName("프로필 수정")
     void updateProfile() {
         User user = mock(User.class);
         ProfileUpdateRequestDto requestDto = ProfileUpdateRequestDto.builder()
