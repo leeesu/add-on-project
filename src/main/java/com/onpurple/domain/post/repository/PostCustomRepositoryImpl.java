@@ -25,9 +25,9 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
     public Slice<PostResponseDto> findAllByCategory(PostCategory category, Pageable pageable) {
         List<Post> postResult = jpaQueryFactory
                 .selectFrom(post)
+                .where(categoryEq(category))
                 .offset(pageable.getOffset())
                 .orderBy(post.createdAt.desc())
-                .where(categoryEq(category))
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
 
@@ -49,9 +49,9 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
     public Slice<PostResponseDto> findAllByCategorySearchScroll(PostCategory category,String keyword, Pageable pageable) {
         List<Post> postResult = jpaQueryFactory
                 .selectFrom(post)
+                .where(categoryEq(category),keywordEq(keyword))
                 .offset(pageable.getOffset())
                 .orderBy(post.createdAt.desc())
-                .where(categoryEq(category),keywordEq(keyword))
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
 

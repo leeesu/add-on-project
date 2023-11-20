@@ -8,6 +8,7 @@ import com.onpurple.domain.user.service.UserService;
 import com.onpurple.global.enums.ErrorCode;
 import com.onpurple.global.exception.CustomException;
 import com.onpurple.global.external.AwsS3UploadService;
+import com.onpurple.global.redis.cacheRepository.CountCacheRepository;
 import com.onpurple.global.security.dto.TokenDto;
 import com.onpurple.global.security.jwt.JwtTokenProvider;
 import org.junit.jupiter.api.DisplayName;
@@ -39,6 +40,8 @@ class UserServiceTest {
     @Mock
     AwsS3UploadService awsS3UploadService;
 
+    @Mock
+    CountCacheRepository countCacheRepository;
     @Mock
     JwtTokenProvider jwtTokenProvider;
 
@@ -138,5 +141,7 @@ class UserServiceTest {
         assertEquals(ErrorCode.PASSWORD_CONFIRM_NOT_MATCHED.getMessage(), exception.getMessage());
         verify(userRepository, never()).save(any(User.class));
     }
+
+
 
 }

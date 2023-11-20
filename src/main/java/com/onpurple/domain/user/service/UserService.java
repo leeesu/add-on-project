@@ -14,7 +14,7 @@ import com.onpurple.global.enums.SuccessCode;
 import com.onpurple.global.exception.CustomException;
 
 import com.onpurple.global.external.AwsS3UploadService;
-import com.onpurple.global.redis.repository.TokenRepository;
+import com.onpurple.global.redis.cacheRepository.CountCacheRepository;
 import com.onpurple.global.role.Authority;
 import com.onpurple.global.security.jwt.JwtTokenProvider;
 import com.onpurple.global.util.CookieUtil;
@@ -22,9 +22,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
@@ -33,14 +35,18 @@ import static com.onpurple.global.enums.SuccessCode.*;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j(topic = "회원가입 및 로그인")
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AwsS3UploadService awsS3UploadService;
     private final JwtTokenProvider jwtTokenProvider;
-    private final TokenRepository tokenRepository;
+    private final CountCacheRepository countCacheRepository;
 
+
+    private final int SUM_USER_COUNT = 1;
     private static final String ADMIN_TOKEN = ("AAABnvxRVklrnYxKZ0aHgTBcXukeZygoC");
+
 
     /**
      * 아이디 체크
@@ -77,7 +83,7 @@ public class UserService {
      * @param imgPaths
      * @return ApiResponseDto<UserResponseDto>
      */
-    @Transactional
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public ApiResponseDto<UserResponseDto> createUser(SignupRequestDto signupRequestDto, UserInfoRequestDto userInfoRequestDto,
                                                       String imgPaths) {
         if (!signupRequestDto.getPassword().equals(signupRequestDto.getPasswordConfirm())) {
@@ -96,7 +102,7 @@ public class UserService {
 
         User user = userFromRequest(signupRequestDto, userInfoRequestDto, imgPaths, role);
         userRepository.save(user);
-
+        updateCountUser();
 
 //        현재 서비스에서 회원가입 이후 바로 서비스를 이용할 수 있도록 설정하였기에 회원가입이 진행될 때 토큰이 발행되도록 설정
         jwtTokenProvider.reissueToken(user.getUsername());
@@ -132,6 +138,12 @@ public class UserService {
                 .likeMovieType(userInfoRequestDto.getLikeMovieType())
                 .pet(userInfoRequestDto.getPet())
                 .build();
+    }
+
+    private void updateCountUser() {
+        String currentCount = countCacheRepository.getCount().orElse("0");
+        int newCount = Integer.parseInt(currentCount) + SUM_USER_COUNT;
+        countCacheRepository.saveCount(String.valueOf(newCount));
     }
 
     /**
