@@ -27,6 +27,7 @@ public enum RedisKeyEnum {
     LOGIN_USER_KEY("User:"),
     // User 리스트 관리 키
     USER_LIST_KEY("UserList:"),
+    USER_COUNT_KEY("UserCount:"),
     ;
 
     private final String desc;
