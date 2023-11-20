@@ -222,14 +222,4 @@ class PostServiceTest {
         assertEquals(response.getData().getTitle(), post.getTitle());
         assertEquals(response.getData().getContent(), post.getContent());
     }
-
-
-
-
-
-
-
-
-
-
 }
