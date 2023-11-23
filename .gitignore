@@ -5,6 +5,7 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 db
+gradlew
 ### STS ###
 .apt_generated
 .classpath
