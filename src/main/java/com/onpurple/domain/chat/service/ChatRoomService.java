@@ -5,11 +5,8 @@ import com.onpurple.domain.chat.dto.ChatMessageResponseDto;
 import com.onpurple.domain.chat.repository.ChatMessageRepository;
 import com.onpurple.domain.chat.dto.ChatRoomDto;
 import com.onpurple.domain.chat.dto.ChatMessageRequestDto;
-import com.onpurple.domain.like.dto.LikedResponseDto;
 import com.onpurple.domain.like.dto.LikesResponseDto;
-import com.onpurple.domain.like.model.Likes;
 import com.onpurple.domain.like.service.LikeService;
-import com.onpurple.domain.like.service.UnLikeService;
 import com.onpurple.domain.user.dto.UserResponseDto;
 import com.onpurple.domain.user.model.User;
 import com.onpurple.domain.user.repository.UserRepository;
@@ -28,13 +25,10 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.onpurple.global.enums.RedisKeyEnum.*;
-import static com.onpurple.global.enums.SuccessCode.SUCCESS_LIKE_USER_FOUND;
 
 @Slf4j
 @Service
@@ -79,9 +73,9 @@ public class ChatRoomService {
 
         User receiver = validateReceiver(chatMessageRequestDto);
         // 나랑 서로 좋아요로 매칭된 회원리스트
-        List<UserResponseDto> likeMatchingUser = validateUserAndMatching(user);
+        Optional<List<UserResponseDto>> likeMatchingUser = validateUserAndMatching(user);
         // 나를 좋아요한 회원 리스트
-        List<LikesResponseDto> likedUsers = validateGetMeLike(user);
+        Optional<List<LikesResponseDto>> likedUsers = validateGetMeLike(user);
         // 매칭된 회원리스트에 receiver가 존재하는지 확인 || 나를 좋아요한 회원 리스트에 receiver가 존재하는지 확인
         boolean isChatRoom = isMatchingReceiver(likeMatchingUser, receiver) || isLikeMeReceiver(likedUsers, receiver);
         // 둘다 존재하지 않으면 챗방 생성 불가
@@ -114,43 +108,37 @@ public class ChatRoomService {
     }
     // Receiver가 실존하는 회원인지 확인
     private User validateReceiver(ChatMessageRequestDto chatMessageRequestDto) {
-        User receiver =
-                userRepository.findByNickname(chatMessageRequestDto.getReceiver()).orElseThrow(
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
-        );
-        return receiver;
+        return userRepository.findByNickname(chatMessageRequestDto.getReceiver())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
     // 회원 매칭 정보가 있는지 확인 없다면 채팅 불가
-    private List<UserResponseDto> validateUserAndMatching(User user) {
+    private Optional<List<UserResponseDto>> validateUserAndMatching(User user) {
         ApiResponseDto<List<UserResponseDto>> likeResponse = likeService.likeCheck(user);
-        if (likeResponse.getData().isEmpty()) {
-            throw new CustomException(ErrorCode.MATCHING_NOT_FOUND);
-        }
-        List<UserResponseDto> likedUsers = likeResponse.getData();
-        return likedUsers;
+        return Optional.ofNullable(
+                likeResponse.getData().isEmpty() ? null : likeResponse.getData());
     }
     // receiver가 좋아요한 목록에 있는지 확인
-    private boolean isMatchingReceiver(List<UserResponseDto> likedUsers, User receiver) {
-        boolean isLikedByReceiver = likedUsers.stream()
-                .anyMatch(likedUser -> likedUser.getUserId().equals(receiver.getId()));
-        return isLikedByReceiver;
+
+    private boolean isMatchingReceiver(Optional<List<UserResponseDto>> likeMatchingUser, User receiver) {
+        return likeMatchingUser.isPresent() &&
+                likeMatchingUser.get()
+                        .stream()
+                        .anyMatch(likedUser -> likedUser.getUserId().equals(receiver.getId()));
     }
     // 나를 좋아요한 회원 리스트
-    private List<LikesResponseDto> validateGetMeLike(User user) {
+    private Optional<List<LikesResponseDto>> validateGetMeLike(User user) {
         ApiResponseDto<List<LikesResponseDto>> likeResponse = likeService.getLike(user);
-        if(likeResponse.getData().isEmpty()){
-            throw new CustomException(ErrorCode.LIKE_ME_USER_NOT_FOUND);
-        }
-        List<LikesResponseDto> likesList = likeResponse.getData();
-        return likesList;
+        return Optional.ofNullable(likeResponse.getData().isEmpty() ? null : likeResponse.getData());
     }
     // 나를 좋아요한 회원에 Recevier가 있는지 확인
-    private boolean isLikeMeReceiver(List<LikesResponseDto> likesList, User receiver) {
-        boolean isLikedByReceiver = likesList.stream()
-                .anyMatch(likedUser -> likedUser.getUserId().equals(receiver.getId()));
-        return isLikedByReceiver;
+    private boolean isLikeMeReceiver(Optional<List<LikesResponseDto>> likedUsers, User receiver) {
+        return likedUsers.isPresent() &&
+                likedUsers.get()
+                        .stream()
+                        .anyMatch(likedUser -> likedUser.getUserId().equals(receiver.getId()));
     }
+
 
 
 
