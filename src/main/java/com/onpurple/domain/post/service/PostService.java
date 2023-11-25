@@ -123,7 +123,8 @@ public class PostService {
     public ApiResponseDto<PostResponseDto> getPost(Long postId) {
         Post post = entityValidatorManager.validatePost(postId);
 
-        List<CommentResponseDto> commentResponseDtoList = commentRepository.findAllByPost(post).stream()
+        List<CommentResponseDto> commentResponseDtoList =
+                commentRepository.findAllByPostWithUser(post).stream()
                 .map(CommentResponseDto::fromEntity)
                 .collect(Collectors.toList());
 

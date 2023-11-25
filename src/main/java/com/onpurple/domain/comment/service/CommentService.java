@@ -42,7 +42,8 @@ public class CommentService {
    * @return ApiResponseDto<CommentResponseDto>
    */
   @Transactional
-  public ApiResponseDto<CommentResponseDto> createComment(Long postId, CommentRequestDto commentRequestDto, User user) {
+  public ApiResponseDto<CommentResponseDto> createComment(
+          Long postId, CommentRequestDto commentRequestDto, User user) {
     // post 유효성 검사
     Post post = entityValidatorManager.validatePost(postId);
     Comment comment = commentFromRequest(commentRequestDto, post, user);
@@ -76,7 +77,7 @@ public class CommentService {
     Post post = entityValidatorManager.validatePost(postId);
 
     List<CommentResponseDto> commentResponseDtoList = commentRepository
-            .findAllByPost(post)
+            .findAllByPostWithUser(post)
             .stream()
             .map(CommentResponseDto::fromEntity)
             .collect(Collectors.toList());
@@ -95,7 +96,8 @@ public class CommentService {
    */
 
   @Transactional
-  public ApiResponseDto<CommentResponseDto> updateComment(Long commentId, CommentRequestDto requestDto, User user) {
+  public ApiResponseDto<CommentResponseDto> updateComment(
+          Long commentId, CommentRequestDto requestDto, User user) {
       // 이곳에서 validate 메서드에서 예외 발생 가능성이 있는 작업 수행
        // 게시글 유효성체크
       entityValidatorManager.validatePost(requestDto.getPostId());
@@ -106,7 +108,8 @@ public class CommentService {
 
       comment.update(requestDto);
 
-      return ApiResponseDto.success(SUCCESS_COMMENT_EDIT.getMessage(),CommentResponseDto.fromEntity(comment));
+      return ApiResponseDto.success(
+              SUCCESS_COMMENT_EDIT.getMessage(),CommentResponseDto.fromEntity(comment));
   }
 
   /**
